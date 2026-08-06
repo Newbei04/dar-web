@@ -38,7 +38,9 @@ if ($trans == "ADD_MODULE") {
     $check = mysqli_query($conn, "
         SELECT id
         FROM user_modules
-        WHERE title='$title'
+        WHERE
+            title='$title'
+            AND parent_id='$parent_id'
         LIMIT 1
     ");
 
@@ -217,6 +219,7 @@ if ($trans == "ADD_MODULE") {
         FROM user_modules
         WHERE
             title='$title'
+            AND parent_id='$parent_id'
             AND id<>'$id'
         LIMIT 1
     ");
@@ -275,15 +278,34 @@ if ($trans == "ADD_MODULE") {
     }
 
     $errors = 0;
+    $sortCounters = [];
 
-    foreach ($order as $index => $id) {
+    foreach ($order as $item) {
 
-        $id = (int) $id;
-        $sort_order = $index + 1;
+        if (is_array($item)) {
+            $id        = (int) ($item['id'] ?? 0);
+            $parent_id = (int) ($item['parent_id'] ?? 0);
+        } else {
+            $id        = (int) $item;
+            $parent_id = 0;
+        }
+
+        if ($id == 0 || $id == $parent_id) {
+            continue;
+        }
+
+        if (!isset($sortCounters[$parent_id])) {
+            $sortCounters[$parent_id] = 0;
+        }
+
+        $sortCounters[$parent_id]++;
+
+        $sort_order = $sortCounters[$parent_id];
 
         $result = mysqli_query($conn, "
             UPDATE user_modules
             SET
+                parent_id='$parent_id',
                 sort_order='$sort_order',
                 updated_at=NOW()
             WHERE id='$id'

@@ -108,6 +108,21 @@ require_once "navbar.php";
     ***********************************-->
 	<!-- Required vendors -->
 	<script src="<?= $baseURL ?>assets/vendor/global/global.min.js"></script>
+	<script>
+		// Bootstrap 5 has no jQuery .modal() plugin; patch it so existing
+		// $('#id').modal('show'|'hide'|'toggle') calls work and ESC closes modals.
+		(function($) {
+			if (!$ || !window.bootstrap || $.fn.modal) return;
+			$.fn.modal = function(action) {
+				return this.each(function() {
+					var modal = bootstrap.Modal.getOrCreateInstance(this);
+					if (action === 'show' || action === 'hide' || action === 'toggle') {
+						modal[action]();
+					}
+				});
+			};
+		})(window.jQuery);
+	</script>
 	<script src="<?= $baseURL ?>assets/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/chart-js/chart.bundle.min.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/owl-carousel/owl.carousel.js"></script>

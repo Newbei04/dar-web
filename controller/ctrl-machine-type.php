@@ -162,6 +162,37 @@ if ($trans == "ADD_MACHINERY_TYPE") {
     ]);
 
     exit;
+} else if ($trans == "DELETE_MACHINERY_TYPE") {
+
+    $id = $data['id'] ?? '';
+
+    if (empty($id)) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "ID is required",
+            "data" => null
+        ]);
+        exit;
+    }
+
+    $delete = mysqli_query($conn, "DELETE FROM machinery_type WHERE id='$id'");
+
+    if (!$delete) {
+        echo json_encode([
+            "code" => 1,
+            "message" => mysqli_error($conn),
+            "data" => null
+        ]);
+        exit;
+    }
+
+    echo json_encode([
+        "code" => 0,
+        "message" => "Machinery type deleted",
+        "data" => null
+    ]);
+
+    exit;
 } else {
     echo json_encode([
         "code" => 1,

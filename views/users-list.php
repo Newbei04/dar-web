@@ -8,8 +8,8 @@
 <div class="container-fluid">
     <div class="page-titles">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
-            <li class="breadcrumb-item active"><a href="javascript:void(0)">Datatable</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">User</a></li>
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">List User</a></li>
         </ol>
     </div>
     <div class="row">
@@ -18,8 +18,8 @@
                 <div class="card-header">
                     <h4 class="card-title">Users List</h4>
 
-                    <a href="<?= $basePath ?>/add-user" class="btn btn-primary">
-                        <i class="fe fe-plus mr-1"></i> New User
+                    <a href="<?= $baseURL ?>add-user" class="btn btn-primary">
+                        <i class="fa fa-plus mr-1"></i> New User
                     </a>
                 </div>
 
@@ -134,7 +134,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="btnSavePassword">
-                    <i class="fe fe-save mr-1"></i> Update Password
+                    <i class="fa fa-save mr-1"></i> Update Password
                 </button>
             </div>
         </div>
@@ -250,7 +250,7 @@
 
         $(document).on('click', '.editBtn', function() {
             let id = $(this).data('id');
-            window.location.href = "<?= $basePath ?>/edit-user?id=" + id;
+            window.location.href = "<?= $baseURL ?>edit-user?id=" + id;
         });
 
         $(document).on('click', '.passBtn', function() {
@@ -324,7 +324,7 @@
                     success: function(res) {
                         $("#btnSavePassword")
                             .prop("disabled", false)
-                            .html(`<i class="fe fe-save mr-1"></i> Update Password`);
+                            .html(`<i class="fa fa-save mr-1"></i> Update Password`);
 
                         if (res.code == 0) {
                             $("#changePasswordModal").modal("hide");
@@ -336,7 +336,7 @@
                     error: function(xhr) {
                         $("#btnSavePassword")
                             .prop("disabled", false)
-                            .html(`<i class="fe fe-save mr-1"></i> Update Password`);
+                            .html(`<i class="fa fa-save mr-1"></i> Update Password`);
 
                         console.error("CHANGE_PASSWORD failed:", xhr.responseText);
                         Swal.fire("Error", "Failed to update password.", "error");

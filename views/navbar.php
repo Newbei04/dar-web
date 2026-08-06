@@ -546,11 +546,30 @@
 <div class="deznav">
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
+            <!-- DASHBOARD -->
             <li><a href="<?= $baseURL ?>dashboard" aria-expanded="false">
                     <i class="flaticon-381-networking"></i>
                     <span class="nav-text">Dashboard</span>
                 </a>
             </li>
+            <!-- MACHINE -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-regular fa-tractor fw-bold"></i>
+                    <span class="nav-text">Machine</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>machine-list">List Machine</a></li>
+                    <li><a href="<?= $baseURL ?>machine-types">Machine Types</a></li>
+                    <li><a href="<?= $baseURL ?>machine-maintenance">Machine Maintenance</a></li>
+                </ul>
+            </li>
+            <!-- BRANCH -->
+            <li><a href="<?= $baseURL ?>branch-list" aria-expanded="false">
+                    <i class="fas fa-location-dot"></i>
+                    <span class="nav-text">Branch</span>
+                </a>
+            </li>
+            <!-- USER -->
             <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa-regular fa-user fw-bold"></i>
                     <span class="nav-text">User</span>
@@ -558,6 +577,16 @@
                 <ul aria-expanded="false">
                     <li><a href="<?= $baseURL ?>user-list">List User</a></li>
                     <li><a href="<?= $baseURL ?>add-user">Add User</a></li>
+                </ul>
+            </li>
+            <!-- SETTINGS -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-regular fa-cog fw-bold"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>module-list">List Module</a></li>
+                    <li><a href="<?= $baseURL ?>user-roles">User Roles</a></li>
                 </ul>
             </li>
         </ul>
@@ -617,7 +646,7 @@
         }
 
         const currentPath = window.location.pathname;
-        const basePath = '<?= $basePath ?>';
+        const basePath = '<?= $baseURL ?>';
 
         const navLinks = document.querySelectorAll('.sidebar-left .nav-link');
 

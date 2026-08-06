@@ -79,6 +79,31 @@ switch ($route) {
 	case 'add-user':
 		require_once 'views/users-add.php';
 		break;
+	case 'edit-user':
+		require_once 'views/users-edit.php';
+		break;
+	// ==================== Module ====================
+	case 'module-list':
+		require_once 'views/module-list.php';
+		break;
+	// ==================== User Roles ====================
+	case 'user-roles':
+		require_once 'views/user-role.php';
+		break;
+	// ==================== Machine ====================
+	case 'machine-list':
+		require_once 'views/machine-list.php';
+		break;
+	case 'machine-types':
+		require_once 'views/machine-types.php';
+		break;
+	case 'machine-maintenance':
+		require_once 'views/machine-maintenance.php';
+		break;
+	// ==================== Branch ====================
+	case 'branch-list':
+		require_once 'views/branch-list.php';
+		break;
 	// ==================== Pages (Standalone) ====================
 	case 'page-login':
 		require_once 'views/page-login.php';

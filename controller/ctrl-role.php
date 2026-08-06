@@ -121,6 +121,43 @@ else if ($trans == "GET_ROLE_DETAIL") {
 
 /*
 |--------------------------------------------------------------------------
+| LIST MODULES (for the add-role access editor)
+|--------------------------------------------------------------------------
+*/
+else if ($trans == "LIST_MODULES") {
+
+    $modQuery = mysqli_query($conn, "
+        SELECT
+            id,
+            parent_id,
+            title,
+            icon,
+            page,
+            sort_order,
+            is_menu
+        FROM user_modules
+        WHERE status = 1
+        ORDER BY parent_id ASC, sort_order ASC, title ASC
+    ");
+
+    $modules = [];
+
+    while ($m = mysqli_fetch_assoc($modQuery)) {
+        $m['allowed'] = 0;
+        $modules[] = $m;
+    }
+
+    echo json_encode([
+        "code" => 0,
+        "message" => "Success",
+        "data" => $modules
+    ]);
+
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
 | UPDATE ROLE ACCESS
 |--------------------------------------------------------------------------
 */
@@ -175,6 +212,70 @@ else if ($trans == "UPDATE_ROLE_ACCESS") {
     echo json_encode([
         "code" => 0,
         "message" => "Role access updated successfully."
+    ]);
+
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
+| ADD ROLE
+|--------------------------------------------------------------------------
+*/
+else if ($trans == "ADD_ROLE") {
+
+    $title    = trim($data['title'] ?? '');
+    $desc     = trim($data['description'] ?? '');
+    $status   = $data['status'] ?? 1;
+    $access   = $data['access'] ?? [];
+
+    if ($title == "") {
+
+        echo json_encode([
+            "code" => 1,
+            "message" => "Role title is required."
+        ]);
+
+        exit;
+    }
+
+    $titleEsc = mysqli_real_escape_string($conn, $title);
+    $descEsc  = mysqli_real_escape_string($conn, $desc);
+
+    $dup = mysqli_query($conn, "
+        SELECT id
+        FROM users_role
+        WHERE title='$titleEsc'
+        LIMIT 1
+    ");
+
+    if (mysqli_num_rows($dup) > 0) {
+
+        echo json_encode([
+            "code" => 1,
+            "message" => "Role title already exists."
+        ]);
+
+        exit;
+    }
+
+    if (!is_array($access)) {
+        $access = [];
+    }
+
+    $access = array_values(array_unique(array_map('intval', $access)));
+    sort($access);
+
+    $accessStr = implode(',', $access);
+
+    mysqli_query($conn, "
+        INSERT INTO users_role (title, description, access, status, created_dt, updated_dt)
+        VALUES ('$titleEsc', '$descEsc', '$accessStr', '$status', NOW(), NOW())
+    ");
+
+    echo json_encode([
+        "code" => 0,
+        "message" => "Role created successfully."
     ]);
 
     exit;

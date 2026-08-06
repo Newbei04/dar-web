@@ -6,7 +6,7 @@
     <div class="page-titles">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?= $baseURL ?>user-list">User</a></li>
-            <li class="breadcrumb-item active"><a href="javascript:void(0)">Add User</a></li>
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit User</a></li>
         </ol>
     </div>
 
@@ -14,7 +14,7 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Add User</h4>
+                    <h4 class="card-title mb-0">Edit User</h4>
                     <a href="<?= $baseURL ?>user-list" class="btn btn-outline-secondary btn-sm">
                         <i class="fa fa-arrow-left me-1"></i> Back to List
                     </a>
@@ -231,13 +231,18 @@
     </div>
 </div>
 <?= endSection() ?>
+
+
 <?= startSection('scripts') ?>
 <script>
+    const CONFIG = "<?= $baseURL ?>config/";
     const MANILA_CODE = "133900000";
     const NCR_CODE = "130000000";
     const API_URL = "<?= $baseURL ?>controller/ctrl-location.php";
 
+    let userData = null;
     let profile = null;
+    let cascading = false;
 
     $(document).ready(function() {
 
@@ -260,10 +265,9 @@
                 return;
             }
 
-            // Convert file to base64
             let reader = new FileReader();
             reader.onload = function(e) {
-                profile = e.target.result; // store as base64 string
+                profile = e.target.result;
                 $("#avatarImg").attr("src", e.target.result).show();
                 $("#avatarIcon").hide();
                 $("#removePhoto").show();
@@ -282,17 +286,17 @@
         };
 
         loadGetAllUsersRole();
-        loadFacilities();
+        loadBranch();
 
         // Hide facility field if role is admin (admin role_id = 1)
         $("#role_id").on("change", function() {
             let roleId = $(this).val();
             if (roleId == 1) {
                 $("#facilityField").hide();
-                $("#facility_id").attr("required", false).val("");
+                $("#branch_id").attr("required", false).val("").trigger('change');
             } else {
                 $("#facilityField").show();
-                $("#facility_id").attr("required", true);
+                $("#branch_id").attr("required", true);
             }
         });
 
@@ -318,45 +322,231 @@
                         </option>
                     `);
                     });
-                    $('#role_id').selectpicker('refresh');
+                    $('#role_id').trigger('change');
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
                 }
+
             });
+
         }
 
-        function loadFacilities() {
+        function loadBranch() {
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-branch.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "LIST_BRANCH",
+                }),
+
+                success: function(res) {
+                    console.log(res);
+                    $('#branch_id')
+                        .empty()
+                        .append(`<option value="" disabled selected>Select Branch</option>`);
+                    let items = res.data || [];
+                    items.forEach(function(item) {
+
+                        $('#branch_id').append(`
+                        <option value="${item.id}">
+                            ${item.name}
+                        </option>
+                    `);
+                    });
+                    $('#branch_id').trigger('change');
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+
+            });
+
+        }
+
+        $("#id").val(getUrlParameter('id'));
+
+        // Load regions first, then load user data
+        getRegionList(() => {
+            loadUser();
+        });
+
+        /* ================= LOAD USER ================= */
+        function loadUser() {
+
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-users.php",
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
                 data: JSON.stringify({
-                    trans: "GET_ALL_FACILITY",
+                    trans: "GET_USER",
+                    id: $("#id").val()
                 }),
 
                 success: function(res) {
-                    $('#facility_id')
-                        .empty()
-                        .append(`<option value="" disabled selected>Select Facility</option>`);
-                    let items = res.data || [];
-                    items.forEach(function(item) {
-                        $('#facility_id').append(`
-                        <option value="${item.id}">
-                            ${item.name}
-                        </option>
-                    `);
-                    });
-                    $('#facility_id').selectpicker('refresh');
-                },
-                error: function(xhr) {
-                    console.log(xhr.responseText);
+
+                    if (res.code == 0) {
+
+                        userData = res.data;
+
+                        let p = userData.profile || {};
+
+                        $("#username").val(userData.username);
+                        $("#role_id").val(userData.role_id).trigger('change');
+
+                        $("#fname").val(p.fname);
+                        $("#mname").val(p.mname);
+                        $("#lname").val(p.lname);
+
+                        const genderMap = {
+                            'Male': 'M',
+                            'Female': 'F'
+                        };
+                        const maritalMap = {
+                            'Single': 'S',
+                            'Married': 'M',
+                            'Divorced': 'D',
+                            'Widowed': 'W'
+                        };
+                        $("#gender").val(genderMap[p.gender] || p.gender || '').trigger('change');
+                        $("#marital").val(maritalMap[p.marital] || p.marital || '').trigger('change');
+                        $("#birthday").val(p.birthday || '');
+
+                        $("#email").val(p.email);
+                        $("#mobile").val(p.mobile);
+
+                        $("#street").val(p.street);
+                        $("#status").val(userData.status).trigger('change');
+
+                        // Load existing profile photo
+                        if (p.profile) {
+                            $("#avatarImg").attr("src", "<?= $baseURL ?>assets/images/profile/" + p.profile).show();
+                            $("#avatarIcon").hide();
+                            $("#removePhoto").show();
+                            $("#avatarPreview").css("border", "2px solid #ced4da");
+                        }
+
+                        // Load existing facility for cooperative
+                        if (userData.role_id == 2 && p.id) {
+                            $.ajax({
+                                url: "<?= $baseURL ?>controller/ctrl-branch.php",
+                                type: "POST",
+                                contentType: "application/json",
+                                dataType: "json",
+                                data: JSON.stringify({
+                                    trans: "GET_BRANCH_BY_EMPLOYEE",
+                                    employee_id: p.id
+                                }),
+                                success: function(res) {
+                                    if (res.code == 0 && res.data) {
+                                        $("#branch_id").val(res.data.id).trigger('change');
+                                    }
+                                }
+                            });
+                        }
+
+                        // Set location cascade
+                        cascading = true;
+                        setRegion(p.region_id, function() {
+                            setProvince(p.province_id, function() {
+                                setCity(p.city_id, function() {
+                                    setSubmuni(p.district_id, function() {
+                                        $("#barangay").val(p.barangay_id);
+                                        $("#region, #province, #city, #submuni, #barangay").trigger('change.select2');
+                                        cascading = false;
+                                    });
+                                });
+                            });
+                        });
+                    }
                 }
             });
         }
 
-        function getRegionList() {
+        /* ================= UPDATE USER ================= */
+        $("#submitUser").submit(function(e) {
+
+            e.preventDefault();
+            showLoader();
+
+            let address = [
+                    $("#street").val(),
+                    $("#barangay option:selected").text(),
+                    $("#submuni option:selected").text(),
+                    $("#city option:selected").text(),
+                    $("#province option:selected").text(),
+                    $("#region option:selected").text()
+                ]
+                .filter(v => v && v.trim() !== '' && !v.startsWith('Select'))
+                .join(', ');
+
+            let postData = {
+                trans: "UPDATE_USER",
+                id: $("#id").val(),
+                username: $("#username").val(),
+                role_id: $("#role_id").val(),
+
+                fname: $("#fname").val(),
+                mname: $("#mname").val(),
+                lname: $("#lname").val(),
+                gender: $("#gender").val(),
+                marital: $("#marital").val(),
+                birthday: $("#birthday").val(),
+                email: $("#email").val(),
+                mobile: $("#mobile").val(),
+
+                profile: profile,
+                branch_id: $("#branch_id").val() || null,
+
+                street: $("#street").val(),
+                barangay_id: $("#barangay").val(),
+                city_id: $("#city").val(),
+                province_id: $("#province").val(),
+                region_id: $("#region").val(),
+                district_id: $("#submuni").val() || null,
+                country: "PH",
+                address: address,
+                status: $("#status").val()
+            };
+
+            if ($("#password").val()) {
+                postData.password = $("#password").val();
+            }
+
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-users.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(postData),
+
+                success: function(res) {
+                    closeLoader();
+                    if (res.code == 0) {
+
+                        Swal.fire("Success", res.message, "success").then(() => {
+
+                            window.location.href = "<?= $baseURL ?>user-list";
+                        });
+
+                    } else {
+
+                        Swal.fire("Error", res.message, "error");
+                    }
+                },
+                error: function() {
+                    closeLoader();
+                    Swal.fire("Error", "Something went wrong. Please try again.", "error");
+                }
+            });
+        });
+
+        // ================= LOCATION FUNCTIONS =================
+
+        function getRegionList(callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -371,15 +561,16 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load regions");
+                    if (callback) callback();
                 }
             });
         }
 
-        function getProvinceList(code) {
+        function getProvinceList(code, callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -395,15 +586,16 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load provinces");
+                    if (callback) callback();
                 }
             });
         }
 
-        function getCityList(code) {
+        function getCityList(code, callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -419,15 +611,16 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load cities");
+                    if (callback) callback();
                 }
             });
         }
 
-        function getNCRCityList() {
+        function getNCRCityList(callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -442,15 +635,16 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load NCR cities");
+                    if (callback) callback();
                 }
             });
         }
 
-        function getDistrictList() {
+        function getDistrictList(callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -465,15 +659,16 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load districts");
+                    if (callback) callback();
                 }
             });
         }
 
-        function getBarangayList(code) {
+        function getBarangayList(code, callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -489,15 +684,16 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load barangays");
+                    if (callback) callback();
                 }
             });
         }
 
-        function getBarangayByDistrict(code) {
+        function getBarangayByDistrict(code, callback) {
             $.ajax({
                 url: API_URL,
                 type: "POST",
@@ -513,24 +709,24 @@
                     if (res.code == 0 && res.data) {
                         res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                     }
-                    d.selectpicker('refresh');
+                    if (callback) callback();
                 },
                 error: function() {
                     console.error("Failed to load barangays by district");
+                    if (callback) callback();
                 }
             });
         }
 
-        // Cascade events
+        // ================= CASCADE EVENTS (user-driven only) =================
+
         $("#region").on("change", function() {
+            if (cascading) return;
             let val = $(this).val();
             $("#submuniField").hide();
-
             if (!val) return;
-
             if (val === NCR_CODE) {
                 $("#provinceField").hide();
-                $("#province").val('').prop('disabled', true).selectpicker('refresh');
                 getNCRCityList();
             } else {
                 $("#provinceField").show();
@@ -539,15 +735,16 @@
         });
 
         $("#province").on("change", function() {
+            if (cascading) return;
             let val = $(this).val();
             if (!val) return;
             getCityList(val);
         });
 
         $("#city").on("change", function() {
+            if (cascading) return;
             let val = $(this).val();
             if (!val) return;
-
             if (val === MANILA_CODE) {
                 $("#submuniField").show();
                 getDistrictList();
@@ -558,78 +755,69 @@
         });
 
         $("#submuni").on("change", function() {
+            if (cascading) return;
             let val = $(this).val();
             if (!val) return;
             getBarangayByDistrict(val);
         });
 
-        // Submit
-        $("#submitUser").submit(function(e) {
-            e.preventDefault();
-            showLoader();
+        // ================= PROGRAMMATIC CASCADE SETTERS =================
 
-            let address = [
-                    $("#street").val(),
-                    $("#barangay option:selected").text(),
-                    $("#submuni option:selected").text(),
-                    $("#city option:selected").text(),
-                    $("#province option:selected").text(),
-                    $("#region option:selected").text()
-                ]
-                .filter(v => v && v.trim() !== '' && !v.startsWith('Select'))
-                .join(', ');
+        function setRegion(val, callback) {
+            if (!val) {
+                if (callback) callback();
+                return;
+            }
+            $("#region").val(val);
+            $("#submuniField").hide();
+            if (val == NCR_CODE) {
+                $("#provinceField").hide();
+                $("#province").val("");
+                getNCRCityList(callback);
+            } else {
+                $("#provinceField").show();
+                getProvinceList(val, callback);
+            }
+        }
 
-            $.ajax({
-                url: "<?= $baseURL ?>controller/ctrl-users.php",
-                type: "POST",
-                contentType: "application/json",
-                dataType: "json",
-                data: JSON.stringify({
-                    trans: "ADD_USER",
-                    username: $("#username").val(),
-                    password: $("#password").val(),
-                    role_id: $("#role_id").val(),
+        function setProvince(val, callback) {
+            if ($("#region").val() == NCR_CODE || !val) {
+                if (callback) callback();
+                return;
+            }
+            $("#province").val(val);
+            getCityList(val, callback);
+        }
 
-                    fname: $("#fname").val(),
-                    mname: $("#mname").val(),
-                    lname: $("#lname").val(),
-                    gender: $("#gender").val(),
-                    marital: $("#marital").val(),
-                    birthday: $("#birthday").val(),
-                    email: $("#email").val(),
-                    mobile: $("#mobile").val(),
+        function setCity(val, callback) {
+            if (!val) {
+                if (callback) callback();
+                return;
+            }
+            $("#city").val(val);
+            if (val == MANILA_CODE) {
+                $("#submuniField").show();
+                getDistrictList(callback);
+            } else {
+                $("#submuniField").hide();
+                getBarangayList(val, callback);
+            }
+        }
 
-                    profile: profile,
-                    facility_id: $("#facility_id").val() || null,
+        function setSubmuni(val, callback) {
+            if (!val) {
+                if (callback) callback();
+                return;
+            }
+            $("#submuni").val(val);
+            getBarangayByDistrict(val, callback);
+        }
 
-                    street: $("#street").val(),
-                    barangay_id: $("#barangay").val(),
-                    city_id: $("#city").val(),
-                    province_id: $("#province").val(),
-                    region_id: $("#region").val(),
-                    district_id: $("#submuni").val() || null,
-                    country: "PH",
-                    address: address,
-                    status: 1
-                }),
-                success: function(res) {
-                    closeLoader();
-                    if (res.code == 0) {
-                        Swal.fire("Success", res.message, "success").then(() => window.location.href = "<?= $baseURL ?>user-list");
-                    } else {
-                        Swal.fire("Error", res.message, "error");
-                    }
-                },
-                error: function() {
-                    closeLoader();
-                    Swal.fire("Error", "Something went wrong. Please try again.", "error");
-                }
-            });
-        });
-
-        // Boot
-        getRegionList();
+        function getUrlParameter(name) {
+            return new URL(window.location.href).searchParams.get(name);
+        }
 
     });
 </script>
+
 <?= endSection() ?>
