@@ -32442,6 +32442,13 @@ table.dataTable thead > tr > th.sorting_disabled::before {
   text-align: center;
   margin-bottom: 2rem;
 }
+.login-account .login-form .login-head .login-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
 .login-account .login-form .login-head .title {
   font-size: 36px;
   font-weight: 600;

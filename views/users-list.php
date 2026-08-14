@@ -24,6 +24,7 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="tblUsers" class="display responsive nowrap w-100">
                         <thead>
                             <tr>
@@ -40,55 +41,8 @@
                             <!-- Loaded via AJAX -->
                         </tbody>
                     </table>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ================= VIEW USER MODAL ================= -->
-<div class="modal fade" id="viewUserModal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">User Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal">
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-borderless mb-0">
-                    <tr>
-                        <th width="35%" class="text-muted">Username</th>
-                        <td id="view_username">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Name</th>
-                        <td id="view_fullname">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Email</th>
-                        <td id="view_email">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Mobile</th>
-                        <td id="view_mobile">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Address</th>
-                        <td id="view_address">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Role</th>
-                        <td id="view_role">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Status</th>
-                        <td id="view_status">-</td>
-                    </tr>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -151,7 +105,15 @@
 <script>
     $(document).ready(function() {
 
-        var tblData = $('#tblUsers').DataTable();
+        var tblData = $('#tblUsers').DataTable({
+            responsive: true,
+            language: {
+                paginate: {
+                    next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
+                    previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
+                }
+            }
+        });
 
         loadUsers();
 
@@ -193,7 +155,7 @@
                             `<div style="width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user text-muted"></i></div>`;
 
                         var actions = `
-                        <button class="btn btn-info mr-2 viewBtn" data-id="${user.id}" data-username="${user.username || '-'}" data-fullname="${fullname.replace(/<[^>]*>/g, '').trim()}" data-email="${profile.email || '-'}" data-mobile="${profile.mobile || '-'}" data-address="${profile.address || '-'}" data-role="${user.role || '-'}" data-status="${user.status}" data-toggle="tooltip" title="View Details">
+                        <button class="btn btn-info mr-2 viewBtn" data-id="${user.id}" data-toggle="tooltip" title="View Details">
                             <i class="fas fa-eye"></i>
                         </button>
                         <button class="btn btn-primary shadow editBtn" data-id="${user.id}" data-toggle="tooltip" title="Update Details">
@@ -236,16 +198,8 @@
         }
 
         $(document).on('click', '.viewBtn', function() {
-            let statusText = $(this).data('status') == 0 ? 'Pending' : $(this).data('status') == 1 ? 'Active' : 'Inactive';
-            let statusBadge = $(this).data('status') == 0 ? 'badge-warning' : $(this).data('status') == 1 ? 'badge-success' : 'badge-danger';
-            $('#view_username').text($(this).data('username') || '-');
-            $('#view_fullname').text($(this).data('fullname') || '-');
-            $('#view_email').text($(this).data('email') || '-');
-            $('#view_mobile').text($(this).data('mobile') || '-');
-            $('#view_address').text($(this).data('address') || '-');
-            $('#view_role').text($(this).data('role') || '-');
-            $('#view_status').html(`<span class="badge ${statusBadge}">${statusText}</span>`);
-            $('#viewUserModal').modal('show');
+            let id = $(this).data('id');
+            window.location.href = "<?= $baseURL ?>view-user?id=" + id;
         });
 
         $(document).on('click', '.editBtn', function() {

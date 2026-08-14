@@ -30,6 +30,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                 </div>
 
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="tblMaintenance" class="display responsive nowrap w-100">
                         <thead>
                             <tr>
@@ -50,6 +51,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                             <!-- Loaded via AJAX -->
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

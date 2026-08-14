@@ -70,7 +70,7 @@ class Wallet {
                 }
 
                 // 2. Insert the new wallet
-                $stmt = $db->prepare("INSERT INTO wallet (beneficiary_id, account_num) VALUES (?, ?)");
+                $stmt = $db->prepare("INSERT INTO wallet (beneficiary_id, account_num, credit_limit, is_frozen) VALUES (?, ?, 0, 0)");
                 $stmt->execute([$beneficiary_id, $accNumber]);
                 
                 // Get the ID of the wallet we just created so we can log it

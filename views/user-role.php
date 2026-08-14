@@ -166,6 +166,7 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="tblRole" class="display responsive nowrap w-100">
                         <thead>
                             <tr>
@@ -182,6 +183,7 @@
                             <!-- Loaded via AJAX -->
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -259,7 +261,15 @@
             window.location.href = '<?= $baseURL ?>login';
         }
 
-        var tblData = $('#tblRole').DataTable();
+        var tblData = $('#tblRole').DataTable({
+            responsive: true,
+            language: {
+                paginate: {
+                    next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
+                    previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
+                }
+            }
+        });
         let modules = [];
 
         loadData();

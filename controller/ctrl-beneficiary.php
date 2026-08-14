@@ -110,7 +110,7 @@ if ($trans == "ADD_BENEFICIARY") {
                             city_id, province_id, region_id, zip_code, 
                             country, profile, status, created_at
                         ) VALUES (
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW()
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW()
                         )";
 
         $beneficiaryStmt = $db->prepare($beneficiarySql);
@@ -122,7 +122,7 @@ if ($trans == "ADD_BENEFICIARY") {
             $data['email'] ?? '', $data['mobile'] ?? '', $data['street'] ?? '',
             $data['address'] ?? '', $data['barangay_id'] ?: null, $data['district_id'] ?: null,
             $data['city_id'] ?: null, $data['province_id'] ?: null, $data['region_id'] ?: null,
-            $data['zip_code'] ?: null, $data['country'] ?? 'PH', $photo_name
+            ($data['zip_code'] ?? '') ?: null, $data['country'] ?? 'PH', $photo_name
         ]);
 
         // Captures the last ID from the 'beneficiary' table 
@@ -492,7 +492,7 @@ if ($trans == "ADD_BENEFICIARY") {
             'email = ?', 'mobile = ?', 'doc_num = ?',
             'street = ?', 'address = ?', 'barangay_id = ?', 'district_id = ?',
             'city_id = ?', 'province_id = ?', 'region_id = ?',
-            'country = ?', 'updated_at = NOW()'
+            'country = ?', 'status = ?', 'updated_at = NOW()'
         ];
         $benParams = [
             $data['fname'] ?? '', $data['mname'] ?? '', $data['lname'] ?? '',
@@ -500,7 +500,7 @@ if ($trans == "ADD_BENEFICIARY") {
             $data['email'] ?? '', $data['mobile'] ?? '', $data['doc_num'] ?? '',
             $data['street'] ?? '', $data['address'] ?? '', $data['barangay_id'] ?: null, $data['district_id'] ?: null,
             $data['city_id'] ?: null, $data['province_id'] ?: null, $data['region_id'] ?: null,
-            $data['country'] ?? 'PH'
+            $data['country'] ?? 'PH', $data['status'] ?? 1
         ];
 
         if (isset($data['branch_id'])) {

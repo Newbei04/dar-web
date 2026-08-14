@@ -206,7 +206,11 @@ if ($trans == "ADD_TRAINING") {
     return;
 } elseif ($trans == "LIST_TRAINING") {
 
-    $sql = "SELECT * FROM training ORDER BY id DESC";
+    $sql = "SELECT t.*,
+                (SELECT COUNT(*) FROM training_program tp WHERE tp.training_id = t.id) AS program_count,
+                (SELECT COUNT(*) FROM training_admission ta WHERE ta.training_id = t.id) AS enrolled_count
+            FROM training t
+            ORDER BY t.id DESC";
     $query = mysqli_query($conn, $sql);
 
     $data = [];

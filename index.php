@@ -19,8 +19,11 @@ $defaultCity = "";
 
 // For Debugging
 $_SESSION["IS_LOGIN"] = true; // Set to true to bypass login for testing
-$_SESSION["type"] = 1; // 1 - Admin, 2 - Cooperative, 3 - Farmer
+$_SESSION["type"] = 1; // Legacy debug flag (treated as admin by CHANGE_PASSWORD/machine-maintenance)
 $_SESSION["user_id"] = 1;
+$_SESSION["users_id"] = 1;
+$_SESSION["role_id"] = 1; // 1 - Administrator, 2 - Employee/Cooperative, 3 - Beneficiary (ARB)
+$_SESSION["username"] = "admin";
 $_SESSION["name"] = "Juan Dela Cruz";
 
 if (!isset($_SESSION["IS_LOGIN"])) {
@@ -82,6 +85,12 @@ switch ($route) {
 	case 'edit-user':
 		require_once 'views/users-edit.php';
 		break;
+	case 'view-user':
+		require_once 'views/users-view.php';
+		break;
+	case 'profile':
+		require_once 'views/profile.php';
+		break;
 	// ==================== Module ====================
 	case 'module-list':
 		require_once 'views/module-list.php';
@@ -103,6 +112,143 @@ switch ($route) {
 	// ==================== Branch ====================
 	case 'branch-list':
 		require_once 'views/branch-list.php';
+		break;
+	// ==================== Agency ====================
+	case 'agency':
+		require_once 'views/agency.php';
+		break;
+	// ==================== Beneficiary ====================
+	case 'beneficiary-list':
+		require_once 'views/beneficiary-list.php';
+		break;
+	case 'beneficiary-verify-list':
+		require_once 'views/beneficiary-verify-list.php';
+		break;
+	case 'beneficiary-verify':
+		require_once 'views/beneficiary-verify.php';
+		break;
+	case 'beneficiary-view':
+		require_once 'views/beneficiary-view.php';
+		break;
+	case 'beneficiary-add':
+		require_once 'views/beneficiary-add.php';
+		break;
+	case 'beneficiary-edit':
+		require_once 'views/beneficiary-edit.php';
+		break;
+	// ==================== Facility ====================
+	case 'facility-type':
+		require_once 'views/facility-type.php';
+		break;
+	case 'list-facility':
+		require_once 'views/facility-list.php';
+		break;
+	case 'add-facility':
+		require_once 'views/facility-add.php';
+		break;
+	case 'edit-facility':
+		require_once 'views/facility-edit.php';
+		break;
+	// ==================== Booking ====================
+	case 'booking-browse':
+		require_once 'views/booking-browse.php';
+		break;
+	case 'booking-beneficiary':
+		require_once 'views/booking-beneficiary.php';
+		break;
+	case 'booking-available':
+		require_once 'views/booking-available.php';
+		break;
+	case 'booking-training':
+		require_once 'views/booking-training.php';
+		break;
+	case 'booking-approval':
+		require_once 'views/booking-approval.php';
+		break;
+	case 'booking-completed':
+		require_once 'views/booking-completed.php';
+		break;
+	case 'booking-declined':
+		require_once 'views/booking-declined.php';
+		break;
+	// ==================== Program ====================
+	case 'list-programs':
+		require_once 'views/program-list.php';
+		break;
+	case 'add-program':
+		require_once 'views/program-add.php';
+		break;
+	case 'list-allocations':
+		require_once 'views/program-allocation.php';
+		break;
+	case 'add-allocation':
+		require_once 'views/program-allocation-add.php';
+		break;
+	case 'edit-allocation':
+		require_once 'views/program-allocation-edit.php';
+		break;
+	case 'list-program-beneficiary':
+		require_once 'views/program-beneficiary.php';
+		break;
+	// ==================== Training ====================
+	case 'list-training':
+		require_once 'views/training-list.php';
+		break;
+	case 'add-training':
+		require_once 'views/training-add.php';
+		break;
+	case 'training-admission':
+		require_once 'views/training-admission.php';
+		break;
+	case 'training-available':
+		require_once 'views/training-available.php';
+		break;
+	// ==================== Land Monitoring ====================
+	case 'list-land-monitoring':
+		require_once 'views/land-monitoring-logs.php';
+		break;
+	case 'list-land-parcel':
+		require_once 'views/land-monitoring-parcel.php';
+		break;
+	case 'add-land-parcel':
+		require_once 'views/land-monitoring-parcel-add.php';
+		break;
+	case 'edit-land-parcel':
+		require_once 'views/land-monitoring-parcel-edit.php';
+		break;
+	case 'list-land-records':
+		require_once 'views/land-monitoring-record.php';
+		break;
+	case 'add-land-records':
+		require_once 'views/land-monitoring-record-add.php';
+		break;
+	case 'edit-land-records':
+		require_once 'views/land-monitoring-record-edit.php';
+		break;
+	// ==================== Product ====================
+	case 'list-products':
+		require_once 'views/product-list.php';
+		break;
+	case 'add-product':
+		require_once 'views/product-add.php';
+		break;
+	case 'edit-product':
+		require_once 'views/product-edit.php';
+		break;
+	case 'product-details':
+		require_once 'views/product-details.php';
+		break;
+	case 'product-category':
+		require_once 'views/product-category.php';
+		break;
+	case 'product-available':
+		require_once 'views/product-available.php';
+		break;
+	case 'list-inventory':
+		require_once 'views/product-inventory.php';
+		break;
+	case 'add-inventory':
+		require_once 'views/product-inventory-add.php';
 		break;
 	// ==================== Pages (Standalone) ====================
 	case 'page-login':

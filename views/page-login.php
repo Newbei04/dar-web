@@ -10,32 +10,33 @@
 	<meta name="robots" content="index, follow">
 	<meta name="twitter:card" content="summary_large_image">
 	<link rel="icon" href="<?= $baseURL ?>assets/images/hand.png" type="image/png">
-	<title>Mophy - Payment Admin Dashboard Bootstrap Template + FrontEnd | DexignZone</title>
+	<title>DAR - Department of Agrarian Reform</title>
 	<link rel="icon" type="image/png" sizes="16x16" href="<?= $baseURL ?>assets/images/favicon.png">
 	<link href="<?= $baseURL ?>assets/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
 	<link class="main-css" href="<?= $baseURL ?>assets/css/style.css" rel="stylesheet">
 </head>
 
-<body class="h-100">
+<body class="vh-100">
 	<div class="login-account">
 		<div class="row h-100">
 			<div class="col-lg-6 align-self-start">
 				<div class="account-info-area" style="background-image: url(<?= $baseURL ?>assets/images/rainbow.gif)">
 					<div class="login-content">
 						<p class="sub-title">Log in to your admin dashboard with your credentials</p>
-						<h1 class="title">The Evolution of <span>Mophy</span></h1>
-						<p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt</p>
+						<h1 class="title">The Evolution of <span>DAR</span></h1>
+						<p class="text">Repormang Agraryo: Binhi ng Kaunlaran at Tagumpay</p>
 					</div>
 				</div>
 			</div>
 			<div class="col-lg-6 col-md-7 col-sm-12 mx-auto align-self-center">
 				<div class="login-form">
 					<div class="login-head">
+						<img src="<?= $baseURL ?>assets/images/dar.png" alt="DAR Logo" class="login-logo">
 						<h3 class="title">Welcome Back</h3>
 						<p>Login page allows users to enter login credentials for authentication and access to secure content.</p>
 					</div>
 					<h6 class="login-title"><span>Login</span></h6>
-					<div class="row mb-5">
+					<!-- <div class="row mb-5">
 						<div class="col-xl-6 col-sm-6">
 							<a href="javascript:void(0);" class="btn btn-outline-danger d-block social-btn">
 								<svg width="16" height="16" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -54,7 +55,7 @@
 								</svg>
 								<span class="ms-1 font-w500 label-color">Sign in with Apple</span></a>
 						</div>
-					</div>
+					</div> -->
 					<form action="<?= $baseURL ?>home">
 						<div class="mb-4">
 							<label class="form-label required">Email</label>

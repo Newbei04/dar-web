@@ -124,6 +124,7 @@ require_once "navbar.php";
 		})(window.jQuery);
 	</script>
 	<script src="<?= $baseURL ?>assets/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+	<script src="<?= $baseURL ?>assets/vendor/select2/js/select2.full.min.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/chart-js/chart.bundle.min.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/owl-carousel/owl.carousel.js"></script>
 	<!-- Chart piety plugin files -->
@@ -136,6 +137,27 @@ require_once "navbar.php";
 	<script src="<?= $baseURL ?>assets/js/deznav-init.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/sweetalert2/dist/sweetalert2.min.js"></script>
 	<script>
+		(function() {
+			if (!window.Swal) return;
+			var origFire = Swal.fire;
+			Swal.fire = function() {
+				var p = origFire.apply(this, arguments);
+				if (!p || typeof p.then !== 'function') return p;
+				return {
+					then: function(fn, onErr) {
+						return p.then(function(result) {
+							if (result && typeof result === 'object' && ('value' in result) && !('isConfirmed' in result)) {
+								result.isConfirmed = !!result.value;
+							}
+							return typeof fn === 'function' ? fn(result) : result;
+						}, onErr);
+					},
+					catch: function(fn) { return p.catch(fn); },
+					finally: function(fn) { return p.finally ? p.finally(fn) : p; }
+				};
+			};
+		})();
+
 		document.title = "<?= isset($title) ? $ENV['APP_NAME'] . ' - ' . htmlspecialchars($title) : $ENV['APP_NAME'] ?>";
 
 		function showLoader(title = "Processing...", html = "Please wait while we are processing your request!") {
@@ -192,11 +214,30 @@ require_once "navbar.php";
 			}, 1000);
 		});
 
+		function syncThemeUI() {
+			var isDark = jQuery('body').attr('data-theme-version') === 'dark';
+			jQuery('.dz-theme-mode').toggleClass('active', isDark);
+		}
+
 		jQuery(document).ready(function() {
+			// Replace the theme's class-dependent dark-mode toggle with a
+			// body-state-based one so the first click always works.
+			jQuery('.dz-theme-mode').off('click').on('click', function(e) {
+				e.preventDefault();
+				var isDark = jQuery('body').attr('data-theme-version') === 'dark';
+				var next = isDark ? 'light' : 'dark';
+				jQuery('body').attr('data-theme-version', next);
+				setCookie('version', next);
+				syncThemeUI();
+			});
+			syncThemeUI();
 			setTimeout(function() {
-				dezSettingsOptions.version = 'light';
+				// Re-apply layout settings using the CURRENT body state so an
+				// early user toggle is not clobbered; keep the cookie as-is.
+				var current = jQuery('body').attr('data-theme-version');
+				dezSettingsOptions.version = (current === 'dark' || current === 'transparent') ? current : 'light';
 				new dezSettings(dezSettingsOptions);
-				setCookie('version', 'light');
+				syncThemeUI();
 			}, 1500)
 		});
 	</script>

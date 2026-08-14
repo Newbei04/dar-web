@@ -83,7 +83,7 @@ if ($trans == "ADD_MAINTENANCE") {
         // 🔥 SET MACHINERY = UNDER MAINTENANCE
         $conn->query("
             UPDATE machinery 
-            SET status = 5 
+            SET status = 0 
             WHERE id = '$machinery_id'
         ");
 

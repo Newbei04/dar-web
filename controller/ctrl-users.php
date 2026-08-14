@@ -316,6 +316,10 @@ if ($trans == "ADD_USER") {
 
     unset($row['password']);
 
+    $roleRes = mysqli_query($conn, "SELECT title FROM users_role WHERE id='" . $row['role_id'] . "' LIMIT 1");
+    $roleRow = mysqli_fetch_assoc($roleRes);
+    $row['role'] = $roleRow['title'] ?? '';
+
     $profile = null;
 
     if ($row['type'] == 0) {
@@ -448,6 +452,47 @@ if ($trans == "ADD_USER") {
         "message" => "User updated successfully",
         "profile_photo" => $profile_photo
     ]);
+} else if ($trans == "DELETE_USER") {
+
+    $id = $data['id'] ?? '';
+
+    if (!$id) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "ID required"
+        ]);
+        exit;
+    }
+
+    $userRes = mysqli_query($conn, "SELECT type FROM users WHERE id='$id'");
+    $userRow = mysqli_fetch_assoc($userRes);
+
+    if (!$userRow) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "User not found"
+        ]);
+        exit;
+    }
+
+    if ($userRow['type'] == 0) {
+        mysqli_query($conn, "DELETE FROM employee WHERE users_id='$id'");
+    } else if ($userRow['type'] == 1) {
+        mysqli_query($conn, "DELETE FROM beneficiary WHERE users_id='$id'");
+    }
+
+    if (mysqli_query($conn, "DELETE FROM users WHERE id='$id'")) {
+        echo json_encode([
+            "code" => 0,
+            "message" => "User deleted successfully"
+        ]);
+    } else {
+        echo json_encode([
+            "code" => 1,
+            "message" => "Failed to delete user"
+        ]);
+    }
+    exit;
 } else if ($trans == "GET_INVOICE_DATA") {
 
     $beneficiary_id = $data['beneficiary_id'];

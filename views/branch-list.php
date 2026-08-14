@@ -24,6 +24,7 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="tblBranch" class="display responsive nowrap w-100">
                         <thead>
                             <tr>
@@ -40,6 +41,7 @@
                             <!-- Loaded via AJAX -->
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

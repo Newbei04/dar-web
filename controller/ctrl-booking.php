@@ -34,17 +34,16 @@ if (!$_SESSION["IS_LOGIN"]) {
 |
 | MACHINERY STATUS
 |--------------------------------------------------------------------------
-| 0 = Not Working / MAINTENANCE
+| 0 = Under Maintenance
 | 1 = Available
-| 2 = Reserved (For Approval)
-| 3 = Approved
-| 4 = Borrowed
+|--------------------------------------------------------------------------
+| NOTE: Booking state is NOT stored in machinery.status.
+| A machine's availability for booking is derived from active
+| bookings (status IN 0,1,2) via NOT EXISTS subqueries.
 |--------------------------------------------------------------------------
 */
 
 if ($trans == "LIST_AVAILABLE_BOOKINGS") {
-
-    $branch_id = $_SESSION["profile"]['branch_id'] ?? '';
 
     $db = DBCon::getConnection();
 
@@ -61,6 +60,11 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                 LEFT JOIN machinery_type mt ON mt.id = m.type_id
                 LEFT JOIN branch b ON b.id = m.branch_id
                 WHERE m.status = '1'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM booking bb
+                      WHERE bb.machinery_id = m.id
+                        AND bb.status IN ('0','1','2')
+                  )
                 ORDER BY m.ratings DESC";
 
         $stmt = $db->query($sql);
@@ -92,7 +96,12 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                 FROM machinery m
                 LEFT JOIN machinery_type mt ON mt.id = m.type_id
                 LEFT JOIN branch b ON b.id = m.branch_id
-                WHERE m.status = '1'";
+                WHERE m.status = '1'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM booking bb
+                      WHERE bb.machinery_id = m.id
+                        AND bb.status IN ('0','1','2')
+                  )";
 
         $params = [];
         if ($role_id != 1 && $branch_id) {
@@ -125,8 +134,8 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
 } else if ($trans == "ADD_BOOKING") {
 
     $beneficiary_id = $data['beneficiary_id'] ?? '';
-    if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 2) {
-        $beneficiary_id = $_SESSION["profile"]['id'];
+    if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 3) {
+        $beneficiary_id = $_SESSION["profile"]['id'] ?? '';
     }
     $machinery_id   = $data['machinery_id'] ?? '';
     $branch_id      = $data['branch_id'] ?? ($_SESSION["profile"]['branch_id'] ?? '');
@@ -151,7 +160,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                             FROM booking_schedules bs
                             INNER JOIN booking b ON bs.booking_id = b.id
                             WHERE b.machinery_id = ?
-                              AND b.status IN (0, 1)
+                              AND b.status IN (0, 1, 2)
                               AND bs.status != 2
                               AND bs.start_at < ?
                               AND bs.end_at > ?";
@@ -188,9 +197,6 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
 
         $schedStmt = $db->prepare("INSERT INTO booking_schedules (booking_id, start_at, end_at, status, created_at) VALUES (?, ?, ?, 0, NOW())");
         $schedStmt->execute([$insertedId, $start_date, $end_date]);
-
-        $machStmt = $db->prepare("UPDATE machinery SET status = '2' WHERE id = ?");
-        $machStmt->execute([$machinery_id]);
 
         $db->commit();
 
@@ -299,9 +305,6 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
             $updateBooking = $db->prepare("UPDATE booking SET status = '1' WHERE id = ?");
             $updateBooking->execute([$booking_id]);
 
-            $updateMach = $db->prepare("UPDATE machinery SET status = '3' WHERE id = ?");
-            $updateMach->execute([$bookingRow['machinery_id']]);
-
             $updateLog = $db->prepare("UPDATE booking_logs SET approved_at = NOW(), approved_staff_id = ? WHERE booking_id = ?");
             $updateLog->execute([$users_id, $booking_id]);
 
@@ -343,9 +346,6 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
             $updateBooking = $db->prepare("UPDATE booking SET status = '4' WHERE id = ?");
             $updateBooking->execute([$booking_id]);
 
-            $updateMach = $db->prepare("UPDATE machinery SET status = '1' WHERE id = ?");
-            $updateMach->execute([$bookingRow['machinery_id']]);
-
             $updateLog = $db->prepare("UPDATE booking_logs SET declined_at = NOW(), declined_staff_id = ?, declined_remarks = ? WHERE booking_id = ?");
             $updateLog->execute([$users_id, $remarks, $booking_id]);
 
@@ -386,9 +386,6 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
             $updateBooking = $db->prepare("UPDATE booking SET status = '2' WHERE id = ?");
             $updateBooking->execute([$booking_id]);
 
-            $updateMach = $db->prepare("UPDATE machinery SET status = '4' WHERE id = ?");
-            $updateMach->execute([$bookingRow['machinery_id']]);
-
             $updateLog = $db->prepare("UPDATE booking_logs SET checkout_at = NOW(), checkout_staff_id = ? WHERE booking_id = ?");
             $updateLog->execute([$users_id, $booking_id]);
 
@@ -411,10 +408,12 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
 
     try {
         $sql = "SELECT b.*, m.name AS machinery_name, m.model,
-                       CONCAT(ben.fname, ' ', ben.lname) AS beneficiary_name
+                       CONCAT(ben.fname, ' ', ben.lname) AS beneficiary_name,
+                       bs.start_at, bs.end_at
                 FROM booking b
                 LEFT JOIN machinery m ON m.id = b.machinery_id
                 LEFT JOIN beneficiary ben ON ben.id = b.beneficiary_id
+                LEFT JOIN booking_schedules bs ON bs.booking_id = b.id
                 WHERE b.status IN ('1','2','3')
                 ORDER BY b.id DESC";
 
@@ -451,9 +450,6 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
         if ($bookingRow) {
             $updateBooking = $db->prepare("UPDATE booking SET status = '3' WHERE id = ?");
             $updateBooking->execute([$booking_id]);
-
-            $updateMach = $db->prepare("UPDATE machinery SET status = '1' WHERE id = ?");
-            $updateMach->execute([$bookingRow['machinery_id']]);
 
             $updateLog = $db->prepare("UPDATE booking_logs SET returned_at = NOW(), returned_staff_id = ? WHERE booking_id = ?");
             $updateLog->execute([$users_id, $booking_id]);
@@ -493,6 +489,53 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
         echo json_encode(["code" => 0, "message" => "Success", "data" => $list]);
     } catch (Exception $e) {
         error_log("Fetch declined error: " . $e->getMessage());
+        echo json_encode(["code" => 1, "message" => "An error occurred."]);
+    }
+    exit;
+
+} else if ($trans == "LIST_BENEFICIARY_BOOKING") {
+
+    $beneficiary_id = $_SESSION["profile"]['id'] ?? '';
+
+    $db = DBCon::getConnection();
+
+    try {
+        if (!$beneficiary_id) {
+            echo json_encode(["code" => 0, "message" => "Success", "data" => []]);
+            exit;
+        }
+
+        $sql = "SELECT
+                    b.*, m.name AS machinery_name, m.model,
+                    mt.name AS machinery_type,
+                    br.name AS branch_name,
+                    bs.start_at, bs.end_at,
+                    bl.declined_remarks,
+                    (SELECT name FROM machinery_images WHERE machinery_id = m.id AND is_primary = 1 LIMIT 1) AS image,
+                    CASE
+                        WHEN b.status = 0 THEN 'Pending'
+                        WHEN b.status = 1 THEN 'Approved'
+                        WHEN b.status = 2 THEN 'Checkout'
+                        WHEN b.status = 3 THEN 'Returned'
+                        WHEN b.status = 4 THEN 'Declined'
+                        ELSE 'Unknown'
+                    END AS status_label
+                FROM booking b
+                LEFT JOIN machinery m ON m.id = b.machinery_id
+                LEFT JOIN machinery_type mt ON mt.id = m.type_id
+                LEFT JOIN branch br ON br.id = b.branch_id
+                LEFT JOIN booking_schedules bs ON bs.booking_id = b.id
+                LEFT JOIN booking_logs bl ON bl.booking_id = b.id
+                WHERE b.beneficiary_id = ?
+                ORDER BY b.id DESC";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$beneficiary_id]);
+        $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode(["code" => 0, "message" => "Success", "data" => $list]);
+    } catch (Exception $e) {
+        error_log("Fetch beneficiary bookings error: " . $e->getMessage());
         echo json_encode(["code" => 1, "message" => "An error occurred."]);
     }
     exit;
@@ -567,17 +610,18 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     $db = DBCon::getConnection();
 
     try {
-        $sql = "SELECT bs.start_at AS from_date, bs.end_at AS end_date,
+        $sql = "                SELECT bs.start_at AS from_date, bs.end_at AS end_date,
                        CASE
                            WHEN b.status = 0 THEN 'pending'
                            WHEN b.status = 1 THEN 'approved'
+                           WHEN b.status = 2 THEN 'approved'
                            WHEN b.status = 4 THEN 'declined'
                            ELSE 'pending'
                        END AS status
                 FROM booking_schedules bs
                 INNER JOIN booking b ON bs.booking_id = b.id
                 WHERE b.machinery_id = ?
-                  AND b.status IN (0, 1)
+                  AND b.status IN (0, 1, 2)
                   AND bs.status != 2";
 
         $stmt = $db->prepare($sql);

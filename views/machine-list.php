@@ -27,6 +27,7 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="tblData" class="display responsive nowrap w-100">
                         <thead>
                             <tr>
@@ -46,6 +47,7 @@
                             <!-- Loaded via AJAX -->
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -355,6 +357,7 @@
         function machineThumbFallback() {
             return '<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>';
         }
+        window.machineThumbFallback = machineThumbFallback;
 
         // ================= LOAD LIST =================
         function loadData() {
@@ -519,10 +522,9 @@
                 return;
             }
 
+            showLoader("Uploading images...");
             const files = Array.from($("#add_image_input")[0].files || []);
             data.images = await filesToBase64(files);
-
-            showLoader("Saving...");
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-machinery.php",
                 type: "POST",
@@ -685,10 +687,9 @@
         // ================= UPDATE =================
         $("#updateMachineBtn").on("click", async function() {
 
+            showLoader("Uploading images...");
             const files = Array.from($("#edit_image_input")[0].files || []);
             const base64Array = await filesToBase64(files);
-
-            showLoader("Updating...");
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-machinery.php",
                 type: "POST",
@@ -872,10 +873,7 @@
 
             const statusMap = {
                 0: '<span class="badge light badge-warning">Under Maintenance</span>',
-                1: '<span class="badge light badge-success">Available</span>',
-                2: '<span class="badge light badge-info">For Approval</span>',
-                3: '<span class="badge light badge-primary">Approved</span>',
-                4: '<span class="badge light badge-dark">Borrowed</span>'
+                1: '<span class="badge light badge-success">Available</span>'
             };
 
             $('#viewModalTitle').text(name);

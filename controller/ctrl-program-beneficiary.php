@@ -586,6 +586,8 @@ if ($trans == "ADD_PROGRAM_BENEFICIARY") {
 
             b.doc_num,
             b.card_num,
+            b.email,
+            b.mobile,
             CONCAT(b.fname, ' ', b.lname) AS beneficiary_name
 
         FROM program_beneficiary pb

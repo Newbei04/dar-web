@@ -1,10 +1,43 @@
 <!-- Start the content for this page -->
 <?= startSection('navbar') ?>
+<style>
+    .nav-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+    }
+
+    .nav-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .nav-avatar .nav-avatar-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #6b7aff 0%, #7c4dff 100%);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+    }
+</style>
 <!--**********************************
             Nav header start
         ***********************************-->
 <div class="nav-header">
-    <a href="<?= $baseURL ?>dashboard-light" class="brand-logo">
+    <a href="<?= $baseURL ?>dashboard" class="brand-logo">
         <img class="logo-abbr" src="<?= $baseURL ?>assets/images/dar.png" alt="">
         <img class="logo-compact" src="<?= $baseURL ?>assets/images/logo-text.png" alt="">
         <img class="brand-title" src="<?= $baseURL ?>assets/images/logo-text.png" alt="">
@@ -499,16 +532,41 @@
                             <span class="badge light text-white bg-primary rounded-circle">5</span>
                         </a>
                     </li>
+                    <?php
+                    $navProfile = $_SESSION['profile'] ?? [];
+                    $navFname = $navProfile['fname'] ?? '';
+                    $navLname = $navProfile['lname'] ?? '';
+                    $navFullName = trim($navFname . ' ' . $navLname);
+                    if (!$navFullName) {
+                        $navFullName = $_SESSION['name'] ?? ($_SESSION['username'] ?? 'User');
+                    }
+                    $navRoleId = (int)($_SESSION['role_id'] ?? 0);
+                    $navRoleMap = [1 => 'Administrator', 2 => 'Employee / Cooperative', 3 => 'Beneficiary (ARB)'];
+                    $navRole = $navRoleMap[$navRoleId] ?? 'User';
+                    $navPhoto = $navProfile['profile'] ?? '';
+                    $navInitials = strtoupper(substr($navFname, 0, 1) . substr($navLname, 0, 1));
+                    if ($navInitials === '') {
+                        $navInitials = strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1));
+                    }
+                    ?>
                     <li class="nav-item dropdown header-profile">
                         <a class="nav-link" href="javascript:void(0)" role="button" data-bs-toggle="dropdown">
                             <div class="header-info">
-                                <span class="text-black">Hello,<strong>Franklin</strong></span>
-                                <p class="fs-12 mb-0">Super Admin</p>
+                                <span class="text-black">Hello, <strong><?= htmlspecialchars($navFullName) ?></strong></span>
+                                <p class="fs-12 mb-0"><?= htmlspecialchars($navRole) ?></p>
                             </div>
-                            <img src="<?= $baseURL ?>assets/images/profile/17.jpg" width="20" alt="">
+                            <?php if ($navPhoto): ?>
+                                <span class="nav-avatar">
+                                    <img src="<?= $baseURL ?>assets/images/profile/<?= htmlspecialchars($navPhoto) ?>" alt="">
+                                </span>
+                            <?php else: ?>
+                                <span class="nav-avatar">
+                                    <span class="nav-avatar-fallback"><?= htmlspecialchars($navInitials) ?></span>
+                                </span>
+                            <?php endif; ?>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <a href="<?= $baseURL ?>app-profile" class="dropdown-item ai-icon">
+                            <a href="<?= $baseURL ?>profile" class="dropdown-item ai-icon">
                                 <svg id="icon-user1" xmlns="http://www.w3.org/2000/svg" class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
@@ -568,6 +626,93 @@
                     <i class="fas fa-location-dot"></i>
                     <span class="nav-text">Branch</span>
                 </a>
+            </li>
+            <!-- AGENCY -->
+            <li><a href="<?= $baseURL ?>agency" aria-expanded="false">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="nav-text">Agency</span>
+                </a>
+            </li>
+            <!-- BENEFICIARY -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                    <span class="nav-text">Beneficiary</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>beneficiary-list">List Beneficiary</a></li>
+                    <li><a href="<?= $baseURL ?>beneficiary-verify-list">For Verification</a></li>
+                    <li><a href="<?= $baseURL ?>beneficiary-add">Add Beneficiary</a></li>
+                </ul>
+            </li>
+            <!-- FACILITY -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span class="nav-text">Facility</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>list-facility">List Facility</a></li>
+                    <li><a href="<?= $baseURL ?>add-facility">Add Facility</a></li>
+                    <li><a href="<?= $baseURL ?>facility-type">Facility Types</a></li>
+                </ul>
+            </li>
+            <!-- PRODUCT -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span class="nav-text">Product</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>list-products">List Products</a></li>
+                    <li><a href="<?= $baseURL ?>product-category">Product Categories</a></li>
+                    <li><a href="<?= $baseURL ?>product-available">Available Products</a></li>
+                    <li><a href="<?= $baseURL ?>list-inventory">Inventory</a></li>
+                </ul>
+            </li>
+            <!-- BOOKING -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span class="nav-text">Booking</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>booking-browse">Book a Machine</a></li>
+                    <li><a href="<?= $baseURL ?>booking-beneficiary">My Bookings</a></li>
+                    <li><a href="<?= $baseURL ?>booking-available">Available Machinery</a></li>
+                    <li><a href="<?= $baseURL ?>booking-approval">Booking Approval</a></li>
+                    <li><a href="<?= $baseURL ?>booking-completed">Checkout & Return</a></li>
+                    <li><a href="<?= $baseURL ?>booking-declined">Declined Bookings</a></li>
+                </ul>
+            </li>
+            <!-- PROGRAM -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span class="nav-text">Program</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>list-programs">Programs</a></li>
+                    <li><a href="<?= $baseURL ?>list-allocations">Allocations</a></li>
+                </ul>
+            </li>
+            <!-- TRAINING -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span class="nav-text">Training</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>training-available">Available Training</a></li>
+                    <li><a href="<?= $baseURL ?>booking-training">Enroll in Training</a></li>
+                    <li><a href="<?= $baseURL ?>list-training">Training List</a></li>
+                    <li><a href="<?= $baseURL ?>training-admission">Training Admission</a></li>
+                </ul>
+            </li>
+            <!-- LAND -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-earth-asia"></i>
+                    <span class="nav-text">Land</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>list-land-monitoring">Land Monitoring Logs</a></li>
+                    <li><a href="<?= $baseURL ?>list-land-parcel">Land Parcels</a></li>
+                    <li><a href="<?= $baseURL ?>list-land-records">Land Records</a></li>
+                </ul>
             </li>
             <!-- USER -->
             <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">

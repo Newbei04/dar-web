@@ -1,1111 +1,697 @@
-<?= startSection('content') ?>
-<!-- row -->
-<div class="container-fluid">
-	<div class="form-head mb-4">
-		<h2 class="text-black font-w600 mb-0">Dashboard</h2>
-	</div>
-	<div class="row">
-		<div class="col-xl-6">
-			<div class="row">
-				<div class="col-xl-8 col-lg-6 col-md-7 col-sm-8">
-					<div class="card-bx stacked">
-						<img src="<?= $baseURL ?>assets/images/card/card.png" alt="" class="mw-100">
-						<div class="card-info text-white">
-							<p class="mb-1 text-white">Main Balance</p>
-							<h2 class="fs-36 text-white mb-sm-4 mb-3">$673,412.66</h2>
-							<div class="d-flex align-items-center justify-content-between mb-sm-5 mb-3">
-								<img src="<?= $baseURL ?>assets/images/dual-dot.png" alt="" class="dot-img">
-								<h4 class="fs-20 text-white mb-0">**** **** **** 1234</h4>
-							</div>
-							<div class="d-flex">
-								<div class="me-5">
-									<p class="fs-14 mb-1 text-white op6">VALID THRU</p>
-									<span>08/21</span>
-								</div>
-								<div>
-									<p class="fs-14 mb-1 text-white op6">CARD HOLDER</p>
-									<span>Franklin Jr.</span>
-								</div>
-							</div>
-						</div>
-						<a href="<?= $baseURL ?>cards-center"><i class="fa fa-caret-down" aria-hidden="true"></i></a>
-					</div>
-				</div>
-				<div class="col-xl-4 col-lg-6 col-md-5 col-sm-4">
-					<div class="card bgl-primary card-body overflow-hidden p-0 d-flex rounded">
-						<div class="p-0 text-center mt-3">
-							<span class="text-black">Limit</span>
-							<h3 class="text-black fs-20 mb-0 font-w600">$4,000</h3>
-							<small>/$10,000</small>
-						</div>
-						<canvas id="lineChart" height="300" class="mt-auto line-chart-demo"></canvas>
-					</div>
-				</div>
-				<div class="col-xl-12">
-					<div class="card">
-						<div class="card-header d-sm-flex d-block border-0 pb-0 flex-wrap">
-							<div class="pr-3 me-auto mb-sm-0 mb-3">
-								<h4 class="fs-20 text-black mb-1">Transaction Overview</h4>
-								<span class="fs-12">Lorem ipsum dolor sit amet, consectetur</span>
-							</div>
-							<div class="d-flex align-items-center justify-content-between">
-								<a href="javascript:void(0)" class="btn btn-rounded btn-primary light me-3"
-									data-bs-toggle="modal" data-bs-target="#DownloadReport"><i
-										class="las la-download  scale5 me-3"></i>Download Report</a>
-								<!-- Modal -->
-								<div class="modal fade" id="DownloadReport">
-									<div class="modal-dialog modal-dialog-centered" role="document">
-										<div class="modal-content">
-											<div class="modal-header">
-												<h5 class="modal-title">Modal title</h5>
-												<button type="button" class="btn-close"
-													data-bs-dismiss="modal">
-												</button>
-											</div>
-											<div class="modal-body">
-												<div class="row">
-													<div class="col-xl-12">
-														<div class="mb-3">
-															<label for="exampleFormControlInput1" class="form-label">Report</label>
-															<input type="text" class="form-control" id="exampleFormControlInput1" placeholder="transction">
-														</div>
+<?= startSection('css') ?>
+<style>
+    .dash-hero {
+        border-radius: 18px;
+        background: linear-gradient(135deg, #0f766e 0%, #0d9488 45%, #14b8a6 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .bg-gradient-primary { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+    .bg-gradient-secondary { background: linear-gradient(135deg, #475569 0%, #64748b 100%); }
+    .bg-gradient-dark { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+    .bg-gradient-danger { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+    .shadow-primary { box-shadow: 0 8px 20px rgba(37, 99, 235, .18); }
+    .shadow-info { box-shadow: 0 8px 20px rgba(14, 165, 233, .18); }
+    .shadow-success { box-shadow: 0 8px 20px rgba(22, 163, 74, .18); }
+    .shadow-warning { box-shadow: 0 8px 20px rgba(245, 158, 11, .18); }
+    .shadow-secondary { box-shadow: 0 8px 20px rgba(71, 85, 105, .18); }
+    .shadow-dark { box-shadow: 0 8px 20px rgba(30, 41, 59, .18); }
+    .shadow-danger { box-shadow: 0 8px 20px rgba(220, 38, 38, .18); }
+    .dash-hero::before {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        top: -90px;
+        right: -40px;
+    }
+    .dash-hero::after {
+        content: "";
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        bottom: -60px;
+        right: 160px;
+    }
+    .stat-card {
+        border: 0;
+        border-radius: 14px;
+        transition: transform .2s ease, box-shadow .2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.10) !important;
+    }
+    .stat-card .stat-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .stat-card .stat-label {
+        font-size: 12px;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        font-weight: 600;
+        opacity: .75;
+    }
+    .stat-card .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.15;
+    }
+    .dash-card {
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(2, 6, 23, 0.06);
+    }
+    .dash-card .card-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(2, 6, 23, .08);
+    }
+    .booking-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+    .recent-booking {
+        border-left: 3px solid transparent;
+        padding: 12px 14px;
+        border-radius: 10px;
+        transition: background .15s ease;
+    }
+    .recent-booking:hover {
+        background: rgba(2, 6, 23, .035);
+    }
+</style>
+<?= endSection() ?>
 
-													</div>
-												</div>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="btn btn-danger light"
-													data-bs-dismiss="modal">Close</button>
-												<button type="button" class="btn btn-primary">Save
-													changes</button>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="dropdown c-pointer">
-									<div class="btn-link" data-bs-toggle="dropdown">
-										<svg width="1.5rem" height="1.5rem" viewBox="0 0 24 24"
-											version="1.1">
-											<g stroke="none" stroke-width="1" fill="none"
-												fill-rule="evenodd">
-												<rect x="0" y="0" width="24" height="24"></rect>
-												<circle fill="#000000" cx="5" cy="12" r="2"></circle>
-												<circle fill="#000000" cx="12" cy="12" r="2"></circle>
-												<circle fill="#000000" cx="19" cy="12" r="2"></circle>
-											</g>
-										</svg>
-									</div>
-									<div class="dropdown-menu dropdown-menu-end">
-										<a class="dropdown-item" href="javascript:void(0)">Delete</a>
-										<a class="dropdown-item" href="javascript:void(0)">Edit</a>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="card-body">
-							<div id="chartBar"></div>
-							<div class="d-flex">
-								<div class="form-check custom-switch toggle-switch text-end me-4">
-									<input type="checkbox" class="form-check-input mt-0"
-										id="customSwitch11">
-									<label class="form-check-label fs-14 text-black pe-2"
-										for="customSwitch11">Number</label>
-								</div>
-								<div class="form-check custom-switch toggle-switch text-end me-4">
-									<input type="checkbox" class="form-check-input mt-0"
-										id="customSwitch12">
-									<label class="form-check-label fs-14 text-black pe-2"
-										for="customSwitch12">Analytics</label>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-xl-12">
-					<div class="card">
-						<div class="card-header d-sm-flex d-block border-0 pb-0">
-							<div class="pr-3 mb-sm-0 mb-3 me-auto">
-								<h4 class="fs-20 text-black mb-1">Quick Transfer</h4>
-								<span class="fs-12">Lorem ipsum dolor sit amet, consectetur</span>
-							</div>
-							<span class="fs-24 text-black font-w600">$56,772.38</span>
-						</div>
-						<div class="card-body">
-							<div class="owl-carousel testimonial-one mb-5">
-								<div class="item">
-									<div class="image-bx mb-2">
-										<img src="<?= $baseURL ?>assets/images/avatar/1.jpg" alt="">
-										<i class="las la-check-circle"></i>
-									</div>
-									<h6 class="fs-16 mb-0"><a href="transactions-details.html"
-											class="text-black">David</a></h6>
-									<span class="fs-12">@davidxc</span>
-								</div>
-								<div class="item">
-									<div class="image-bx mb-2">
-										<img src="<?= $baseURL ?>assets/images/avatar/2.jpg" alt="">
-										<i class="las la-check-circle"></i>
-									</div>
-									<h6 class="fs-16 mb-0"><a href="transactions-details.html"
-											class="text-black">Cindy</a></h6>
-									<span class="fs-12">@cindyss</span>
-								</div>
-								<div class="item">
-									<div class="image-bx mb-2">
-										<img src="<?= $baseURL ?>assets/images/avatar/3.jpg" alt="">
-										<i class="las la-check-circle"></i>
-									</div>
-									<h6 class="fs-16 mb-0"><a href="transactions-details.html"
-											class="text-black">Samuel</a></h6>
-									<span class="fs-12">@sam224</span>
-								</div>
-								<div class="item">
-									<div class="image-bx mb-2">
-										<img src="<?= $baseURL ?>assets/images/avatar/4.jpg" alt="">
-										<i class="las la-check-circle"></i>
-									</div>
-									<h6 class="fs-16 mb-0"><a href="transactions-details.html"
-											class="text-black">Olivia</a></h6>
-									<span class="fs-12">@oliv62</span>
-								</div>
-								<div class="item">
-									<div class="image-bx mb-2">
-										<img src="<?= $baseURL ?>assets/images/avatar/5.jpg" alt="">
-										<i class="las la-check-circle"></i>
-									</div>
-									<h6 class="fs-16 mb-0"><a href="transactions-details.html"
-											class="text-black">Martha</a></h6>
-									<span class="fs-12">@marthaa</span>
-								</div>
-							</div>
-							<form>
-								<div class="form-group mb-0 row style-1 align-items-center">
-									<div class="col-sm-3">
-										<label class="fs-18 text-black font-w500">Amount</label>
-									</div>
-									<div class="col-sm-9">
-										<div class="input-group">
-											<input type="number" class="form-control">
-											<div class="input-group-append">
-												<button class="btn btn-primary rounded"
-													type="button">TRANSFER NOW</button>
-											</div>
-										</div>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-xl-6">
-			<div class="row">
-				<div class="col-xl-6 col-sm-6">
-					<div class="card">
-						<div class="card-header flex-wrap border-0 pb-0">
-							<div class="me-3 mb-2">
-								<p class="fs-14 mb-1">Income</p>
-								<span class="fs-24 text-black font-w600">$65,123</span>
-							</div>
-							<span class="fs-12 mb-2">
-								<svg width="21" height="15" viewBox="0 0 21 15" fill="none"
-									xmlns="http://www.w3.org/2000/svg">
-									<path
-										d="M0.999939 13.5C1.91791 12.4157 4.89722 9.22772 6.49994 7.5L12.4999 10.5L19.4999 1.5"
-										stroke="#2BC155" stroke-width="2" />
-									<path
-										d="M6.49994 7.5C4.89722 9.22772 1.91791 12.4157 0.999939 13.5H19.4999V1.5L12.4999 10.5L6.49994 7.5Z"
-										fill="url(#paint0_linear)" />
-									<defs>
-										<linearGradient id="paint0_linear" x1="10.2499" y1="3" x2="10.9999"
-											y2="13.5" gradientUnits="userSpaceOnUse">
-											<stop offset="0" stop-color="#2BC155" stop-opacity="0.73" />
-											<stop offset="1" stop-color="#2BC155" stop-opacity="0" />
-										</linearGradient>
-									</defs>
-								</svg>
-								4% (30 days)</span>
-						</div>
-						<div class="card-body p-0">
-							<canvas id="widgetChart1" height="80"></canvas>
-						</div>
-					</div>
-				</div>
-				<div class="col-xl-6 col-sm-6">
-					<div class="card">
-						<div class="card-header flex-wrap border-0 pb-0">
-							<div class="me-3 mb-2">
-								<p class="fs-14 mb-1">Outome</p>
-								<span class="fs-24 text-black font-w600">$24,551</span>
-							</div>
-							<span class="fs-12 mb-2">
-								<svg width="21" height="15" viewBox="0 0 21 15" fill="none"
-									xmlns="http://www.w3.org/2000/svg">
-									<path
-										d="M14.3514 7.5C15.9974 9.37169 19.0572 12.8253 20 14H1V1L8.18919 10.75L14.3514 7.5Z"
-										fill="url(#paint0_linear1)" />
-									<path d="M19.5 13.5C18.582 12.4157 15.6027 9.22772 14 7.5L8 10.5L1 1.5"
-										stroke="#FF2E2E" stroke-width="2" stroke-linecap="round" />
-									<defs>
-										<linearGradient id="paint0_linear1" x1="10.5" y1="2.625"
-											x2="9.64345" y2="13.9935" gradientUnits="userSpaceOnUse">
-											<stop offset="0" stop-color="#FF2E2E" />
-											<stop offset="1" stop-color="#FF2E2E" stop-opacity="0.03" />
-										</linearGradient>
-									</defs>
-								</svg>
-								4% (30 days)</span>
-						</div>
-						<div class="card-body p-0">
-							<canvas id="widgetChart2" height="80"></canvas>
-						</div>
-					</div>
-				</div>
-				<div class="col-xl-12">
-					<div class="card overflow-hidden">
-						<div class="card-header d-sm-flex d-block border-0 pb-0">
-							<div class="mb-sm-0 mb-2">
-								<p class="fs-14 mb-1">Weekly Wallet Usage</p>
-								<span class="mb-0">
-									<svg width="12" height="6" viewBox="0 0 12 6" fill="none"
-										xmlns="http://www.w3.org/2000/svg">
-										<path d="M11.9999 6L5.99994 -2.62268e-07L-6.10352e-05 6"
-											fill="#2BC155" />
-									</svg>
-									<strong class="fs-24 text-black ms-2 me-3">43%</strong>Than last
-									week</span>
-							</div>
-							<span class="fs-12">
-								<svg width="21" height="15" viewBox="0 0 21 15" fill="none"
-									xmlns="http://www.w3.org/2000/svg">
-									<path
-										d="M0.999939 13.5C1.91791 12.4157 4.89722 9.22772 6.49994 7.5L12.4999 10.5L19.4999 1.5"
-										stroke="#2BC155" stroke-width="2" />
-									<path
-										d="M6.49994 7.5C4.89722 9.22772 1.91791 12.4157 0.999939 13.5H19.4999V1.5L12.4999 10.5L6.49994 7.5Z"
-										fill="url(#paint0_linear2)" />
-									<defs>
-										<linearGradient id="paint0_linear2" x1="10.2499" y1="3" x2="10.9999"
-											y2="13.5" gradientUnits="userSpaceOnUse">
-											<stop offset="0" stop-color="#2BC155" stop-opacity="0.73" />
-											<stop offset="1" stop-color="#2BC155" stop-opacity="0" />
-										</linearGradient>
-									</defs>
-								</svg>
-								4% (30 days)</span>
-						</div>
-						<div class="card-body p-0">
-							<canvas id="widgetChart3" height="80"></canvas>
-						</div>
-					</div>
-				</div>
-				<div class="col-xl-12">
-					<div class="card">
-						<div class="card-body">
-							<div class="row align-items-center">
-								<div class="col-xl-5 col-xxl-12 col-md-5">
-									<h4 class="fs-20 text-black mb-4">Spendings</h4>
-									<div class="row">
-										<div class="d-flex col-xl-12 col-xxl-6  col-md-12 col-sm-6 mb-4">
-											<svg class="me-3" width="14" height="54" viewBox="0 0 14 54"
-												fill="none" xmlns="http://www.w3.org/2000/svg">
-												<rect x="-6.10352e-05" width="14" height="54" rx="7"
-													fill="#AC39D4" />
-											</svg>
-											<div>
-												<p class="fs-14 mb-2">Investment</p>
-												<span class="fs-18 font-w500"><span
-														class="text-black me-2">$1,415</span>/$2,000</span>
-											</div>
-										</div>
-										<div class="d-flex col-xl-12 col-xxl-6 col-md-12 col-sm-6 mb-4">
-											<svg class="me-3" width="14" height="54" viewBox="0 0 14 54"
-												fill="none" xmlns="http://www.w3.org/2000/svg">
-												<rect x="-6.10352e-05" width="14" height="54" rx="7"
-													fill="#40D4A8" />
-											</svg>
-											<div>
-												<p class="fs-14 mb-2">Installment</p>
-												<span class="fs-18 font-w500"><span
-														class="text-black me-2">$1,567</span>/$5,000</span>
-											</div>
-										</div>
-										<div class="d-flex col-xl-12 col-xxl-6 col-md-12 col-sm-6 mb-4">
-											<svg class="me-3" width="14" height="54" viewBox="0 0 14 54"
-												fill="none" xmlns="http://www.w3.org/2000/svg">
-												<rect x="-6.10352e-05" width="14" height="54" rx="7"
-													fill="#1EB6E7" />
-											</svg>
-											<div>
-												<p class="fs-14 mb-2">Restaurant</p>
-												<span class="fs-18 font-w500"><span
-														class="text-black me-2">$487</span>/$10,000</span>
-											</div>
-										</div>
-										<div class="d-flex col-xl-12 col-xxl-6 col-md-12 col-sm-6 mb-4">
-											<svg class="me-3" width="14" height="54" viewBox="0 0 14 54"
-												fill="none" xmlns="http://www.w3.org/2000/svg">
-												<rect x="-6.10352e-05" width="14" height="54" rx="7"
-													fill="#461EE7" />
-											</svg>
-											<div>
-												<p class="fs-14 mb-2">Property</p>
-												<span class="fs-18 font-w500"><span
-														class="text-black me-2">$3,890</span>/$4,000</span>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-xl-7  col-xxl-12 col-md-7">
-									<div class="row g-3">
-										<div class="col-sm-6">
-											<div class="bg-secondary rounded text-center p-3">
-												<div
-													class="d-inline-block position-relative donut-chart-sale mb-3">
-													<span class="donut1"
-														data-peity='{ "fill": ["rgb(255, 255, 255)", "rgba(255, 255, 255, 0.2)"],   "innerRadius": 33, "radius": 10}'>5/8</span>
-													<small class="text-white">71%</small>
-												</div>
-												<span class="fs-14 text-white d-block">Investment</span>
-											</div>
-										</div>
-										<div class="col-sm-6">
-											<div class="bg-success rounded text-center p-3">
-												<div
-													class="d-inline-block position-relative donut-chart-sale mb-3">
-													<span class="donut1"
-														data-peity='{ "fill": ["rgb(255, 255, 255)", "rgba(255, 255, 255, 0.2)"],   "innerRadius": 33, "radius": 10}'>3/8</span>
-													<small class="text-white">30%</small>
-												</div>
-												<span class="fs-14 text-white d-block">Installment</span>
-											</div>
-										</div>
-										<div class="col-sm-6">
-											<div
-												class="border border-2 border-primary rounded text-center p-3">
-												<div
-													class="d-inline-block position-relative donut-chart-sale mb-3">
-													<span class="donut1"
-														data-peity='{ "fill": ["rgb(30, 170, 231)", "rgba(234, 234, 234, 1)"],   "innerRadius": 33, "radius": 10}'>1/8</span>
-													<small class="text-black">5%</small>
-												</div>
-												<span class="fs-14 text-black d-block">Restaurant</span>
-											</div>
-										</div>
-										<div class="col-sm-6">
-											<div class="bg-info rounded text-center p-3">
-												<div
-													class="d-inline-block position-relative donut-chart-sale mb-3">
-													<span class="donut1"
-														data-peity='{ "fill": ["rgb(255, 255, 255)", "rgba(255, 255, 255, 0.2)"],   "innerRadius": 33, "radius": 10}'>9/10</span>
-													<small class="text-white">96%</small>
-												</div>
-												<span class="fs-14 text-white d-block">Property</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-xl-12">
-					<div class="card">
-						<div class="card-header d-block d-sm-flex border-0">
-							<div class="me-3">
-								<h4 class="fs-20 text-black">Previous Transactions</h4>
-								<p class="mb-0 fs-13">Lorem ipsum dolor sit amet, consectetur</p>
-							</div>
-							<div class="card-action card-tabs d-inline-block mt-3 mt-sm-0">
-								<ul class="nav nav-tabs" role="tablist">
-									<li class="nav-item">
-										<a class="nav-link active" data-bs-toggle="tab" href="#monthly"
-											role="tab">Monthly</a>
-									</li>
-									<li class="nav-item">
-										<a class="nav-link" data-bs-toggle="tab" href="#Weekly"
-											role="tab">Weekly</a>
-									</li>
-									<li class="nav-item">
-										<a class="nav-link" data-bs-toggle="tab" href="#Today"
-											role="tab">Today</a>
-									</li>
-								</ul>
-							</div>
-						</div>
-						<div class="card-body tab-content p-0">
-							<div class="tab-pane active show fade" id="monthly" role="tabpanel">
-								<div class="table-responsive">
-									<table
-										class="table table-responsive-md card-table previous-transactions">
-										<tbody>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip0)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip0">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">XYZ Store ID</a></h6>
-													<span class="fs-14">Cashback</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-success fs-16 font-w500 text-end d-block">Completed</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip1)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip1">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Chef Renata</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-warning fs-16 font-w500 text-end d-block">Pending</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip2)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip2">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Cindy Alexandro</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-danger fs-16 font-w500 text-end d-block">Canceled</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip7)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip7">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Paipal</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-success fs-16 font-w500 text-end d-block">Completed</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip3)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip3">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Hawkins Jr.</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-danger fs-16 font-w500 text-end d-block">Canceled</span>
-												</td>
-											</tr>
-										<tbody>
-									</table>
-								</div>
-							</div>
-							<div class="tab-pane" id="Weekly" role="tabpanel">
-								<div class="table-responsive">
-									<table class="table card-table previous-transactions">
-										<tbody>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip9)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip9">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">XYZ Store ID</a></h6>
-													<span class="fs-14">Cashback</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-success fs-16 font-w500 text-end d-block">Completed</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip10)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip10">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Chef Renata</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-warning fs-16 font-w500 text-end d-block">Pending</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip4)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip4">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Cindy Alexandro</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-danger fs-16 font-w500 text-end d-block">Canceled</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip9)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip11">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">XYZ Store ID</a></h6>
-													<span class="fs-14">Cashback</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-success fs-16 font-w500 text-end d-block">Completed</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip10)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip12">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Chef Renata</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-warning fs-16 font-w500 text-end d-block">Pending</span>
-												</td>
-											</tr>
-										<tbody>
-									</table>
-								</div>
-							</div>
-							<div class="tab-pane" id="Today" role="tabpanel">
-								<div class="table-responsive">
-									<table class="table card-table previous-transactions">
-										<tbody>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip5)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip13">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Paipal</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-success fs-16 font-w500 text-end d-block">Completed</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip6)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip14">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Hawkins Jr.</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-danger fs-16 font-w500 text-end d-block">Canceled</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip10)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip15">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Chef Renata</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 5, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-warning fs-16 font-w500 text-end d-block">Pending</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1.00002" y="1" width="61" height="61"
-															rx="29" stroke="#2BC155" stroke-width="2" />
-														<g clip-path="url(#clip9)">
-															<path
-																d="M35.2219 42.9875C34.8938 42.3094 35.1836 41.4891 35.8617 41.1609C37.7484 40.2531 39.3453 38.8422 40.4828 37.0758C41.6477 35.2656 42.2656 33.1656 42.2656 31C42.2656 24.7875 37.2125 19.7344 31 19.7344C24.7875 19.7344 19.7344 24.7875 19.7344 31C19.7344 33.1656 20.3523 35.2656 21.5117 37.0813C22.6437 38.8477 24.2461 40.2586 26.1328 41.1664C26.8109 41.4945 27.1008 42.3094 26.7727 42.993C26.4445 43.6711 25.6297 43.9609 24.9461 43.6328C22.6 42.5063 20.6148 40.7563 19.2094 38.5578C17.7656 36.3047 17 33.6906 17 31C17 27.2594 18.4547 23.743 21.1016 21.1016C23.743 18.4547 27.2594 17 31 17C34.7406 17 38.257 18.4547 40.8984 21.1016C43.5453 23.7484 45 27.2594 45 31C45 33.6906 44.2344 36.3047 42.7852 38.5578C41.3742 40.7508 39.3891 42.5063 37.0484 43.6328C36.3648 43.9555 35.55 43.6711 35.2219 42.9875Z"
-																fill="#2BC155" />
-															<path
-																d="M36.3211 31.7274C36.5891 31.9953 36.7203 32.3453 36.7203 32.6953C36.7203 33.0453 36.5891 33.3953 36.3211 33.6633L32.8812 37.1031C32.3781 37.6063 31.7109 37.8797 31.0055 37.8797C30.3 37.8797 29.6273 37.6008 29.1297 37.1031L25.6898 33.6633C25.1539 33.1274 25.1539 32.2633 25.6898 31.7274C26.2258 31.1914 27.0898 31.1914 27.6258 31.7274L29.6437 33.7453L29.6437 25.9742C29.6437 25.2196 30.2562 24.6071 31.0109 24.6071C31.7656 24.6071 32.3781 25.2196 32.3781 25.9742L32.3781 33.7508L34.3961 31.7328C34.9211 31.1969 35.7852 31.1969 36.3211 31.7274Z"
-																fill="#2BC155" />
-														</g>
-														<defs>
-															<clipPath id="clip16">
-																<rect width="28" height="28" fill="white"
-																	transform="matrix(-4.37114e-08 1 1 4.37114e-08 17 17)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">XYZ Store ID</a></h6>
-													<span class="fs-14">Cashback</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">+$5,553</span>
-												</td>
-												<td><span
-														class="text-success fs-16 font-w500 text-end d-block">Completed</span>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<svg width="63" height="63" viewBox="0 0 63 63"
-														fill="none" xmlns="http://www.w3.org/2000/svg">
-														<rect x="1" y="1" width="61" height="61" rx="29"
-															stroke="#FF2E2E" stroke-width="2" />
-														<g clip-path="url(#clip3)">
-															<path
-																d="M35.2219 19.0125C34.8937 19.6906 35.1836 20.5109 35.8617 20.8391C37.7484 21.7469 39.3453 23.1578 40.4828 24.9242C41.6476 26.7344 42.2656 28.8344 42.2656 31C42.2656 37.2125 37.2125 42.2656 31 42.2656C24.7875 42.2656 19.7344 37.2125 19.7344 31C19.7344 28.8344 20.3523 26.7344 21.5117 24.9187C22.6437 23.1523 24.2461 21.7414 26.1328 20.8336C26.8109 20.5055 27.1008 19.6906 26.7726 19.007C26.4445 18.3289 25.6297 18.0391 24.9461 18.3672C22.6 19.4937 20.6148 21.2437 19.2094 23.4422C17.7656 25.6953 17 28.3094 17 31C17 34.7406 18.4547 38.257 21.1015 40.8984C23.743 43.5453 27.2594 45 31 45C34.7406 45 38.257 43.5453 40.8984 40.8984C43.5453 38.2516 45 34.7406 45 31C45 28.3094 44.2344 25.6953 42.7851 23.4422C41.3742 21.2492 39.389 19.4937 37.0484 18.3672C36.3648 18.0445 35.55 18.3289 35.2219 19.0125Z"
-																fill="#FF2E2E" />
-															<path
-																d="M36.3211 30.2726C36.589 30.0047 36.7203 29.6547 36.7203 29.3047C36.7203 28.9547 36.589 28.6047 36.3211 28.3367L32.8812 24.8969C32.3781 24.3937 31.7109 24.1203 31.0055 24.1203C30.3 24.1203 29.6273 24.3992 29.1297 24.8969L25.6898 28.3367C25.1539 28.8726 25.1539 29.7367 25.6898 30.2726C26.2258 30.8086 27.0898 30.8086 27.6258 30.2726L29.6437 28.2547L29.6437 36.0258C29.6437 36.7804 30.2562 37.3929 31.0109 37.3929C31.7656 37.3929 32.3781 36.7804 32.3781 36.0258L32.3781 28.2492L34.3961 30.2672C34.9211 30.8031 35.7851 30.8031 36.3211 30.2726Z"
-																fill="#FF2E2E" />
-														</g>
-														<defs>
-															<clipPath id="clip17">
-																<rect width="28" height="28" fill="white"
-																	transform="translate(17 45) rotate(-90)" />
-															</clipPath>
-														</defs>
-													</svg>
-												</td>
-												<td>
-													<h6 class="fs-16 font-w600 mb-0"><a
-															href="transactions-details.html"
-															class="text-black">Hawkins Jr.</a></h6>
-													<span class="fs-14">Transfer</span>
-												</td>
-												<td>
-													<h6 class="fs-16 text-black font-w400 mb-0">June 4, 2024
-													</h6>
-													<span class="fs-14">05:34</span>
-												</td>
-												<td><span class="fs-16 text-black font-w500">-$167</span>
-												</td>
-												<td><span
-														class="text-danger fs-16 font-w500 text-end d-block">Canceled</span>
-												</td>
-											</tr>
-										<tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+<?= startSection('content') ?>
+<div class="container-fluid">
+    <!-- PAGE TITLES -->
+    <div class="page-titles">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Dashboard</a></li>
+        </ol>
+    </div>
+
+    <!-- HERO -->
+    <div class="dash-hero p-4 mb-4 text-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between position-relative" style="z-index:1;">
+            <div>
+                <h3 class="text-white mb-1">Welcome back, <?= htmlspecialchars($_SESSION['name'] ?? $_SESSION['username'] ?? 'User') ?> 👋</h3>
+                <p class="text-white-50 mb-0" id="todayDate"></p>
+                <p class="text-white mb-0 fs-20 fw-bold" id="clockTime"></p>
+            </div>            <div class="text-end" id="branchBox" style="display:none;">
+                <small class="text-white-50 d-block">Assigned Branch</small>
+                <strong id="branchName" class="text-white fs-18">—</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="row g-4 mb-4" id="statsRow">
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-primary text-white shadow-primary">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Machines</p>
+                        <h3 class="text-white stat-value mb-0" id="statMachines">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-primary"><i class="fa-solid fa-tractor"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-info text-white shadow-info">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Bookings</p>
+                        <h3 class="text-white stat-value mb-0" id="statBookings">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-info"><i class="fa-solid fa-calendar-check"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-success text-white shadow-success">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Facilities</p>
+                        <h3 class="text-white stat-value mb-0" id="statFacility">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-success"><i class="fa-solid fa-building-columns"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-warning text-white shadow-warning">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Programs</p>
+                        <h3 class="text-white stat-value mb-0" id="statPrograms">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-warning"><i class="fa-solid fa-list-check"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-secondary text-white shadow-secondary">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Trainings</p>
+                        <h3 class="text-white stat-value mb-0" id="statTrainings">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-secondary"><i class="fa-solid fa-chalkboard-user"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-dark text-white shadow-dark">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Inventory</p>
+                        <h3 class="text-white stat-value mb-0" id="statInventory">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-dark"><i class="fa-solid fa-boxes-stacked"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-danger text-white shadow-danger">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Reserved Stock</p>
+                        <h3 class="text-white stat-value mb-0" id="statReserved">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-danger"><i class="fa-solid fa-lock"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-primary text-white shadow-primary">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Users</p>
+                        <h3 class="text-white stat-value mb-0" id="statUsers">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-primary"><i class="fa-solid fa-users"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card bg-gradient-info text-white shadow-info">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                        <p class="stat-label text-white mb-1">Beneficiaries</p>
+                        <h3 class="text-white stat-value mb-0" id="statBeneficiaries">0</h3>
+                    </div>
+                    <div class="stat-icon bg-white text-info"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS + RECENT ACTIVITY -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <div class="card dash-card">
+                <div class="card-header d-flex flex-wrap align-items-center py-3">
+                    <div class="me-auto">
+                        <h4 class="card-title mb-0">Booking Trend</h4>
+                        <small class="text-muted">Last 6 months</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="chartTrend"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card dash-card h-100">
+                <div class="card-header py-3">
+                    <h4 class="card-title mb-0">Booking Status</h4>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div id="chartPie"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-7">
+            <div class="card dash-card">
+                <div class="card-header d-flex flex-wrap align-items-center py-3">
+                    <div class="me-auto">
+                        <h4 class="card-title mb-0">Inventory Overview</h4>
+                        <small class="text-muted">Top 5 products by available stock</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="chartInventory"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card dash-card h-100">
+                <div class="card-header py-3">
+                    <h4 class="card-title mb-0">Machine Availability</h4>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div id="chartMachine"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="card dash-card h-100">
+                <div class="card-header d-flex flex-wrap align-items-center py-3">
+                    <div class="me-auto">
+                        <h4 class="card-title mb-0">Recent Activity</h4>
+                        <small class="text-muted">Latest transactions</small>
+                    </div>
+                    <ul class="nav nav-pills ms-auto" id="activityTabs">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#actBookings">Bookings</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#actInventory">Inventory</a></li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="actBookings">
+                            <div id="recentBookings">
+                                <div class="text-center text-muted py-4">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="actInventory">
+                            <div id="recentLogs">
+                                <div class="text-center text-muted py-4">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card dash-card h-100">
+                <div class="card-header py-3">
+                    <h4 class="card-title mb-0">Needs Attention</h4>
+                </div>
+                <div class="card-body" id="alertsBox">
+                    <div class="text-center text-muted py-4">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <?= endSection() ?>
+
 <?= startSection('scripts') ?>
 <script>
-	function carouselReview() {
-		/*  testimonial one function by = owl.carousel.js */
-		jQuery('.testimonial-one').owlCarousel({
-			loop: true,
-			margin: 10,
-			autoplay: true,
-			nav: false,
-			center: true,
-			rtl: true,
-			dots: false,
-			navText: ['<i class="fas fa-caret-left"></i>', '<i class="fas fa-caret-right"></i>'],
-			responsive: {
-				0: {
-					items: 2
-				},
-				400: {
-					items: 3
-				},
-				700: {
-					items: 5
-				},
-				991: {
-					items: 6
-				},
+    $(document).ready(function() {
+        const baseURL = "<?= $baseURL ?>";
+        const roleId = "<?= $_SESSION['role_id'] ?? 0 ?>";
+        const usersId = "<?= $_SESSION['users_id'] ?? 0 ?>";
 
-				1200: {
-					items: 4
-				},
-				1600: {
-					items: 5
-				}
-			}
-		})
-	}
+        $('#todayDate').text(new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }));
 
-	jQuery(window).on('load', function() {
-		setTimeout(function() {
-			carouselReview();
+        function updateClock() {
+            $('#clockTime').text(new Date().toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }));
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
 
-		}, 1000);
-	});
+        const STATUS_COLORS = {
+            Pending: '#ffb547',
+            Approved: '#0d9488',
+            Checkout: '#4d79f6',
+            Returned: '#2bc155',
+            Declined: '#f6498b'
+        };
 
+        function statusBadge(status) {
+            let cls = 'secondary';
+            if (status === 'Pending') cls = 'warning';
+            else if (status === 'Approved') cls = 'success';
+            else if (status === 'Checkout') cls = 'info';
+            else if (status === 'Returned') cls = 'success';
+            else if (status === 'Declined') cls = 'danger';
+            return `<span class="badge light badge-${cls}">${status}</span>`;
+        }
 
-	jQuery(document).ready(function() {
-		setTimeout(function() {
-			dezSettingsOptions.version = 'light';
-			new dezSettings(dezSettingsOptions);
+        function fmtDate(d) {
+            if (!d) return '—';
+            return new Date(d).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
 
-			setCookie('version', 'light');
+        function renderTrendChart(labels, totals) {
+            if (!labels || !labels.length) {
+                $('#chartTrend').html('<div class="text-center text-muted py-5">No booking data available</div>');
+                return;
+            }
+            let options = {
+                series: [{
+                    name: 'Bookings',
+                    data: totals
+                }],
+                chart: {
+                    type: 'area',
+                    height: 320,
+                    toolbar: { show: false },
+                    fontFamily: 'inherit',
+                    animations: { enabled: true }
+                },
+                colors: ['#0d9488'],
+                dataLabels: { enabled: false },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.35,
+                        opacityTo: 0.05,
+                        stops: [0, 100]
+                    }
+                },
+                xaxis: {
+                    categories: labels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                },
+                yaxis: {
+                    min: 0,
+                    forceNiceScale: true,
+                    labels: { formatter: v => Math.round(v) }
+                },
+                grid: {
+                    borderColor: 'rgba(2,6,23,.08)',
+                    strokeDashArray: 4
+                },
+                tooltip: { y: { formatter: v => v + ' bookings' } }
+            };
+            new ApexCharts(document.querySelector('#chartTrend'), options).render();
+        }
 
-		}, 1500)
-	});
+        function renderPieChart(breakdown) {
+            let series = [], labels = [];
+            (breakdown || {}).forEach(function(b) {
+                series.push(b.value);
+                labels.push(b.label);
+            });
+            let total = series.reduce((a, b) => a + b, 0);
+            if (total === 0) {
+                $('#chartPie').html('<div class="text-center text-muted py-5">No booking data available</div>');
+                return;
+            }
+            let options = {
+                series: series,
+                chart: {
+                    type: 'donut',
+                    height: 320,
+                    fontFamily: 'inherit'
+                },
+                labels: labels,
+                colors: ['#ffb547', '#0d9488', '#4d79f6', '#2bc155', '#f6498b'],
+                legend: { position: 'bottom' },
+                dataLabels: {
+                    enabled: false
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '72%',
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Total',
+                                    fontSize: '14px',
+                                    formatter: () => total
+                                }
+                            }
+                        }
+                    }
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: { height: 280 },
+                        legend: { position: 'bottom' }
+                    }
+                }]
+            };
+            new ApexCharts(document.querySelector('#chartPie'), options).render();
+        }
+
+        function renderRecent(bookings) {
+            if (!bookings || !bookings.length) {
+                $('#recentBookings').html('<div class="text-center text-muted py-4">No bookings yet</div>');
+                return;
+            }
+            let html = bookings.map(function(b) {
+                let color = STATUS_COLORS[b.status_label] || '#6c757d';
+                let ref = b.id ? 'Booking #' + b.id : '';
+                let machine = b.machinery_name || '—';
+                if (b.machinery_model) machine += ` <small class="text-muted">(${b.machinery_model})</small>`;
+                return `
+                    <div class="recent-booking d-flex flex-wrap align-items-center justify-content-between">
+                        <div class="d-flex align-items-center me-3">
+                            <span class="booking-status-dot" style="background:${color};"></span>
+                            <div>
+                                <div class="fw-bold text-black">${machine}</div>
+                                <small class="text-muted">${ref}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-4">
+                            <small class="text-muted d-none d-sm-inline">${fmtDate(b.created_at)}</small>
+                            ${statusBadge(b.status_label)}
+                        </div>
+                    </div>`;
+            }).join('<hr class="my-1">');
+            $('#recentBookings').html(html);
+        }
+
+        const LOG_ACTIONS = { 1: 'Receive', 2: 'Sale', 3: 'Return', 4: 'Adjustment', 5: 'Expired', 6: 'Damaged', 7: 'Price Change', 8: 'Reserve', 9: 'Release', 10: 'Transfer' };
+        const LOG_COLORS = { 1: 'success', 2: 'info', 3: 'warning', 4: 'secondary', 5: 'danger', 6: 'danger', 7: 'primary', 8: 'warning', 9: 'success', 10: 'info' };
+
+        function renderRecentLogs(logs) {
+            if (!logs || !logs.length) {
+                $('#recentLogs').html('<div class="text-center text-muted py-4">No inventory activity yet</div>');
+                return;
+            }
+            let html = logs.map(function(l) {
+                let act = LOG_ACTIONS[l.action_type] || 'Log';
+                let who = l.created_by_name ? ' · ' + l.created_by_name : '';
+                return `
+                    <div class="recent-booking d-flex flex-wrap align-items-center justify-content-between">
+                        <div class="d-flex align-items-center me-3">
+                            <span class="badge light badge-${LOG_COLORS[l.action_type] || 'secondary'} me-2">${act}</span>
+                            <div>
+                                <div class="fw-bold text-black">${l.product_name || '—'}</div>
+                                <small class="text-muted">${l.facility_name || ''}${who}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-4">
+                            <small class="text-muted d-none d-sm-inline">${fmtDate(l.created_at)}</small>
+                            <span class="badge light badge-dark">${l.quantity_changed}</span>
+                        </div>
+                    </div>`;
+            }).join('<hr class="my-1">');
+            $('#recentLogs').html(html);
+        }
+
+        function renderAlerts(pending, lowStock) {
+            pending = pending || [];
+            lowStock = lowStock || [];
+            let html = '';
+            if (pending.length) {
+                html += '<div class="d-block text-uppercase text-muted fw-bold mb-2" style="font-size:11px;letter-spacing:.4px;">Pending Approvals</div>';
+                html += pending.map(function(p) {
+                    return `
+                        <div class="recent-booking d-flex flex-wrap align-items-center justify-content-between">
+                            <div class="d-flex align-items-center me-2">
+                                <span class="booking-status-dot" style="background:#ffb547;"></span>
+                                <div>
+                                    <div class="fw-bold text-black">${p.machinery_name || 'Booking #' + p.id}</div>
+                                    <small class="text-muted">${p.booked_by_name || ''}</small>
+                                </div>
+                            </div>
+                            <small class="text-muted">${fmtDate(p.created_at)}</small>
+                        </div>`;
+                }).join('<hr class="my-1">');
+                html += '<hr class="my-3">';
+            }
+            if (lowStock.length) {
+                html += '<div class="d-block text-uppercase text-muted fw-bold mb-2" style="font-size:11px;letter-spacing:.4px;">Low Stock</div>';
+                html += lowStock.map(function(s) {
+                    return `
+                        <div class="recent-booking d-flex flex-wrap align-items-center justify-content-between">
+                            <div class="d-flex align-items-center me-2">
+                                <span class="booking-status-dot" style="background:#f6498b;"></span>
+                                <div>
+                                    <div class="fw-bold text-black">${s.product_name || '—'}</div>
+                                    <small class="text-muted">${s.facility_name || ''}</small>
+                                </div>
+                            </div>
+                            <span class="badge light badge-danger">${s.current_stock} left</span>
+                        </div>`;
+                }).join('<hr class="my-1">');
+            }
+            if (!html) html = '<div class="text-center text-muted py-4">All good — nothing needs attention</div>';
+            $('#alertsBox').html(html);
+        }
+
+        function renderInventoryChart(data) {
+            if (!data || !data.length) {
+                $('#chartInventory').html('<div class="text-center text-muted py-5">No inventory data available</div>');
+                return;
+            }
+            let labels = data.map(function(d) {
+                let n = d.product_name || '';
+                return n.length > 14 ? n.slice(0, 13) + '…' : n;
+            });
+            let options = {
+                series: [
+                    { name: 'Available', data: data.map(function(d) { return (+d.current_stock || 0) - (+d.reserved_stock || 0); }) },
+                    { name: 'Reserved', data: data.map(function(d) { return +d.reserved_stock || 0; }) }
+                ],
+                chart: { type: 'bar', height: 320, toolbar: { show: false }, fontFamily: 'inherit' },
+                colors: ['#0d9488', '#ffb547'],
+                plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 4 } },
+                dataLabels: { enabled: false },
+                xaxis: { categories: labels, axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { fontSize: '11px' } } },
+                yaxis: { min: 0 },
+                legend: { position: 'top', horizontalAlign: 'right' },
+                grid: { borderColor: 'rgba(2,6,23,.08)', strokeDashArray: 4 },
+                tooltip: { y: { formatter: v => v + ' units' } }
+            };
+            new ApexCharts(document.querySelector('#chartInventory'), options).render();
+        }
+
+        function renderMachineDonut(data) {
+            data = data || {};
+            let series = [(+data.available || 0), (+data.maintenance || 0), (+data.checked_out || 0)];
+            let labels = ['Available', 'Maintenance', 'Checked Out'];
+            let total = series.reduce((a, b) => a + b, 0);
+            if (total === 0) {
+                $('#chartMachine').html('<div class="text-center text-muted py-5">No machines recorded</div>');
+                return;
+            }
+            let options = {
+                series: series,
+                chart: { type: 'donut', height: 320, fontFamily: 'inherit' },
+                labels: labels,
+                colors: ['#16a34a', '#f59e0b', '#4d79f6'],
+                legend: { position: 'bottom' },
+                dataLabels: { enabled: false },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '72%',
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Total',
+                                    fontSize: '14px',
+                                    formatter: () => total
+                                }
+                            }
+                        }
+                    }
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: { chart: { height: 280 }, legend: { position: 'bottom' } }
+                }]
+            };
+            new ApexCharts(document.querySelector('#chartMachine'), options).render();
+        }
+
+        function loadCounts() {
+            $.ajax({
+                url: baseURL + "controller/ctrl-dashboard.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "GET_DASHBOARD_COUNTS",
+                    role_id: roleId,
+                    users_id: usersId
+                }),
+                success: function(res) {
+                    if (res.code == 0) {
+                        const d = res.data || {};
+                        $('#statMachines').text(d.machines ?? 0);
+                        $('#statBookings').text(d.bookings ?? 0);
+                        $('#statFacility').text(d.facility ?? 0);
+                        $('#statPrograms').text(d.programs ?? 0);
+                        $('#statTrainings').text(d.trainings ?? 0);
+                        $('#statInventory').text(d.total_inventory ?? 0);
+                        $('#statReserved').text(d.reserved ?? 0);
+                        $('#statUsers').text(d.users_count ?? 0);
+                        $('#statBeneficiaries').text(d.beneficiaries_count ?? 0);
+
+                        if (d.branch && d.branch.name) {
+                            $('#branchBox').show();
+                            $('#branchName').text(d.branch.name);
+                        }
+
+                        const breakdown = d.booking_breakdown || {};
+                        renderPieChart([
+                            { label: 'Pending', value: +breakdown.pending || 0 },
+                            { label: 'Approved', value: +breakdown.approved || 0 },
+                            { label: 'Checkout', value: +breakdown.checkout || 0 },
+                            { label: 'Returned', value: +breakdown.returned || 0 },
+                            { label: 'Declined', value: +breakdown.declined || 0 }
+                        ]);
+
+                        renderTrendChart(
+                            (d.booking_trend || {}).labels || [],
+                            (d.booking_trend || {}).totals || []
+                        );
+
+                        renderRecent(d.recent_bookings || []);
+                        renderInventoryChart(d.top_products || []);
+                        renderMachineDonut(d.machine_breakdown || {});
+                        renderRecentLogs(d.recent_logs || []);
+                        renderAlerts(d.pending_bookings || [], d.low_stock || []);
+                    }
+                }
+            });
+        }
+
+        loadCounts();
+    });
 </script>
 <?= endSection() ?>

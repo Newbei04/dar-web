@@ -27,7 +27,7 @@ if (empty($trans)) {
 if ($trans === 'LIST_FACILITY') {
 
     $role_id    = (int)($_SESSION['role_id'] ?? 0);
-    $employee_id = (int)($_SESSION['employee_id'] ?? 0);
+    $employee_id = (int)($_SESSION['employee_id'] ?? $_SESSION['user_id'] ?? 0);
 
     $page   = max(1, (int)($data['page'] ?? 1));
     $limit  = max(1, (int)($data['limit'] ?? 10));
@@ -40,14 +40,12 @@ if ($trans === 'LIST_FACILITY') {
      * role_id = 2 -> EMPLOYEE
      */
     if ($role_id == 2) {
-        $where .= " AND f.employee_id = $employee_id ";
+        $where .= " AND f.id = (SELECT facility_id FROM employee WHERE users_id = $employee_id LIMIT 1) ";
     }
 
     $totalQuery = mysqli_query($conn, "
         SELECT COUNT(*) AS total
         FROM facility f
-        LEFT JOIN facility_type ft 
-            ON ft.id = f.type_ids
         $where
     ");
 
@@ -64,11 +62,12 @@ if ($trans === 'LIST_FACILITY') {
     $result = mysqli_query($conn, "
         SELECT 
             f.*,
-            ft.name AS facility_type
+            GROUP_CONCAT(ft.name ORDER BY ft.id SEPARATOR ', ') AS facility_types
         FROM facility f
         LEFT JOIN facility_type ft 
-            ON ft.id = f.type_ids
+            ON FIND_IN_SET(ft.id, f.type_ids)
         $where
+        GROUP BY f.id
         ORDER BY f.id DESC
         LIMIT $offset, $limit
     ");
@@ -117,12 +116,14 @@ if ($trans === 'LIST_FACILITY') {
     $sql = mysqli_query($conn, "
         SELECT 
             f.*,
-            ft.name AS facility_type,
-            b.name AS branch_name
+            GROUP_CONCAT(ft.name ORDER BY ft.id SEPARATOR ', ') AS facility_types,
+            b.name AS branch_name,
+            (SELECT users_id FROM employee WHERE facility_id = f.id LIMIT 1) AS employee_id
         FROM facility f
-        LEFT JOIN facility_type ft ON ft.id = f.type_ids
+        LEFT JOIN facility_type ft ON FIND_IN_SET(ft.id, f.type_ids)
         LEFT JOIN branch b ON b.id = f.branch_id
         WHERE f.id='$id'
+        GROUP BY f.id
         LIMIT 1
     ");
 
@@ -139,6 +140,7 @@ if ($trans === 'LIST_FACILITY') {
 
     $branch_id  = $data['branch_id'] ?? '';
     $type_ids = $data['type_ids'] ?? '';
+    $employee_id = $data['employee_id'] ?? '';
 
     if (is_array($type_ids)) {
         $type_ids = implode(',', $type_ids);
@@ -216,11 +218,17 @@ if ($trans === 'LIST_FACILITY') {
         exit;
     }
 
+    $facility_id = mysqli_insert_id($conn);
+
+    if (!empty($employee_id)) {
+        mysqli_query($conn, "UPDATE employee SET facility_id='$facility_id' WHERE users_id='$employee_id'");
+    }
+
     echo json_encode([
         "code" => 0,
         "message" => "Facility added successfully",
         "data" => [
-            "id" => mysqli_insert_id($conn)
+            "id" => $facility_id
         ]
     ]);
 
@@ -240,6 +248,7 @@ if ($trans === 'LIST_FACILITY') {
 
     $branch_id  = $data['branch_id'] ?? '';
     $type_ids = $data['type_ids'] ?? '';
+    $employee_id = $data['employee_id'] ?? '';
 
     if (is_array($type_ids)) {
         $type_ids = implode(',', $type_ids);
@@ -289,6 +298,11 @@ if ($trans === 'LIST_FACILITY') {
             "data" => null
         ]);
         exit;
+    }
+
+    if (!empty($employee_id)) {
+        mysqli_query($conn, "UPDATE employee SET facility_id=NULL WHERE facility_id='$id' AND users_id != '$employee_id'");
+        mysqli_query($conn, "UPDATE employee SET facility_id='$id' WHERE users_id='$employee_id'");
     }
 
     echo json_encode([
@@ -350,10 +364,11 @@ if ($trans === 'LIST_FACILITY') {
     $sql = mysqli_query($conn, "
         SELECT 
             f.*,
-            ft.name AS facility_type
+            GROUP_CONCAT(ft.name ORDER BY ft.id SEPARATOR ', ') AS facility_types
         FROM facility f
-        LEFT JOIN facility_type ft ON ft.id = f.type_id
-        WHERE f.employee_id='$employee_id'
+        LEFT JOIN facility_type ft ON FIND_IN_SET(ft.id, f.type_ids)
+        WHERE f.id = (SELECT facility_id FROM employee WHERE users_id='$employee_id' LIMIT 1)
+        GROUP BY f.id
         LIMIT 1
     ");
 
