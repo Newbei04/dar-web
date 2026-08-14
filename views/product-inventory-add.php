@@ -5,8 +5,8 @@
 <div class="container-fluid">
     <div class="page-titles">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?= $baseURL ?>list-inventory">Product</a></li>
-            <li class="breadcrumb-item active"><a href="javascript:void(0)">Add Inventory</a></li>
+            <li class="breadcrumb-item"><a href="<?= $baseURL ?>list-inventory">Inventory</a></li>
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Receive Stock</a></li>
         </ol>
     </div>
 
@@ -14,7 +14,7 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Add Inventory</h4>
+                    <h4 class="card-title mb-0">Receive Stock</h4>
                     <a href="<?= $baseURL ?>list-inventory" class="btn btn-outline-secondary btn-sm">
                         <i class="fa fa-arrow-left me-1"></i> Back to List
                     </a>
@@ -72,7 +72,7 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="current_stock" class="form-label">Current Stock <span class="text-danger">*</span></label>
+                                    <label for="current_stock" class="form-label">Quantity Received <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="current_stock" min="0" step="any" value="0">
                                 </div>
                             </div>
@@ -105,8 +105,18 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="selling_price" class="form-label">Selling Price (₱)</label>
-                                    <input type="number" class="form-control" id="selling_price" min="0" step="0.01" value="0">
+                                    <label for="selling_price" class="form-label">Facility Selling Price (₱)</label>
+                                    <input type="number" class="form-control bg-light" id="selling_price" min="0" step="0.01" readonly>
+                                    <small class="form-text text-muted" id="sellingPriceHint">Auto-loaded from Facility Prices once facility + product are selected.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="receive_remarks" class="form-label">Remarks</label>
+                                    <input type="text" class="form-control" id="receive_remarks" placeholder="Optional note for the movement log">
                                 </div>
                             </div>
                         </div>
@@ -116,7 +126,7 @@
                         <div class="d-flex justify-content-end">
                             <a href="<?= $baseURL ?>list-inventory" class="btn btn-outline-secondary me-2">Cancel</a>
                             <button class="btn btn-primary px-4" type="submit">
-                                <i class="fa fa-save me-1"></i> Save Inventory
+                                <i class="fa fa-box-open me-1"></i> Receive Stock
                             </button>
                         </div>
                     </form>
@@ -155,7 +165,7 @@
                 dataType: "json",
                 data: JSON.stringify({
                     trans: "LIST_FACILITY_BY_TYPE",
-                    facility_type: 4
+                    facility_type: "1,4"
                 }),
                 success: function(res) {
                     $('#facility_id')
@@ -203,6 +213,45 @@
         loadFacilities();
         loadProducts();
 
+        // ================= AUTO-LOAD FACILITY PRICE =================
+        function loadFacilityPrice() {
+            let facility_id = $("#facility_id").val();
+            let product_id = $("#product_id").val();
+
+            if (!facility_id || !product_id) {
+                $("#selling_price").val('');
+                $("#sellingPriceHint").html('Auto-loaded from Facility Prices once facility + product are selected.');
+                return;
+            }
+
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-product-price.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "GET_FACILITY_PRICE",
+                    product_id: product_id,
+                    facility_id: facility_id
+                }),
+                success: function(res) {
+                    let price = res && res.data ? res.data.selling_price : null;
+                    if (price !== null && price !== undefined) {
+                        $("#selling_price").val(price);
+                        $("#sellingPriceHint").html('Selling price from Facility Prices.');
+                    } else {
+                        $("#selling_price").val('');
+                        $("#sellingPriceHint").html('<span class="text-warning">No facility price set. Set it under Pricing &gt; Facility Prices before selling.</span>');
+                    }
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        $("#facility_id, #product_id").on("change", loadFacilityPrice);
+
         // ================= SUBMIT =================
         $("#submitInventory").submit(function(e) {
             e.preventDefault();
@@ -244,6 +293,7 @@
                     trans: "ADD_INVENTORY",
                     facility_id: facility_id,
                     product_id: product_id,
+                    quantity: current_stock,
                     current_stock: current_stock,
                     reserved_stock: reserved_stock,
                     reorder_level: parseFloat($("#reorder_level").val()) || 0,
@@ -252,6 +302,7 @@
                     batch_number: $("#batch_number").val().trim(),
                     expiry_date: $("#expiry_date").val(),
                     storage_location: $("#storage_location").val().trim() || null,
+                    remarks: $("#receive_remarks").val().trim(),
                     users_id: <?= $_SESSION['users_id'] ?? 0 ?>
                 }),
                 success: function(res) {

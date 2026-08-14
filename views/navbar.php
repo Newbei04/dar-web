@@ -658,13 +658,27 @@
             <!-- PRODUCT -->
             <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa-solid fa-boxes-stacked"></i>
-                    <span class="nav-text">Product</span>
+                    <span class="nav-text">Products</span>
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="<?= $baseURL ?>list-products">List Products</a></li>
                     <li><a href="<?= $baseURL ?>product-category">Product Categories</a></li>
                     <li><a href="<?= $baseURL ?>product-available">Available Products</a></li>
-                    <li><a href="<?= $baseURL ?>list-inventory">Inventory</a></li>
+                    <li><a href="<?= $baseURL ?>facility-prices">Facility Prices</a></li>
+                    <li><a href="<?= $baseURL ?>price-history">Price History</a></li>
+                </ul>
+            </li>
+            <!-- INVENTORY -->
+            <li><a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span class="nav-text">Inventory</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="<?= $baseURL ?>list-inventory">Stock List</a></li>
+                    <li><a href="<?= $baseURL ?>add-inventory">Receive Stock</a></li>
+                    <li><a href="<?= $baseURL ?>stock-movements">Stock Movements</a></li>
+                    <li><a href="<?= $baseURL ?>low-stock">Low Stock</a></li>
+                    <li><a href="<?= $baseURL ?>simulation">Buy / Sell Simulation</a></li>
                 </ul>
             </li>
             <!-- BOOKING -->

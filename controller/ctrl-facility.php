@@ -382,13 +382,30 @@ if ($trans === 'LIST_FACILITY') {
 
     exit;
 } else if ($trans === 'LIST_FACILITY_BY_TYPE') { 
+    $facility_type = $data['facility_type'] ?? '';
+
+    $where = " WHERE f.status = 1 ";
+
+    if (!empty($facility_type)) {
+        $type_ids = array_values(array_filter(array_map('intval', explode(',', (string)$facility_type))));
+        if ($type_ids) {
+            $parts = [];
+            foreach ($type_ids as $tid) {
+                $parts[] = "FIND_IN_SET('$tid', f.type_ids)";
+            }
+            $where .= " AND (" . implode(" OR ", $parts) . ") ";
+        }
+    }
+
     $result = mysqli_query($conn, "
         SELECT
             f.*,
-            GROUP_CONCAT(ft.name) AS facility_types
+            GROUP_CONCAT(ft.name ORDER BY ft.id SEPARATOR ', ') AS facility_types
         FROM facility f
         LEFT JOIN facility_type ft ON FIND_IN_SET(ft.id, f.type_ids)
-        GROUP BY f.id 
+        $where
+        GROUP BY f.id
+        ORDER BY f.name ASC
     ");
 
     if (!$result) {

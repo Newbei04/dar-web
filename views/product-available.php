@@ -226,6 +226,37 @@
         padding: 3rem 0;
         color: #adb5bd;
     }
+
+    .cart-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+
+    .cart-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #166534;
+    }
+
+    .cart-info .cart-total {
+        font-weight: 700;
+        color: #14532d;
+    }
+
+    .cart-actions {
+        display: flex;
+        gap: 8px;
+    }
 </style>
 <?= endSection() ?>
 
@@ -258,6 +289,23 @@
                             <option value="low">Low Stock</option>
                             <option value="zero">Out of Stock</option>
                         </select>
+                    </div>
+
+                    <!-- CART BAR -->
+                    <div class="cart-bar" id="cartBar" style="display:none;">
+                        <div class="cart-info">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            <span id="cartSummary">0 items</span>
+                            <span class="cart-total">₱0.00</span>
+                        </div>
+                        <div class="cart-actions">
+                            <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearCart">
+                                <i class="fas fa-trash me-1"></i> Clear
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" id="btnOpenCheckout">
+                                <i class="fas fa-credit-card me-1"></i> Checkout
+                            </button>
+                        </div>
                     </div>
 
                     <!-- LOADING STATE -->
@@ -313,6 +361,103 @@
         </div>
     </div>
 </div>
+
+<!-- ================= BUY MODAL ================= -->
+<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title"><i class="fas fa-cart-plus me-2 text-success"></i>Add to Cart</h5>
+                    <small class="text-muted" id="buyProductSub"></small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="buyIdx">
+                <div class="alert alert-light border py-2 px-3 mb-3" style="font-size:13px;">
+                    <i class="fas fa-cube me-1"></i>
+                    <span id="buyBatchLabel">-</span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="buyQty" min="1" step="1" value="1">
+                    <small class="form-text text-muted" id="buyQtyHint"></small>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label">Remarks (optional)</label>
+                    <input type="text" class="form-control" id="buyRemarks" placeholder="Optional note">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="btnAddToCart"><i class="fas fa-cart-plus me-1"></i> Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= CHECKOUT MODAL ================= -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title"><i class="fas fa-credit-card me-2 text-primary"></i>Checkout</h5>
+                    <small class="text-muted">Complete the sale for the beneficiary.</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label class="form-label">Beneficiary <span class="text-danger">*</span></label>
+                            <select class="form-select default-select" id="checkoutBeneficiary">
+                                <option value="">Select beneficiary</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method <span class="text-danger">*</span></label>
+                            <select class="form-select" id="checkoutPayment">
+                                <option value="1">Cash</option>
+                                <option value="2">Card / POS</option>
+                                <option value="3">Wallet</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-success py-2 px-3" style="font-size:15px;">
+                            <div class="d-flex justify-content-between">
+                                <span>Grand Total</span>
+                                <strong id="checkoutGrandTotal">₱0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Facility</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="checkoutCartBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnPlaceCheckout"><i class="fas fa-check me-1"></i> Place Checkout</button>
+            </div>
+        </div>
+    </div>
+</div>
 <?= endSection() ?>
 
 <?= startSection('scripts') ?>
@@ -321,6 +466,9 @@
 
         let allInventory = [];
         let currentItems = [];
+        let cart = {};
+        let cartCount = 0;
+        let beneficiariesLoaded = false;
 
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>"']/g, function(char) {
@@ -360,6 +508,252 @@
             if (!expiryDate) return false;
             return new Date(expiryDate) < new Date();
         }
+
+        // ================= CART =================
+        function renderCart() {
+            const ids = Object.keys(cart);
+            cartCount = 0;
+            let total = 0;
+
+            ids.forEach(function(id) {
+                const line = cart[id];
+                cartCount += line.qty;
+                total += line.qty * line.unit_price;
+            });
+
+            if (!ids.length) {
+                $('#cartBar').hide();
+                $('#cartSummary').text('0 items');
+                $('.cart-total').text('₱0.00');
+                return;
+            }
+
+            $('#cartBar').show();
+            $('#cartSummary').text(cartCount + ' item' + (cartCount > 1 ? 's' : ''));
+            $('.cart-total').text('₱' + formatNumber(total));
+        }
+
+        function addToCart(idx) {
+            const item = currentItems[idx];
+            const unitPrice = item.facility_price !== null && item.facility_price !== undefined ? item.facility_price : item.selling_price;
+            const qty = parseInt($('#buyQty').val(), 10);
+            const available = parseFloat(item.available_stock || 0);
+
+            if (!qty || qty <= 0) {
+                Swal.fire("Validation", "Enter a valid quantity", "warning");
+                return;
+            }
+            if (qty > available) {
+                Swal.fire("Validation", "Only " + formatNumber(available) + " available", "warning");
+                return;
+            }
+
+            const id = String(item.id);
+            if (cart[id]) {
+                const newQty = cart[id].qty + qty;
+                if (newQty > available) {
+                    Swal.fire("Validation", "Cart quantity exceeds available stock (" + formatNumber(available) + ")", "warning");
+                    return;
+                }
+                cart[id].qty = newQty;
+            } else {
+                cart[id] = {
+                    inventory_id: item.id,
+                    product_id: item.product_id,
+                    product_name: item.product_name,
+                    facility_name: item.facility_name,
+                    unit_price: unitPrice,
+                    qty: qty,
+                    available: available
+                };
+            }
+
+            renderCart();
+            $('#buyModal').modal('hide');
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to cart',
+                text: item.product_name + ' x ' + qty,
+                timer: 1200,
+                showConfirmButton: false
+            });
+        }
+
+        // ================= LOAD BENEFICIARIES =================
+        function loadBeneficiaries() {
+            if (beneficiariesLoaded) return;
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-beneficiary.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({ trans: "LIST_BENEFICIARY", status: "VERIFIED" }),
+                success: function(res) {
+                    beneficiariesLoaded = true;
+                    let opts = '<option value="">Select beneficiary</option>';
+                    (res.data || []).forEach(function(b) {
+                        opts += `<option value="${b.users_id}">${escapeHtml(b.name || 'Beneficiary')}${b.facility ? ' (' + escapeHtml(b.facility) + ')' : ''}</option>`;
+                    });
+                    $('#checkoutBeneficiary').html(opts);
+                },
+                error: function(xhr) {
+                    console.log("LIST_BENEFICIARY failed:", xhr.responseText);
+                }
+            });
+        }
+
+        function openCheckout() {
+            const ids = Object.keys(cart);
+            if (!ids.length) return;
+
+            loadBeneficiaries();
+
+            let rows = '';
+            let total = 0;
+            ids.forEach(function(id) {
+                const line = cart[id];
+                const sub = line.qty * line.unit_price;
+                total += sub;
+                rows += `
+                    <tr>
+                        <td>${escapeHtml(line.product_name)}<br><small class="text-muted">${escapeHtml(line.facility_name || '')}</small></td>
+                        <td>${escapeHtml(line.facility_name || '-')}</td>
+                        <td>${formatNumber(line.qty)}</td>
+                        <td>₱${formatNumber(line.unit_price)}</td>
+                        <td>₱${formatNumber(sub)}</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger cartRemoveBtn" data-id="${id}"><i class="fas fa-times"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            $('#checkoutCartBody').html(rows);
+            $('#checkoutGrandTotal').text('₱' + formatNumber(total));
+            $('#checkoutModal').modal('show');
+        }
+
+        // ================= EVENTS =================
+        $(document).on('click', '.buyBtn', function() {
+            const idx = $(this).data('idx');
+            const item = currentItems[idx];
+            if (!item) return;
+
+            const unitPrice = item.facility_price !== null && item.facility_price !== undefined ? item.facility_price : item.selling_price;
+
+            $('#buyIdx').val(idx);
+            $('#buyProductSub').text(item.product_name + (item.sku ? ' | ' + item.sku : ''));
+            $('#buyBatchLabel').html(
+                `<strong>${escapeHtml(item.batch_number || '-')}</strong> · ${escapeHtml(item.facility_name || '-')} · Available: ${formatNumber(item.available_stock)} · Price: ₱${formatNumber(unitPrice)}`
+            );
+            $('#buyQty').val(1).attr('max', item.available_stock);
+            $('#buyQtyHint').text('Max ' + formatNumber(item.available_stock) + ' units');
+            $('#buyRemarks').val('');
+            $('#buyModal').modal('show');
+        });
+
+        $('#btnAddToCart').on('click', function() {
+            addToCart(parseInt($('#buyIdx').val(), 10));
+        });
+
+        $('#btnClearCart').on('click', function() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Clear cart?',
+                text: 'All items will be removed.',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, clear'
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    cart = {};
+                    renderCart();
+                }
+            });
+        });
+
+        $('#btnOpenCheckout').on('click', openCheckout);
+
+        $(document).on('click', '.cartRemoveBtn', function() {
+            delete cart[$(this).data('id')];
+            renderCart();
+            if (Object.keys(cart).length) openCheckout();
+            else $('#checkoutModal').modal('hide');
+        });
+
+        $('#btnPlaceCheckout').on('click', function() {
+            const beneficiaryId = $('#checkoutBeneficiary').val();
+            if (!beneficiaryId) {
+                Swal.fire("Validation", "Select a beneficiary", "warning");
+                return;
+            }
+
+            const items = Object.keys(cart).map(function(id) {
+                const line = cart[id];
+                return { inventory_id: line.inventory_id, product_id: line.product_id, qty: line.qty };
+            });
+
+            if (!items.length) {
+                Swal.fire("Validation", "Cart is empty", "warning");
+                return;
+            }
+
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
+
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-checkout.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "PLACE_CHECKOUT",
+                    beneficiary_id: beneficiaryId,
+                    cooperative_id: <?= $_SESSION['users_id'] ?? 0 ?>,
+                    users_id: <?= $_SESSION['users_id'] ?? 0 ?>,
+                    payment_method: $('#checkoutPayment').val(),
+                    items: items
+                }),
+                success: function(res) {
+                    $('#btnPlaceCheckout').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Place Checkout');
+                    if (res.code == 0) {
+                        const d = res.data || {};
+                        const sum = d.summary || {};
+                        let lines = '';
+                        (d.items || []).forEach(function(it) {
+                            lines += `<tr><td>${escapeHtml(it.product_name || '')}</td><td>${formatNumber(it.qty)}</td><td>₱${formatNumber(it.subtotal)}</td></tr>`;
+                        });
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Checkout successful',
+                            html: `
+                                <div class="text-start small">
+                                    <p class="mb-1"><strong>Reference:</strong> ${escapeHtml(d.reference_id)}</p>
+                                    <p class="mb-1"><strong>Beneficiary:</strong> ${escapeHtml((d.beneficiary || {}).name || '-')}</p>
+                                    <p class="mb-1"><strong>Facility:</strong> ${escapeHtml((d.facility || {}).name || '-')}</p>
+                                    <p class="mb-2"><strong>Grand Total:</strong> ₱${formatNumber(sum.grand_total)}</p>
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead><tr><th>Item</th><th>Qty</th><th>Subtotal</th></tr></thead>
+                                        <tbody>${lines}</tbody>
+                                    </table>
+                                </div>
+                            `,
+                            confirmButtonText: 'Done'
+                        }).then(function() {
+                            cart = {};
+                            renderCart();
+                            $('#checkoutModal').modal('hide');
+                            loadInventory();
+                        });
+                    } else {
+                        Swal.fire("Error", res.message || "Checkout failed", "error");
+                    }
+                },
+                error: function(xhr) {
+                    $('#btnPlaceCheckout').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Place Checkout');
+                    console.log("PLACE_CHECKOUT failed:", xhr.responseText);
+                    Swal.fire("Error", "Server error during checkout", "error");
+                }
+            });
+        });
 
         // ================= POPULATE CATEGORY FILTER =================
         function populateCategoryFilter() {
@@ -424,6 +818,20 @@
 
                 let availColor = stockLevel === 'ok' ? 'text-success' : stockLevel === 'low' ? 'text-warning' : 'text-danger';
 
+                let unitPrice = item.facility_price !== null && item.facility_price !== undefined ? item.facility_price : item.selling_price;
+                let hasPrice = unitPrice !== null && unitPrice !== undefined && unitPrice > 0;
+                let priceHtml = hasPrice
+                    ? `<div class="price-box"><span class="p-label">Facility Price</span><span class="p-value">₱${formatNumber(unitPrice)}</span></div>`
+                    : `<div class="price-box"><span class="p-label">Facility Price</span><span class="p-value text-muted">Not set</span></div>`;
+
+                let buyBtn = (item.available_stock > 0 && hasPrice)
+                    ? `<button class="btn btn-success btn-sm flex-fill buyBtn" data-idx="${index}">
+                           <i class="fas fa-cart-plus me-1"></i> Buy
+                       </button>`
+                    : `<button class="btn btn-success btn-sm flex-fill" disabled title="${!hasPrice ? 'No facility price set' : 'Out of stock'}">
+                           <i class="fas fa-cart-plus me-1"></i> Buy
+                       </button>`;
+
                 html += `
             <div class="inventory-card">
                 <div class="card-thumb">
@@ -449,6 +857,8 @@
                         </div>
                     </div>
 
+                    <div class="card-price-row">${priceHtml}</div>
+
                     ${expiryHtml}
 
                     ${item.facility_name ? `<p class="card-info"><i class="fas fa-building me-1"></i>${escapeHtml(item.facility_name)}</p>` : ''}
@@ -457,6 +867,7 @@
                     <button class="btn btn-outline-primary btn-sm flex-fill viewProductBtn" data-idx="${index}">
                         <i class="fas fa-eye me-1"></i> View
                     </button>
+                    ${buyBtn}
                 </div>
             </div>`;
             });
@@ -501,10 +912,12 @@
                 </div>
             `);
 
+            let unitPrice = item.facility_price !== null && item.facility_price !== undefined ? item.facility_price : item.selling_price;
+
             $("#viewProductPrice").html(`
                 <div class="price-box">
-                    <span class="p-label">Selling</span>
-                    <span class="p-value">₱${formatNumber(item.selling_price)}</span>
+                    <span class="p-label">Facility Price</span>
+                    <span class="p-value">${unitPrice !== null && unitPrice !== undefined ? '₱' + formatNumber(unitPrice) : 'Not set'}</span>
                 </div>
             `);
 

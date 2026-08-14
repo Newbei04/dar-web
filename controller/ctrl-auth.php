@@ -76,6 +76,7 @@ if ($trans == "LOGIN") {
     }
 
     $_SESSION['users_id'] = $row['users_id'];
+    $_SESSION['user_id'] = $row['users_id'];
     $_SESSION['username'] = $row['username'];
     $_SESSION['role_id'] = $row['role_id'];
     $_SESSION['type'] = $row['type'];
@@ -90,6 +91,38 @@ if ($trans == "LOGIN") {
     }
     $_SESSION["profile"] = $profile;
     $_SESSION["IS_LOGIN"] = true;
+
+    $fullName = trim(($profile['fname'] ?? '') . ' ' . ($profile['lname'] ?? ''));
+    $_SESSION['name'] = $fullName !== '' ? $fullName : $row['username'];
+
+    // ── Load role access (access_menu) + module tree into session ──
+    $accessMenu = [];
+    $roleRes = mysqli_query($conn, "SELECT access FROM users_role WHERE id='{$row['role_id']}' LIMIT 1");
+    $roleRow = $roleRes ? mysqli_fetch_assoc($roleRes) : null;
+    if ($roleRow && !empty($roleRow['access'])) {
+        $accessMenu = array_filter(array_map('intval', explode(',', $roleRow['access'])));
+        sort($accessMenu);
+    }
+
+    $modules = [];
+    $modRes = mysqli_query($conn, "
+        SELECT id, parent_id, title, icon, page, filename, sort_order, is_menu
+        FROM user_modules
+        WHERE status = 1
+        ORDER BY parent_id ASC, sort_order ASC, title ASC
+    ");
+    if ($modRes) {
+        while ($m = mysqli_fetch_assoc($modRes)) {
+            $m['id']         = (int)$m['id'];
+            $m['parent_id']  = (int)$m['parent_id'];
+            $m['sort_order'] = (int)$m['sort_order'];
+            $m['is_menu']    = (int)$m['is_menu'];
+            $modules[] = $m;
+        }
+    }
+
+    $_SESSION['role_access']  = $accessMenu;
+    $_SESSION['user_modules'] = $modules;
 
     echo json_encode([
         "code" => 0,

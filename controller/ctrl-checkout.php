@@ -6,6 +6,7 @@ ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 
 include __DIR__ . '/connect.php';
+include_once __DIR__ . '/../model/inventory.php';
 
 $data  = json_decode(file_get_contents("php://input"), true);
 $trans = $_GET['trans'] ?? ($data['trans'] ?? '');
@@ -55,6 +56,36 @@ if ($trans == "PLACE_CHECKOUT") {
 
         exit;
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELLING FACILITY
+    |--------------------------------------------------------------------------
+    | The store facility is taken from the store employee (cooperative).
+    | Stock is only deducted from batches at this facility and items are
+    | priced using the active product_facility_price row for this facility.
+    */
+    $cooperative_row_query = mysqli_query($conn, "
+        SELECT e.*, f.id AS facility_id, f.name AS facility_name
+        FROM employee e
+        LEFT JOIN facility f ON f.id = e.facility_id
+        WHERE e.users_id = '$cooperative_id'
+        LIMIT 1
+    ");
+
+    $cooperative_row = mysqli_fetch_assoc($cooperative_row_query);
+    $facility_id     = (int)($cooperative_row['facility_id'] ?? 0);
+
+    if (!$facility_id) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "Store employee has no assigned facility",
+            "data" => null
+        ]);
+        exit;
+    }
+
+    $sale_facility_name = $cooperative_row['facility_name'] ?? '';
 
     // $reference_id = "CHK-" . date("YmdHis");
     // reference_id is an INT column — use a Unix timestamp (fits INT range)
@@ -110,8 +141,10 @@ if ($trans == "PLACE_CHECKOUT") {
                 LEFT JOIN product_category pc
                     ON pc.id = p.category_id
                 WHERE pi.product_id = '$product_id'
+                AND pi.facility_id = '$facility_id'
                 AND pi.status = 1
                 AND pi.current_stock > pi.reserved_stock
+                AND (pi.expiry_date IS NULL OR pi.expiry_date >= CURDATE())
                 ORDER BY
                     CASE WHEN pi.expiry_date IS NULL THEN 1 ELSE 0 END ASC,
                     pi.expiry_date ASC,
@@ -133,6 +166,14 @@ if ($trans == "PLACE_CHECKOUT") {
             }
 
             $remaining = $qty;
+
+            $facility_price = InventoryEngine::getFacilitySellingPrice($conn, $product_id, $facility_id);
+
+            if ($facility_price === null) {
+                $success = false;
+                $error_message = "No facility price set for this product at " . $sale_facility_name;
+                break;
+            }
 
             while ($remaining > 0) {
 
@@ -203,7 +244,7 @@ if ($trans == "PLACE_CHECKOUT") {
                     break 2;
                 }
 
-                $batch_price = (float)$batch['selling_price'];
+                $batch_price = $facility_price;
                 $subtotal    = $batch_price * $take;
 
                 $grand_total += $subtotal;
@@ -272,6 +313,18 @@ if ($trans == "PLACE_CHECKOUT") {
 
         $inventory = mysqli_fetch_assoc($inventory_query);
 
+        if ((int)$inventory['facility_id'] !== $facility_id) {
+            $success = false;
+            $error_message = "Inventory batch does not belong to the store facility";
+            break;
+        }
+
+        if (!empty($inventory['expiry_date']) && $inventory['expiry_date'] < date('Y-m-d')) {
+            $success = false;
+            $error_message = "Cannot sell expired batch of " . $inventory['product_name'];
+            break;
+        }
+
         $available_stock =
             (float)$inventory['current_stock'] -
             (float)$inventory['reserved_stock'];
@@ -292,7 +345,15 @@ if ($trans == "PLACE_CHECKOUT") {
             break;
         }
 
-        $selling_price = (float)$inventory['selling_price'];
+        $facility_price = InventoryEngine::getFacilitySellingPrice($conn, $inventory['product_id'], $facility_id);
+
+        if ($facility_price === null) {
+            $success = false;
+            $error_message = "No facility price set for " . $inventory['product_name'] . " at " . $sale_facility_name;
+            break;
+        }
+
+        $selling_price = $facility_price;
         $subtotal      = $selling_price * $qty;
         $new_balance   = (float)$inventory['current_stock'] - $qty;
 
@@ -437,6 +498,65 @@ if ($trans == "PLACE_CHECKOUT") {
 
     /*
     |--------------------------------------------------------------------------
+    | STORE TRANSACTION
+    |--------------------------------------------------------------------------
+    | Log the sale into the existing store_transactions table
+    | (settled directly to the store, empty card payload).
+    */
+    $payment_method = (int)($data['payment_method'] ?? 1);
+
+    $insert_transaction = mysqli_query($conn, "
+        INSERT INTO store_transactions (
+            reference_no,
+            facility_id,
+            beneficiary_id,
+            emp_id,
+            program_id,
+            wallet_balance_id,
+            gross_amount,
+            discount_amount,
+            net_amount,
+            payment_method,
+            settlement_status,
+            card_tap_payload,
+            transaction_dt,
+            notes,
+            created_at
+        )
+        VALUES (
+            '$reference_id',
+            '$facility_id',
+            " . ($beneficiary_id ? "'$beneficiary_id'" : "NULL") . ",
+            '$cooperative_id',
+            NULL,
+            NULL,
+            '$grand_total',
+            '0',
+            '$grand_total',
+            '$payment_method',
+            '1',
+            '',
+            NOW(),
+            'Beneficiary checkout',
+            NOW()
+        )
+    ");
+
+    if (!$insert_transaction) {
+
+        mysqli_rollback($conn);
+
+        echo json_encode([
+            "code" => 1,
+            "message" => mysqli_error($conn),
+            "data" => null
+        ]);
+
+        exit;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | SUCCESS RESPONSE
     |--------------------------------------------------------------------------
     */
@@ -476,6 +596,11 @@ if ($trans == "PLACE_CHECKOUT") {
 
                 "facility_name" =>
                 $cooperative['facility_name'] ?? ''
+            ],
+
+            "facility" => [
+                "id" => $facility_id,
+                "name" => $sale_facility_name
             ],
 
             "summary" => [

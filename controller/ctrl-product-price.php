@@ -2,6 +2,7 @@
 
 header("Content-Type: application/json");
 include __DIR__ . '/connect.php';
+include_once __DIR__ . '/../model/inventory.php';
 
 $data  = json_decode(file_get_contents("php://input"), true);
 $trans = $_GET['trans'] ?? ($data['trans'] ?? '');
@@ -121,6 +122,19 @@ if ($trans === "SET_FACILITY_PRICE") {
     ");
 
     if (!$history) {
+        mysqli_rollback($conn);
+        echo json_encode(["code" => 1, "message" => mysqli_error($conn), "data" => null]);
+        exit;
+    }
+
+    // ── Sync inventory display cache so batch rows show the same price ──
+    $sync = mysqli_query($conn, "
+        UPDATE product_inventory
+        SET selling_price = '$selling_price', updated_at = NOW()
+        WHERE product_id = '$product_id' AND facility_id = '$facility_id'
+    ");
+
+    if (!$sync) {
         mysqli_rollback($conn);
         echo json_encode(["code" => 1, "message" => mysqli_error($conn), "data" => null]);
         exit;
@@ -290,6 +304,31 @@ if ($trans === "GET_PRICE_HISTORY") {
         "code" => 0,
         "message" => "Success",
         "data" => $list
+    ]);
+    exit;
+}
+
+/* ============================================================================
+   GET FACILITY PRICE
+   Returns the active selling price for a (product, facility) pair.
+   Used by the Receive Stock and Sell dialogs.
+============================================================================ */
+if ($trans === "GET_FACILITY_PRICE") {
+
+    $product_id  = (int)($data['product_id'] ?? 0);
+    $facility_id = (int)($data['facility_id'] ?? 0);
+
+    if (!$product_id || !$facility_id) {
+        echo json_encode(["code" => 1, "message" => "Product and Facility are required", "data" => null]);
+        exit;
+    }
+
+    $price = InventoryEngine::getFacilitySellingPrice($conn, $product_id, $facility_id);
+
+    echo json_encode([
+        "code" => 0,
+        "message" => "Success",
+        "data" => ["selling_price" => $price]
     ]);
     exit;
 }

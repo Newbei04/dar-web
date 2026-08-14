@@ -2,8 +2,8 @@
 // Start output buffering
 ob_start();
 
-// Load page from template
-require_once "navbar.php";
+// Load page from template (session + access_menu driven sidebar)
+require_once "navbar_1.php";
 
 ?>
 <!DOCTYPE html>

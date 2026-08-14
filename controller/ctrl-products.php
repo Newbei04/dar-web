@@ -335,7 +335,12 @@ if ($trans == "ADD_PRODUCT") {
     $inventory = [];
     $fi = mysqli_query($conn, "
         SELECT pi.*, f.name AS facility_name,
-               (pi.current_stock - pi.reserved_stock) AS available_stock
+               (pi.current_stock - pi.reserved_stock) AS available_stock,
+               (SELECT pfp.selling_price FROM product_facility_price pfp
+                WHERE pfp.product_id = pi.product_id
+                AND pfp.facility_id = pi.facility_id
+                AND pfp.status = 1
+                LIMIT 1) AS facility_price
         FROM product_inventory pi
         LEFT JOIN facility f ON f.id = pi.facility_id
         WHERE pi.product_id = '$product_id'
@@ -350,8 +355,11 @@ if ($trans == "ADD_PRODUCT") {
             "current_stock"    => (float)$r['current_stock'],
             "reserved_stock"   => (float)$r['reserved_stock'],
             "available_stock"  => (float)$r['available_stock'],
+            "received_stock"   => (float)$r['received_stock'],
             "reorder_level"    => (int)$r['reorder_level'],
             "cost_price"       => (float)$r['cost_price'],
+            "selling_price"    => (float)$r['selling_price'],
+            "facility_price"   => $r['facility_price'] !== null ? (float)$r['facility_price'] : null,
             "expiry_date"      => $r['expiry_date'],
             "storage_location" => $r['storage_location'],
             "status"           => (int)$r['status'],

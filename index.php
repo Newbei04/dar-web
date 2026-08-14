@@ -17,17 +17,47 @@ $basePath = $ENV['APP_URL'] . "/index.php";
 $defaultProvince = "";
 $defaultCity = "";
 
-// For Debugging
-$_SESSION["IS_LOGIN"] = true; // Set to true to bypass login for testing
-$_SESSION["type"] = 1; // Legacy debug flag (treated as admin by CHANGE_PASSWORD/machine-maintenance)
-$_SESSION["user_id"] = 1;
-$_SESSION["users_id"] = 1;
-$_SESSION["role_id"] = 1; // 1 - Administrator, 2 - Employee/Cooperative, 3 - Beneficiary (ARB)
-$_SESSION["username"] = "admin";
-$_SESSION["name"] = "Juan Dela Cruz";
-
 if (!isset($_SESSION["IS_LOGIN"])) {
 	$_SESSION["IS_LOGIN"] = false;
+}
+
+// Load the user's module access + menu tree into the session once per login.
+// The sidebar (views/navbar_1.php) renders menu items from this session data.
+if ($_SESSION["IS_LOGIN"] && empty($_SESSION["user_modules"])) {
+	require_once __DIR__ . '/controller/connect.php';
+
+	$roleId = (int)($_SESSION["role_id"] ?? 0);
+	$accessMenu = [];
+
+	if ($roleId > 0) {
+		$roleRes = mysqli_query($conn, "SELECT access FROM users_role WHERE id='$roleId' LIMIT 1");
+		$roleRow = $roleRes ? mysqli_fetch_assoc($roleRes) : null;
+		if ($roleRow && !empty($roleRow['access'])) {
+			$accessMenu = array_filter(array_map('intval', explode(',', $roleRow['access'])));
+			sort($accessMenu);
+		}
+	}
+
+	$modules = [];
+	$modRes = mysqli_query($conn, "
+		SELECT id, parent_id, title, icon, page, filename, sort_order, is_menu
+		FROM user_modules
+		WHERE status = 1
+		ORDER BY parent_id ASC, sort_order ASC, title ASC
+	");
+	if ($modRes) {
+		while ($m = mysqli_fetch_assoc($modRes)) {
+			$m['id']        = (int)$m['id'];
+			$m['parent_id'] = (int)$m['parent_id'];
+			$m['sort_order'] = (int)$m['sort_order'];
+			$m['is_menu']   = (int)$m['is_menu'];
+			$modules[] = $m;
+		}
+	}
+
+	$_SESSION["role_access"]  = $accessMenu;
+	$_SESSION["user_modules"] = $modules;
+	$_SESSION["name"] = $_SESSION["name"] ?? ($_SESSION["username"] ?? 'User');
 }
 
 
@@ -249,6 +279,21 @@ switch ($route) {
 		break;
 	case 'add-inventory':
 		require_once 'views/product-inventory-add.php';
+		break;
+	case 'stock-movements':
+		require_once 'views/product-stock-movements.php';
+		break;
+	case 'low-stock':
+		require_once 'views/product-low-stock.php';
+		break;
+	case 'simulation':
+		require_once 'views/product-simulation.php';
+		break;
+	case 'facility-prices':
+		require_once 'views/facility-prices.php';
+		break;
+	case 'price-history':
+		require_once 'views/price-history.php';
 		break;
 	// ==================== Pages (Standalone) ====================
 	case 'page-login':

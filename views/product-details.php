@@ -293,11 +293,20 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="pdReceiveQty" min="1" step="1" required>
+                        <input type="number" class="form-control" id="pdReceiveQty" min="1" step="any" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Batch Number</label>
+                        <input type="text" class="form-control" id="pdReceiveBatch" placeholder="e.g. BATCH-SEED-001">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Cost Price</label>
                         <input type="number" class="form-control" id="pdReceiveCost" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Facility Selling Price</label>
+                        <input type="number" class="form-control bg-light" id="pdReceiveSelling" min="0" step="0.01" readonly>
+                        <small class="form-text text-muted" id="pdReceivePriceHint">Auto-loaded from Facility Prices.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Expiry Date</label>
@@ -333,6 +342,8 @@
                 <div class="modal-body">
                     <input type="hidden" id="pdInvActionId">
                     <input type="hidden" id="pdInvActionName">
+                    <input type="hidden" id="pdInvActionFacilityId">
+                    <input type="hidden" id="pdInvActionProductId">
                     <div class="alert alert-info py-2 px-3 mb-3" style="font-size:13px;">
                         <i class="fas fa-cube me-1"></i>
                         <span id="pdInvActionSummary">-</span>
@@ -480,7 +491,7 @@
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
-                data: JSON.stringify({ trans: "LIST_FACILITY_BY_TYPE", facility_type: 3 }),
+                data: JSON.stringify({ trans: "LIST_FACILITY_BY_TYPE", facility_type: "1,4" }),
                 success: function(res) {
                     const opts = res.code == 0 && res.data ? res.data : [];
                     facilityOptions = opts;
@@ -765,21 +776,41 @@
                         `;
                     }).join('');
 
-                    let inventoryRows = '<tr><td colspan="10" class="text-center text-muted py-3">No inventory records.</td></tr>';
+                    let inventoryRows = '<tr><td colspan="13" class="text-center text-muted py-3">No inventory records.</td></tr>';
                     if (inventory.length) {
                         inventoryRows = inventory.map(function(inv) {
                             const invStatus = inv.status == 1 ?
                                 '<span class="badge light badge-success">Active</span>' :
                                 '<span class="badge light badge-secondary">Inactive</span>';
+
+                            const available = parseFloat(inv.available_stock ?? 0);
+                            const reorder = parseFloat(inv.reorder_level ?? 0);
+                            let availCell = `<span class="${available <= 0 ? 'text-danger' : (available <= reorder ? 'text-warning' : 'text-success')} fw-semibold">${formatNumber(available)}</span>`;
+                            if (available <= reorder) availCell += ' <span class="badge light badge-warning">LOW</span>';
+
+                            let expiryCell = escapeHtml(inv.expiry_date || '-');
+                            if (inv.expiry_date) {
+                                const today = new Date(); today.setHours(0, 0, 0, 0);
+                                const exp = new Date(inv.expiry_date);
+                                const diff = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                                if (diff < 0) expiryCell = '<span class="badge light badge-danger">' + escapeHtml(inv.expiry_date) + ' (Expired)</span>';
+                                else if (diff <= 60) expiryCell = '<span class="badge light badge-warning">' + escapeHtml(inv.expiry_date) + ' (Expiring)</span>';
+                            }
+
+                            const sellingVal = inv.facility_price !== null && inv.facility_price !== undefined ? inv.facility_price : inv.selling_price;
+
                             return `
                                 <tr>
                                     <td>${escapeHtml(inv.facility_name || '-')}</td>
                                     <td>${escapeHtml(inv.batch_number || '-')}</td>
+                                    <td>${formatNumber(inv.received_stock)}</td>
                                     <td>${formatNumber(inv.current_stock)}</td>
                                     <td>${formatNumber(inv.reserved_stock)}</td>
-                                    <td>${formatNumber(inv.available_stock)}</td>
+                                    <td>${availCell}</td>
+                                    <td>${formatNumber(reorder)}</td>
                                     <td>${escapeHtml(inv.cost_price != null ? '₱' + formatNumber(inv.cost_price) : '-')}</td>
-                                    <td>${escapeHtml(inv.expiry_date || '-')}</td>
+                                    <td>${escapeHtml(sellingVal != null && sellingVal !== undefined ? '₱' + formatNumber(sellingVal) : '-')}</td>
+                                    <td>${expiryCell}</td>
                                     <td>${escapeHtml(inv.storage_location || '-')}</td>
                                     <td>${invStatus}</td>
                                     <td class="text-end">
@@ -789,6 +820,11 @@
                                                 <i class="fas fa-ellipsis-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="sell"><i class="fas fa-cart-plus me-1 text-success"></i>Sell</a></li>
+                                                <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="return"><i class="fas fa-undo me-1 text-primary"></i>Return</a></li>
+                                                <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="damaged"><i class="fas fa-times-circle me-1 text-danger"></i>Mark Damaged</a></li>
+                                                <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="expired"><i class="fas fa-clock me-1 text-warning"></i>Mark Expired</a></li>
+                                                <li><hr class="dropdown-divider"></li>
                                                 <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="reserve"><i class="fas fa-lock me-1 text-warning"></i>Reserve</a></li>
                                                 <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="release"><i class="fas fa-unlock me-1 text-info"></i>Release Reservation</a></li>
                                                 <li><a class="dropdown-item inv-action" href="javascript:void(0)" data-id="${escapeHtml(inv.id)}" data-name="${escapeHtml(inv.batch_number || 'Batch')}" data-action="adjust"><i class="fas fa-sliders me-1 text-primary"></i>Adjust Quantity</a></li>
@@ -900,10 +936,13 @@
                                             <tr>
                                                 <th>Facility</th>
                                                 <th>Batch #</th>
+                                                <th>Received</th>
                                                 <th>Current</th>
                                                 <th>Reserved</th>
                                                 <th>Available</th>
+                                                <th>Reorder</th>
                                                 <th>Cost</th>
+                                                <th>Selling</th>
                                                 <th>Expiry</th>
                                                 <th>Location</th>
                                                 <th>Status</th>
@@ -1233,6 +1272,8 @@
         $('#pdReceiveBtn').on('click', function() {
             $('#pdReceiveStockForm')[0].reset();
             $('#pdReceiveProductId').val(productId);
+            $('#pdReceiveSelling').val('');
+            $('#pdReceivePriceHint').html('Auto-loaded from Facility Prices.');
             if (facilityOptions.length) {
                 let html = '<option value="">Select facility</option>';
                 facilityOptions.forEach(function(f) {
@@ -1240,6 +1281,39 @@
                 });
                 $('#pdReceiveFacility').html(html);
             }
+        });
+
+        $('#pdReceiveFacility').on('change', function() {
+            const facilityId = $(this).val();
+            if (!facilityId) {
+                $('#pdReceiveSelling').val('');
+                $('#pdReceivePriceHint').html('Auto-loaded from Facility Prices.');
+                return;
+            }
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-product-price.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "GET_FACILITY_PRICE",
+                    product_id: productId,
+                    facility_id: facilityId
+                }),
+                success: function(res) {
+                    const price = res && res.data ? res.data.selling_price : null;
+                    if (price !== null && price !== undefined) {
+                        $('#pdReceiveSelling').val(price);
+                        $('#pdReceivePriceHint').html('Selling price from Facility Prices.');
+                    } else {
+                        $('#pdReceiveSelling').val('');
+                        $('#pdReceivePriceHint').html('<span class="text-warning">No facility price set. Set it under Pricing before selling.</span>');
+                    }
+                },
+                error: function(xhr) {
+                    console.error("GET_FACILITY_PRICE failed:", xhr.responseText);
+                }
+            });
         });
 
         $('#pdReceiveStockForm').on('submit', function(e) {
@@ -1254,7 +1328,9 @@
                 product_id: productId,
                 facility_id: facilityId,
                 quantity: $('#pdReceiveQty').val(),
+                batch_number: $('#pdReceiveBatch').val().trim(),
                 cost_price: $('#pdReceiveCost').val(),
+                selling_price: $('#pdReceiveSelling').val() || 0,
                 expiry_date: $('#pdReceiveExpiry').val() || null,
                 storage_location: $('#pdReceiveLocation').val(),
                 remarks: $('#pdReceiveRemarks').val(),
@@ -1301,6 +1377,10 @@
                 return String(x.id) == String(id);
             });
             const labels = {
+                sell: { title: 'Sell Stock', btn: 'Sell', qtyLabel: 'Quantity to sell', icon: 'fa-cart-plus', cls: 'btn-success' },
+                return: { title: 'Return Stock', btn: 'Return', qtyLabel: 'Quantity to return', icon: 'fa-undo', cls: 'btn-primary' },
+                damaged: { title: 'Mark Damaged', btn: 'Mark Damaged', qtyLabel: 'Quantity damaged', icon: 'fa-times-circle', cls: 'btn-danger' },
+                expired: { title: 'Mark Expired', btn: 'Mark Expired', qtyLabel: 'Quantity to remove (blank = all)', icon: 'fa-clock', cls: 'btn-warning' },
                 reserve: { title: 'Reserve Stock', btn: 'Reserve', qtyLabel: 'Quantity to reserve', icon: 'fa-lock', cls: 'btn-warning' },
                 release: { title: 'Release Reservation', btn: 'Release', qtyLabel: 'Quantity to release', icon: 'fa-unlock', cls: 'btn-info' },
                 adjust: { title: 'Adjust Quantity', btn: 'Adjust', qtyLabel: 'New quantity', icon: 'fa-sliders', cls: 'btn-primary' },
@@ -1311,10 +1391,18 @@
 
             $('#pdInvActionId').val(id);
             $('#pdInvActionName').val(action);
+            $('#pdInvActionFacilityId').val(inv ? inv.facility_id : '');
+            $('#pdInvActionProductId').val(inv ? inv.product_id : '');
             $('#pdInvActionTitle').html(`<i class="fas ${cfg.icon} me-2 text-primary"></i>${cfg.title}`);
 
             let summary = `Batch <strong>${escapeHtml(name)}</strong>`;
-            if (inv) summary += ` · Facility: ${escapeHtml(inv.facility_name || '-')} · Current: ${formatNumber(inv.current_stock)} · Available: ${formatNumber(inv.available_stock)}`;
+            if (inv) {
+                summary += ` · Facility: ${escapeHtml(inv.facility_name || '-')} · Current: ${formatNumber(inv.current_stock)} · Available: ${formatNumber(inv.available_stock)}`;
+                if (action === 'sell') {
+                    const sp = inv.facility_price !== null && inv.facility_price !== undefined ? inv.facility_price : inv.selling_price;
+                    summary += ` · Selling: <strong>₱${formatNumber(sp)}</strong>`;
+                }
+            }
             $('#pdInvActionSummary').html(summary);
 
             const isTransfer = action === 'transfer';
@@ -1325,10 +1413,11 @@
             $('#pdInvStatusWrap').toggle(isStatus);
             $('#pdInvRemarksWrap').toggle(!isStatus);
             $('#pdInvQty').val('');
+            $('#pdInvQty').prop('required', action !== 'expired');
             $('#pdInvRemarks').val('');
             $('#pdInvStatus').val(inv && inv.status == 1 ? '1' : '0');
             $('#pdInvActionSubmit')
-                .removeClass('btn-primary btn-warning btn-info btn-secondary btn-success')
+                .removeClass('btn-primary btn-warning btn-info btn-secondary btn-success btn-danger')
                 .addClass(cfg.cls)
                 .html(`<i class="fas fa-check me-1"></i>${cfg.btn}`);
 
@@ -1339,14 +1428,31 @@
             e.preventDefault();
             const id = $('#pdInvActionId').val();
             const action = $('#pdInvActionName').val();
+            const transMap = {
+                sell: 'SELL_INVENTORY',
+                return: 'RETURN_INVENTORY',
+                damaged: 'DAMAGE_INVENTORY',
+                expired: 'MARK_EXPIRED',
+                reserve: 'RESERVE_INVENTORY',
+                release: 'RELEASE_RESERVATION',
+                adjust: 'ADJUST_INVENTORY',
+                transfer: 'TRANSFER_INVENTORY',
+                status: 'EDIT_STATUS'
+            };
             const payload = {
-                trans: action,
+                trans: transMap[action] || action,
                 inventory_id: id,
                 created_by: "<?= $_SESSION['users_id'] ?? 0 ?>",
                 remarks: $('#pdInvRemarks').val()
             };
-            if (action !== 'status') payload.quantity = $('#pdInvQty').val();
-            if (action === 'transfer') payload.to_facility_id = $('#pdInvTargetFacility').val();
+            if (action === 'sell') {
+                payload.facility_id = $('#pdInvActionFacilityId').val();
+                payload.product_id = $('#pdInvActionProductId').val();
+                payload.quantity = $('#pdInvQty').val();
+            } else if (action !== 'status') {
+                payload.quantity = $('#pdInvQty').val();
+            }
+            if (action === 'transfer') payload.destination_facility_id = $('#pdInvTargetFacility').val();
             if (action === 'status') payload.status = $('#pdInvStatus').val();
 
             Swal.fire({

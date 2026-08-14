@@ -56,14 +56,15 @@
 								<span class="ms-1 font-w500 label-color">Sign in with Apple</span></a>
 						</div>
 					</div> -->
-					<form action="<?= $baseURL ?>home">
+					<form id="loginForm" autocomplete="off">
+						<div id="loginError" class="alert alert-danger py-2 px-3" style="display:none;font-size:13px;"></div>
 						<div class="mb-4">
-							<label class="form-label required">Email</label>
-							<input type="email" class="form-control" value="hello@example.com">
+							<label class="form-label required">Username</label>
+							<input type="text" id="loginUsername" class="form-control" placeholder="Enter your username" autocomplete="username">
 						</div>
 						<div class="mb-4 position-relative">
 							<label class="mb-1 form-label required">Password</label>
-							<input type="password" id="dz-password" class="form-control" value="123456">
+							<input type="password" id="dz-password" class="form-control" placeholder="Enter your password" autocomplete="current-password">
 							<span class="show-pass eye">
 
 								<i class="fa fa-eye-slash"></i>
@@ -74,7 +75,7 @@
 						<div class="form-row d-flex justify-content-between mt-4 mb-2">
 							<div class="mb-4">
 								<div class="form-check custom-checkbox mb-3">
-									<input type="checkbox" class="form-check-input" id="customCheckBox1" required="">
+									<input type="checkbox" class="form-check-input" id="customCheckBox1" checked="">
 									<label class="form-check-label" for="customCheckBox1">Remember my preference</label>
 								</div>
 							</div>
@@ -83,7 +84,7 @@
 							</div>
 						</div>
 						<div class="text-center mb-4">
-							<button type="submit" class="btn btn-primary btn-block">Sign Me In</button>
+							<button type="submit" id="btnLogin" class="btn btn-primary btn-block">Sign Me In</button>
 						</div>
 						<p class="text-center">Not registered?
 							<a class="btn-link text-primary" href="<?= $baseURL ?>page-register">Register</a>
@@ -101,6 +102,60 @@
 	<script src="<?= $baseURL ?>assets/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 	<script src="<?= $baseURL ?>assets/js/custom.min.js"></script>
 	<script src="<?= $baseURL ?>assets/js/deznav-init.js"></script>
+	<script>
+		(function() {
+			var BASEURL = '<?= $baseURL ?>';
+			var form = document.getElementById('loginForm');
+			var errorBox = document.getElementById('loginError');
+			var btn = document.getElementById('btnLogin');
+
+			function showError(message) {
+				errorBox.textContent = message;
+				errorBox.style.display = 'block';
+			}
+
+			form.addEventListener('submit', function(e) {
+				e.preventDefault();
+
+				var username = document.getElementById('loginUsername').value.trim();
+				var password = document.getElementById('dz-password').value;
+
+				errorBox.style.display = 'none';
+
+				if (!username || !password) {
+					showError('Please enter your username and password.');
+					return;
+				}
+
+				btn.disabled = true;
+				var original = btn.innerHTML;
+				btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Signing in...';
+
+				fetch(BASEURL + 'controller/ctrl-auth.php', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ trans: 'LOGIN', username: username, password: password })
+				})
+				.then(function(response) { return response.json(); })
+				.then(function(res) {
+					btn.disabled = false;
+					btn.innerHTML = original;
+
+					if (res.code === 0) {
+						window.location.href = BASEURL + 'home';
+					} else {
+						showError(res.message || 'Login failed. Please try again.');
+					}
+				})
+				.catch(function(err) {
+					btn.disabled = false;
+					btn.innerHTML = original;
+					console.error(err);
+					showError('Unable to connect. Please try again.');
+				});
+			});
+		})();
+	</script>
 
 </body>
 
