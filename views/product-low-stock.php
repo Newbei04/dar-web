@@ -31,7 +31,7 @@
                 <div class="card-header flex-wrap">
                     <h4 class="card-title">Low Stock Batches</h4>
                     <div class="d-flex align-items-center gap-2">
-                        <select id="facilityFilter" class="form-control default-select" style="min-width:240px;">
+                        <select id="facilityFilter" class="form-control native-select" style="min-width:240px;">
                             <option value="">All Facilities</option>
                         </select>
                         <a href="<?= $baseURL ?>add-inventory" class="btn btn-primary">

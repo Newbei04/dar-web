@@ -8,8 +8,8 @@
     }
 
     .inventory-card {
-        background: #fff;
-        border: 1px solid #e9ecef;
+        background: var(--card, #fff);
+        border: 1px solid var(--border, #e9ecef);
         border-radius: 12px;
         overflow: hidden;
         display: flex;
@@ -24,12 +24,12 @@
 
     .card-thumb {
         height: 110px;
-        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        background: linear-gradient(135deg, var(--body-bg, #f0f4ff) 0%, var(--card, #e8f0fe) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 40px;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
         position: relative;
         overflow: hidden;
     }
@@ -66,14 +66,14 @@
     .card-name {
         font-size: 14px;
         font-weight: 600;
-        color: #212529;
+        color: var(--text-dark, #212529);
         margin: 0;
         line-height: 1.35;
     }
 
     .card-sku {
         font-size: 11px;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
         margin: 0;
         font-family: monospace;
         letter-spacing: 0.5px;
@@ -91,15 +91,15 @@
         font-weight: 600;
         padding: 3px 8px;
         border-radius: 20px;
-        background: #e7f1ff;
-        color: #0d6efd;
+        background: var(--rgba-primary-1, #e7f1ff);
+        color: var(--primary, #0d6efd);
     }
 
     .stock-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #f8f9fa;
+        background: var(--body-bg, #f8f9fa);
         border-radius: 8px;
         padding: 8px 10px;
         margin-top: 6px;
@@ -111,7 +111,7 @@
 
     .stock-item .s-label {
         font-size: 9px;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         display: block;
@@ -121,7 +121,7 @@
     .stock-item .s-value {
         font-size: 14px;
         font-weight: 700;
-        color: #212529;
+        color: var(--text-dark, #212529);
     }
 
     .stock-item .s-value.available {
@@ -131,7 +131,6 @@
     .stock-item .s-value.reserved {
         color: #856404;
     }
-
     .card-price-row {
         display: flex;
         gap: 8px;
@@ -140,7 +139,7 @@
 
     .price-box {
         flex: 1;
-        background: #f8f9fa;
+        background: var(--body-bg, #f8f9fa);
         border-radius: 8px;
         padding: 6px 8px;
         text-align: center;
@@ -148,7 +147,7 @@
 
     .price-box .p-label {
         font-size: 9px;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
         text-transform: uppercase;
         letter-spacing: 0.4px;
         display: block;
@@ -157,12 +156,12 @@
     .price-box .p-value {
         font-size: 13px;
         font-weight: 600;
-        color: #212529;
+        color: var(--text-dark, #212529);
     }
 
     .card-info {
         font-size: 11px;
-        color: #6c757d;
+        color: var(--text-gray, #6c757d);
         display: flex;
         align-items: center;
         gap: 4px;
@@ -171,7 +170,7 @@
 
     .card-expiry-warn {
         font-size: 11px;
-        color: #856404;
+        color: var(--text-dark, #856404);
         background: #fff3cd;
         border-radius: 6px;
         padding: 3px 8px;
@@ -181,13 +180,13 @@
 
     .card-date {
         font-size: 11px;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
         margin-top: auto;
         padding-top: 6px;
     }
 
     .card-footer {
-        border-top: 1px solid #f1f3f5;
+        border-top: 1px solid var(--border, #f1f3f5);
         padding: 10px 14px;
         display: flex;
         gap: 8px;
@@ -211,7 +210,7 @@
     #emptyState {
         text-align: center;
         padding: 4rem 0;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
         font-size: 15px;
     }
 
@@ -224,7 +223,7 @@
     #loadingState {
         text-align: center;
         padding: 3rem 0;
-        color: #adb5bd;
+        color: var(--text-gray, #adb5bd);
     }
 
     .cart-bar {
@@ -245,17 +244,35 @@
         align-items: center;
         gap: 8px;
         font-weight: 600;
-        color: #166534;
+        color: var(--text-dark, #166534);
     }
 
     .cart-info .cart-total {
         font-weight: 700;
-        color: #14532d;
+        color: var(--text-dark, #14532d);
     }
 
     .cart-actions {
         display: flex;
         gap: 8px;
+    }
+
+    [data-theme-version="dark"] .stock-item .s-value.available {
+        color: #4ade80;
+    }
+
+    [data-theme-version="dark"] .stock-item .s-value.reserved {
+        color: #fbbf24;
+    }
+
+    [data-theme-version="dark"] .card-expiry-warn {
+        background: rgba(255, 193, 7, 0.15);
+        color: #fbbf24;
+    }
+
+    [data-theme-version="dark"] .cart-bar {
+        background: rgba(40, 167, 69, 0.12);
+        border-color: rgba(40, 167, 69, 0.35);
     }
 </style>
 <?= endSection() ?>
@@ -280,10 +297,10 @@
                     <!-- TOOLBAR: Search + Filters -->
                     <div class="toolbar">
                         <input type="text" class="form-control" id="searchBox" placeholder="Search product name, SKU, batch…">
-                        <select class="form-control" id="filterCat" style="max-width:180px;">
+                        <select class="form-control native-select" id="filterCat" style="max-width:180px;">
                             <option value="">All Categories</option>
                         </select>
-                        <select class="form-control" id="filterStock" style="max-width:160px;">
+                        <select class="form-control native-select" id="filterStock" style="max-width:160px;">
                             <option value="">All Stock Levels</option>
                             <option value="ok">In Stock</option>
                             <option value="low">Low Stock</option>
@@ -413,13 +430,13 @@
                     <div class="col-md-5">
                         <div class="mb-3">
                             <label class="form-label">Beneficiary <span class="text-danger">*</span></label>
-                            <select class="form-select default-select" id="checkoutBeneficiary">
+                            <select class="form-select native-select" id="checkoutBeneficiary">
                                 <option value="">Select beneficiary</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Payment Method <span class="text-danger">*</span></label>
-                            <select class="form-select" id="checkoutPayment">
+                            <select class="form-select native-select" id="checkoutPayment">
                                 <option value="1">Cash</option>
                                 <option value="2">Card / POS</option>
                                 <option value="3">Wallet</option>
@@ -469,6 +486,35 @@
         let cart = {};
         let cartCount = 0;
         let beneficiariesLoaded = false;
+
+        const CART_STORAGE_KEY = 'dar_product_cart';
+
+        function loadCart() {
+            try {
+                const saved = localStorage.getItem(CART_STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        cart = parsed;
+                    }
+                }
+            } catch (e) {
+                cart = {};
+            }
+        }
+
+        function saveCart() {
+            try {
+                if (Object.keys(cart).length) {
+                    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+                } else {
+                    localStorage.removeItem(CART_STORAGE_KEY);
+                }
+            } catch (e) {}
+        }
+
+        loadCart();
+        renderCart();
 
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>"']/g, function(char) {
@@ -569,6 +615,7 @@
             }
 
             renderCart();
+            saveCart();
             $('#buyModal').modal('hide');
             Swal.fire({
                 icon: 'success',
@@ -667,6 +714,7 @@
                 if (result.isConfirmed) {
                     cart = {};
                     renderCart();
+                    saveCart();
                 }
             });
         });
@@ -676,6 +724,7 @@
         $(document).on('click', '.cartRemoveBtn', function() {
             delete cart[$(this).data('id')];
             renderCart();
+            saveCart();
             if (Object.keys(cart).length) openCheckout();
             else $('#checkoutModal').modal('hide');
         });
@@ -740,6 +789,7 @@
                         }).then(function() {
                             cart = {};
                             renderCart();
+                            saveCart();
                             $('#checkoutModal').modal('hide');
                             loadInventory();
                         });

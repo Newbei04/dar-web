@@ -30,10 +30,10 @@
                 <div class="card-header flex-wrap">
                     <h4 class="card-title">Stock Movements / Logs</h4>
                     <div class="d-flex align-items-center gap-2">
-                        <select id="facilityFilter" class="form-control default-select" style="min-width:220px;">
+                        <select id="facilityFilter" class="form-control native-select" style="min-width:220px;">
                             <option value="">All Facilities</option>
                         </select>
-                        <select id="actionFilter" class="form-control default-select" style="min-width:160px;">
+                        <select id="actionFilter" class="form-control native-select" style="min-width:160px;">
                             <option value="">All Types</option>
                             <option value="1">Receive</option>
                             <option value="2">Sale</option>

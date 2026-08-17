@@ -28,7 +28,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="facility_id" class="form-label">Facility <span class="text-danger">*</span></label>
-                                    <select id="facility_id" class="form-control default-select">
+                                    <select id="facility_id" class="form-control native-select">
                                         <option value="" disabled selected>Select Facility</option>
                                     </select>
                                 </div>
@@ -36,7 +36,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="product_id" class="form-label">Product <span class="text-danger">*</span></label>
-                                    <select id="product_id" class="form-control default-select">
+                                    <select id="product_id" class="form-control native-select">
                                         <option value="" disabled selected>Select Product</option>
                                     </select>
                                 </div>
@@ -174,7 +174,6 @@
                     (res.data || []).forEach(function(f) {
                         $('#facility_id').append(`<option value="${f.id}">${escapeHtml(f.name)}</option>`);
                     });
-                    $('#facility_id').selectpicker('refresh');
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
@@ -202,7 +201,6 @@
                             `<option value="${p.id}">${escapeHtml(p.name)}${p.sku ? ' (' + escapeHtml(p.sku) + ')' : ''}</option>`
                         );
                     });
-                    $('#product_id').selectpicker('refresh');
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);

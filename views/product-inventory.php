@@ -30,7 +30,7 @@
                     <h4 class="card-title">Inventory List <small class="text-muted">(batch level)</small></h4>
 
                     <div class="d-flex align-items-center flex-wrap gap-2">
-                        <select id="facilityFilter" class="form-control default-select facility-filter">
+                        <select id="facilityFilter" class="form-control native-select facility-filter">
                             <option value="">All Facilities</option>
                         </select>
 
@@ -43,7 +43,7 @@
                         <a href="<?= $baseURL ?>simulation" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-flask mr-1"></i> Simulation
                         </a>
-                        <a href="<?= $baseURL ?>add-inventory" class="btn btn-primary">
+                        <a href="<?= $baseURL ?>add-inventory" class="btn btn-primary btn-sm">
                             <i class="fa fa-plus mr-1"></i> Receive Stock
                         </a>
                     </div>
@@ -107,7 +107,7 @@
 
                 <div class="mb-3" id="invActionDestGroup" style="display:none;">
                     <label class="form-label">Destination Facility <span class="text-danger">*</span></label>
-                    <select id="invActionDest" class="form-control default-select">
+                    <select id="invActionDest" class="form-control native-select">
                         <option value="">Select Facility</option>
                     </select>
                 </div>
@@ -260,9 +260,6 @@
                     opts += `<option value="${f.id}">${escapeHtml(f.name)}</option>`;
                 });
                 $("#facilityFilter").html(opts);
-                if ($.fn.select2) {
-                    $("#facilityFilter").trigger('change');
-                }
             }
         });
 
@@ -515,8 +512,6 @@
             }
         };
 
-        $("#invActionDest").selectpicker();
-
         function findBatch(id) {
             for (let i = 0; i < inventoryRows.length; i++) {
                 if (inventoryRows[i].id == id) return inventoryRows[i];
@@ -580,10 +575,10 @@
                                 opts += `<option value="${f.id}">${escapeHtml(f.name)}</option>`;
                             }
                         });
-                        $("#invActionDest").html(opts).selectpicker('refresh');
+                        $("#invActionDest").html(opts);
                     },
                     error: function() {
-                        $("#invActionDest").html(opts).selectpicker('refresh');
+                        $("#invActionDest").html(opts);
                     }
                 });
             } else {

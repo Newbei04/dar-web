@@ -98,6 +98,22 @@
     .recent-booking:hover {
         background: rgba(2, 6, 23, .035);
     }
+
+    [data-theme-version="dark"] .text-black {
+        color: var(--text-dark, #fff) !important;
+    }
+
+    [data-theme-version="dark"] .dash-card .card-header {
+        border-bottom-color: var(--border, #333a54);
+    }
+
+    [data-theme-version="dark"] .recent-booking:hover {
+        background: rgba(255, 255, 255, 0.045);
+    }
+
+    [data-theme-version="dark"] .stat-card:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45) !important;
+    }
 </style>
 <?= endSection() ?>
 
@@ -327,6 +343,18 @@
         const roleId = "<?= $_SESSION['role_id'] ?? 0 ?>";
         const usersId = "<?= $_SESSION['users_id'] ?? 0 ?>";
 
+        const isDark = document.body.getAttribute('data-theme-version') === 'dark';
+        const CHART_TEXT = isDark ? '#b3b3b3' : '#737B8B';
+        const CHART_GRID = isDark ? 'rgba(255,255,255,.08)' : 'rgba(2,6,23,.08)';
+
+        function chartTheme(baseOptions) {
+            return Object.assign({}, baseOptions, {
+                theme: { mode: isDark ? 'dark' : 'light' },
+                chart: Object.assign({ foreColor: CHART_TEXT }, baseOptions.chart),
+                grid: Object.assign({ borderColor: CHART_GRID }, baseOptions.grid)
+            });
+        }
+
         $('#todayDate').text(new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -419,7 +447,7 @@
                 },
                 tooltip: { y: { formatter: v => v + ' bookings' } }
             };
-            new ApexCharts(document.querySelector('#chartTrend'), options).render();
+            new ApexCharts(document.querySelector('#chartTrend'), chartTheme(options)).render();
         }
 
         function renderPieChart(breakdown) {
@@ -470,7 +498,7 @@
                     }
                 }]
             };
-            new ApexCharts(document.querySelector('#chartPie'), options).render();
+            new ApexCharts(document.querySelector('#chartPie'), chartTheme(options)).render();
         }
 
         function renderRecent(bookings) {
@@ -595,7 +623,7 @@
                 grid: { borderColor: 'rgba(2,6,23,.08)', strokeDashArray: 4 },
                 tooltip: { y: { formatter: v => v + ' units' } }
             };
-            new ApexCharts(document.querySelector('#chartInventory'), options).render();
+            new ApexCharts(document.querySelector('#chartInventory'), chartTheme(options)).render();
         }
 
         function renderMachineDonut(data) {
@@ -635,7 +663,7 @@
                     options: { chart: { height: 280 }, legend: { position: 'bottom' } }
                 }]
             };
-            new ApexCharts(document.querySelector('#chartMachine'), options).render();
+            new ApexCharts(document.querySelector('#chartMachine'), chartTheme(options)).render();
         }
 
         function loadCounts() {

@@ -28,7 +28,7 @@ var Mophy = function(){
 		if(jQuery('.default-select').length > 0 ){
 			jQuery('.default-select').selectpicker();
 		}
-		$('select:not(.select2):not(.single-select)').selectpicker();
+		$('select:not(.select2):not(.single-select):not(.native-select)').selectpicker();
 	}
 	
 	var handleTheme = function(){

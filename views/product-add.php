@@ -62,7 +62,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
-                                    <select id="category_id" class="form-control default-select" required>
+                                    <select id="category_id" class="form-control native-select" required>
                                         <option value="" disabled selected>Select Category</option>
                                     </select>
                                 </div>
@@ -91,7 +91,7 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status</label>
-                                    <select id="status" class="form-control default-select">
+                                    <select id="status" class="form-control native-select">
                                         <option value="1" selected>Active</option>
                                         <option value="0">Inactive</option>
                                     </select>
@@ -176,7 +176,6 @@
                         });
                     }
                     $("#category_id").html(html);
-                    $("#category_id").selectpicker('refresh');
                 },
                 error: function(xhr) {
                     console.error("Category error:", xhr.responseText);

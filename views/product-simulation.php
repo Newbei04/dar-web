@@ -130,14 +130,14 @@
 
                     <div class="mb-3">
                         <label class="form-label">Facility</label>
-                        <select class="form-control default-select" id="simFacility">
+                        <select class="form-control native-select" id="simFacility">
                             <option value="">Select Facility</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Product</label>
-                        <select class="form-control default-select" id="simProduct">
+                        <select class="form-control native-select" id="simProduct">
                             <option value="">Select Product</option>
                         </select>
                     </div>

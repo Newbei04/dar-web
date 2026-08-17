@@ -13,6 +13,48 @@ $trans = $data['trans'] ?? '';
 
 /*
 |--------------------------------------------------------------------------
+| REFRESH SESSION MODULE SNAPSHOT
+|--------------------------------------------------------------------------
+| The sidebar (views/navbar_1.php) renders from the session, which is only
+| loaded once per login. Rebuild it here so module changes show immediately.
+*/
+function refreshModuleSession($conn)
+{
+    $roleId = (int)($_SESSION["role_id"] ?? 0);
+    $accessMenu = [];
+
+    if ($roleId > 0) {
+        $roleRes = mysqli_query($conn, "SELECT access FROM users_role WHERE id='$roleId' LIMIT 1");
+        $roleRow = $roleRes ? mysqli_fetch_assoc($roleRes) : null;
+        if ($roleRow && !empty($roleRow['access'])) {
+            $accessMenu = array_filter(array_map('intval', explode(',', $roleRow['access'])));
+            sort($accessMenu);
+        }
+    }
+
+    $modules = [];
+    $modRes = mysqli_query($conn, "
+        SELECT id, parent_id, title, icon, page, filename, sort_order, is_menu
+        FROM user_modules
+        WHERE status = 1
+        ORDER BY parent_id ASC, sort_order ASC, title ASC
+    ");
+    if ($modRes) {
+        while ($m = mysqli_fetch_assoc($modRes)) {
+            $m['id']         = (int)$m['id'];
+            $m['parent_id']  = (int)$m['parent_id'];
+            $m['sort_order'] = (int)$m['sort_order'];
+            $m['is_menu']    = (int)$m['is_menu'];
+            $modules[] = $m;
+        }
+    }
+
+    $_SESSION["role_access"]  = $accessMenu;
+    $_SESSION["user_modules"] = $modules;
+}
+
+/*
+|--------------------------------------------------------------------------
 | ADD MODULE
 |--------------------------------------------------------------------------
 */
@@ -86,6 +128,8 @@ if ($trans == "ADD_MODULE") {
         "code" => 0,
         "message" => "Module added successfully."
     ]);
+
+    refreshModuleSession($conn);
 
     exit;
 }
@@ -256,6 +300,8 @@ if ($trans == "ADD_MODULE") {
         "message" => "Module updated successfully."
     ]);
 
+    refreshModuleSession($conn);
+
     exit;
 }
 
@@ -331,6 +377,8 @@ if ($trans == "ADD_MODULE") {
         "message" => "Module order updated successfully."
     ]);
 
+    refreshModuleSession($conn);
+
     exit;
 }
 
@@ -364,6 +412,8 @@ if ($trans == "ADD_MODULE") {
         "code" => 0,
         "message" => "Module deleted successfully."
     ]);
+
+    refreshModuleSession($conn);
 
     exit;
 }

@@ -21,7 +21,7 @@
 
     .gallery-main {
         position: relative;
-        background: #f8f9fa;
+        background: var(--body-bg);
         border-radius: 8px;
         overflow: hidden;
         aspect-ratio: 1 / 1;
@@ -50,8 +50,8 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        background: #f1f5f9;
-        color: #adb5bd;
+        background: var(--body-bg);
+        color: var(--text-gray);
         font-size: 13px;
     }
 
@@ -126,7 +126,7 @@
         cursor: pointer;
         flex-shrink: 0;
         transition: border-color 0.15s;
-        background: #f0f0ff;
+        background: var(--body-bg);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -150,6 +150,15 @@
         font-size: 20px;
         font-weight: 600;
         line-height: 1.4;
+    }
+
+    .pd-info-card {
+        background: var(--body-bg);
+        border-color: var(--border);
+    }
+
+    .pd-info-card .info-value {
+        color: var(--text-dark);
     }
 
     .img-overlay {
@@ -287,7 +296,7 @@
                     <input type="hidden" id="pdReceiveProductId">
                     <div class="mb-3">
                         <label class="form-label">Facility</label>
-                        <select class="form-select default-select" id="pdReceiveFacility" required>
+                        <select class="form-select native-select" id="pdReceiveFacility" required>
                             <option value="">Select facility</option>
                         </select>
                     </div>
@@ -358,13 +367,13 @@
                     </div>
                     <div class="mb-3" id="pdInvFacilityWrap" style="display:none;">
                         <label class="form-label">Transfer To Facility</label>
-                        <select class="form-select default-select" id="pdInvTargetFacility">
+                        <select class="form-select native-select" id="pdInvTargetFacility">
                             <option value="">Select facility</option>
                         </select>
                     </div>
                     <div class="mb-0" id="pdInvStatusWrap" style="display:none;">
                         <label class="form-label">Status</label>
-                        <select class="form-select default-select" id="pdInvStatus">
+                        <select class="form-select native-select" id="pdInvStatus">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
@@ -427,7 +436,7 @@
                     <input type="hidden" id="pdPriceId">
                     <div class="mb-3">
                         <label class="form-label">Facility</label>
-                        <select class="form-select default-select" id="pdPriceFacility" required>
+                        <select class="form-select native-select" id="pdPriceFacility" required>
                             <option value="">Select facility</option>
                         </select>
                     </div>
@@ -607,7 +616,7 @@
 
         function productImgFallback(el) {
             const fallback = document.createElement('div');
-            fallback.style.cssText = 'width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#f1f5f9;color:#adb5bd;font-size:13px;';
+            fallback.style.cssText = 'width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--body-bg,#f1f5f9);color:var(--text-gray,#adb5bd);font-size:13px;';
             fallback.innerHTML = '<i class="fas fa-image fa-3x"></i><span>No image</span>';
             el.replaceWith(fallback);
         }
@@ -768,9 +777,9 @@
                     ].map(function(c) {
                         return `
                             <div class="col-6 col-md-3">
-                                <div class="p-2 rounded border" style="background:#f8f9fa;">
+                                <div class="p-2 rounded border pd-info-card">
                                     <small class="text-muted d-block"><i class="fas ${c.icon} me-1"></i>${c.label}</small>
-                                    <span class="fw-semibold">${escapeHtml(c.value)}</span>
+                                    <span class="fw-semibold info-value">${escapeHtml(c.value)}</span>
                                 </div>
                             </div>
                         `;
@@ -1027,7 +1036,7 @@
                                             ${urls.map(function(url, i) {
                                                 const isPrimary = images[i] && images[i].is_primary == 1;
                                                 return `
-                                                    <div style="width:84px;height:84px;border-radius:6px;overflow:hidden;position:relative;border:2px solid ${isPrimary ? '#0f766e' : '#e9ecef'};" class="detail-thumb" data-url="${url}" data-image-id="${escapeHtml(images[i].id)}" data-index="${i}">
+                                                    <div style="width:84px;height:84px;border-radius:6px;overflow:hidden;position:relative;border:2px solid ${isPrimary ? '#0f766e' : 'var(--border,#e9ecef)'};" class="detail-thumb" data-url="${url}" data-image-id="${escapeHtml(images[i].id)}" data-index="${i}">
                                                         <img src="${url}" alt="img ${i+1}" style="width:100%;height:100%;object-fit:cover;" onerror="productImgFallback(this)">
                                                         ${isPrimary ? '<span style="position:absolute;top:2px;left:2px;background:#0f766e;color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;">Primary</span>' : ''}
                                                     </div>

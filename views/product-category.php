@@ -67,7 +67,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="add_status" class="form-label">Status</label>
-                        <select class="form-control default-select" id="add_status">
+                        <select class="form-control native-select" id="add_status">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
@@ -106,7 +106,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="edit_status" class="form-label">Status</label>
-                        <select class="form-control default-select" id="edit_status">
+                        <select class="form-control native-select" id="edit_status">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
@@ -205,7 +205,7 @@
         // ================= OPEN ADD MODAL =================
         $("#btnAddCategory").click(function() {
             $("#addCategoryForm")[0].reset();
-            $("#addCategoryForm").find('select').val('1').selectpicker('refresh');
+            $("#addCategoryForm").find('select').val('1');
             $("#addCategoryModal").modal("show");
         });
 
@@ -250,7 +250,7 @@
             $("#edit_id").val($(this).data("id"));
             $("#edit_name").val($(this).data("name"));
             $("#edit_details").val($(this).data("details"));
-            $("#edit_status").val($(this).data("status")).selectpicker('refresh');
+            $("#edit_status").val($(this).data("status"));
 
             $("#editCategoryModal").modal("show");
         });
