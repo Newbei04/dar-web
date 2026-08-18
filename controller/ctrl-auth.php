@@ -81,11 +81,11 @@ if ($trans == "LOGIN") {
     $_SESSION['role_id'] = $row['role_id'];
     $_SESSION['type'] = $row['type'];
     
+    $profile = null;
     if($row['type'] == 0) {
         $sql = mysqli_query($conn, "SELECT * FROM employee WHERE users_id='{$row['users_id']}'");
         $profile = mysqli_fetch_assoc($sql);
-    }
-    if($row['type'] == 1) {
+    } else {
         $sql = mysqli_query($conn, "SELECT * FROM beneficiary WHERE users_id='{$row['users_id']}'");
         $profile = mysqli_fetch_assoc($sql);
     }

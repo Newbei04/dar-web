@@ -28,7 +28,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="branch_id" class="form-label">Branch <span class="text-danger">*</span></label>
-                                    <select id="branch_id" class="form-control default-select" required>
+                                    <select id="branch_id" class="form-control single-select" required>
                                         <option value="" disabled selected>Select Branch</option>
                                     </select>
                                 </div>
@@ -36,7 +36,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="type_ids" class="form-label">Facility Type <span class="text-danger">*</span></label>
-                                    <select id="type_ids" class="form-control default-select" multiple required>
+                                    <select id="type_ids" class="form-control single-select" multiple required>
                                         <option value="" disabled>Select Facility Type</option>
                                     </select>
                                 </div>
@@ -47,7 +47,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="employee_id" class="form-label">Assigned Employee</label>
-                                    <select id="employee_id" class="form-control default-select">
+                                    <select id="employee_id" class="form-control single-select">
                                         <option value="" disabled selected>Select Employee</option>
                                     </select>
                                 </div>
@@ -84,7 +84,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="region" class="form-label">Region <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="region" required>
+                                    <select class="form-control single-select" id="region" required>
                                         <option value="">Select Region</option>
                                     </select>
                                 </div>
@@ -92,7 +92,7 @@
                             <div class="col-md-6" id="provinceField">
                                 <div class="mb-3">
                                     <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="province" disabled>
+                                    <select class="form-control single-select" id="province" disabled>
                                         <option value="">Select Province</option>
                                     </select>
                                 </div>
@@ -103,7 +103,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="city" class="form-label">City / Municipality <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="city" disabled>
+                                    <select class="form-control single-select" id="city" disabled>
                                         <option value="">Select City</option>
                                     </select>
                                 </div>
@@ -111,7 +111,7 @@
                             <div class="col-md-6" id="submuniField" style="display:none;">
                                 <div class="mb-3">
                                     <label for="submuni" class="form-label">District</label>
-                                    <select class="form-control default-select" id="submuni" disabled>
+                                    <select class="form-control single-select" id="submuni" disabled>
                                         <option value="">Select District</option>
                                     </select>
                                 </div>
@@ -122,7 +122,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="barangay" class="form-label">Barangay <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="barangay" disabled>
+                                    <select class="form-control single-select" id="barangay" disabled>
                                         <option value="">Select Barangay</option>
                                     </select>
                                 </div>
@@ -144,7 +144,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="status" required>
+                                    <select class="form-control single-select" id="status" required>
                                         <option value="0">Pending</option>
                                         <option value="1" selected>Active</option>
                                         <option value="2">Not Active</option>
@@ -187,9 +187,12 @@
         $("#region").on("change", function() {
             let val = $(this).val();
 
-            $("#province").prop("disabled", true).html('<option value="">Select Province</option>').selectpicker('refresh');
-            $("#city").prop("disabled", true).html('<option value="">Select City</option>').selectpicker('refresh');
-            $("#barangay").prop("disabled", true).html('<option value="">Select Barangay</option>').selectpicker('refresh');
+            $("#province").prop("disabled", true).html('<option value="">Select Province</option>');
+            reinitSelect2("#province");
+            $("#city").prop("disabled", true).html('<option value="">Select City</option>');
+            reinitSelect2("#city");
+            $("#barangay").prop("disabled", true).html('<option value="">Select Barangay</option>');
+            reinitSelect2("#barangay");
             $("#submuniField").hide();
 
             if (!val) return;
@@ -205,8 +208,10 @@
 
         $("#province").on("change", function() {
             let val = $(this).val();
-            $("#city").prop("disabled", true).html('<option value="">Select City</option>').selectpicker('refresh');
-            $("#barangay").prop("disabled", true).html('<option value="">Select Barangay</option>').selectpicker('refresh');
+            $("#city").prop("disabled", true).html('<option value="">Select City</option>');
+            reinitSelect2("#city");
+            $("#barangay").prop("disabled", true).html('<option value="">Select Barangay</option>');
+            reinitSelect2("#barangay");
             if (!val) return;
             getCityList(val);
         });
@@ -309,10 +314,11 @@
                         dropdown.append(`<option value="${b.id}">${b.code} — ${b.name}</option>`);
                     });
                 }
-                dropdown.selectpicker('refresh');
+                reinitSelect2(dropdown);
             },
             error: function() {
-                $("#branch_id").html('<option value="" disabled selected>Select Branch</option>').selectpicker('refresh');
+                $("#branch_id").html('<option value="" disabled selected>Select Branch</option>');
+                reinitSelect2("#branch_id");
             }
         });
     }
@@ -332,10 +338,11 @@
                 (res.data?.result || []).forEach(item => {
                     dropdown.append(`<option value="${item.id}">${item.name}</option>`);
                 });
-                dropdown.selectpicker('refresh');
+                reinitSelect2(dropdown);
             },
             error: function() {
-                $("#type_ids").html('<option value="" disabled>Select Facility Type</option>').selectpicker('refresh');
+                $("#type_ids").html('<option value="" disabled>Select Facility Type</option>');
+                reinitSelect2("#type_ids");
             }
         });
     }
@@ -362,10 +369,11 @@
                     ].filter(Boolean).join(' ');
                     dropdown.append(`<option value="${item.id}">${fullname || item.username}</option>`);
                 });
-                dropdown.selectpicker('refresh');
+                reinitSelect2(dropdown);
             },
             error: function() {
-                $("#employee_id").html('<option value="" disabled selected>Select Employee</option>').selectpicker('refresh');
+                $("#employee_id").html('<option value="" disabled selected>Select Employee</option>');
+                reinitSelect2("#employee_id");
             }
         });
     }
@@ -387,7 +395,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load regions");
@@ -411,7 +419,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load provinces");
@@ -435,7 +443,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load cities");
@@ -458,7 +466,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load NCR cities");
@@ -481,7 +489,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load districts");
@@ -505,7 +513,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load barangays");
@@ -529,7 +537,7 @@
                 if (res.code == 0 && res.data) {
                     res.data.forEach(i => d.append(`<option value="${i.code}">${i.name}</option>`));
                 }
-                d.selectpicker('refresh');
+                reinitSelect2(d);
             },
             error: function() {
                 console.error("Failed to load barangays by district");

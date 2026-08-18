@@ -50,6 +50,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     try {
         $sql = "SELECT
                     m.*, mt.name AS machinery_type, b.name AS facility_name,
+                    COALESCE((SELECT AVG(mr.rating) FROM machinery_reviews mr WHERE mr.machinery_id = m.id AND mr.status = 1), 0) AS ratings,
                     CASE
                         WHEN m.status = 0 THEN 'Maintenance'
                         WHEN m.status = 1 THEN 'Available'
@@ -59,13 +60,13 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                 FROM machinery m
                 LEFT JOIN machinery_type mt ON mt.id = m.type_id
                 LEFT JOIN branch b ON b.id = m.branch_id
-                WHERE m.status = '1'
+                WHERE m.status IN ('0','1')
                   AND NOT EXISTS (
                       SELECT 1 FROM booking bb
                       WHERE bb.machinery_id = m.id
                         AND bb.status IN ('0','1','2')
                   )
-                ORDER BY m.ratings DESC";
+                ORDER BY ratings DESC";
 
         $stmt = $db->query($sql);
         $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -87,6 +88,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     try {
         $sql = "SELECT
                     m.*, mt.name AS machinery_type, b.name AS branch,
+                    COALESCE((SELECT AVG(mr.rating) FROM machinery_reviews mr WHERE mr.machinery_id = m.id AND mr.status = 1), 0) AS ratings,
                     CASE
                         WHEN m.status = 0 THEN 'Maintenance'
                         WHEN m.status = 1 THEN 'Available'
@@ -96,7 +98,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                 FROM machinery m
                 LEFT JOIN machinery_type mt ON mt.id = m.type_id
                 LEFT JOIN branch b ON b.id = m.branch_id
-                WHERE m.status = '1'
+                WHERE m.status IN ('0','1')
                   AND NOT EXISTS (
                       SELECT 1 FROM booking bb
                       WHERE bb.machinery_id = m.id
@@ -108,7 +110,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
             $sql .= " AND m.branch_id = ?";
             $params[] = $branch_id;
         }
-        $sql .= " ORDER BY m.ratings DESC";
+        $sql .= " ORDER BY ratings DESC";
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -134,9 +136,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
 } else if ($trans == "ADD_BOOKING") {
 
     $beneficiary_id = $data['beneficiary_id'] ?? '';
-    if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 3) {
-        $beneficiary_id = $_SESSION["profile"]['id'] ?? '';
-    }
+    $isBeneficiaryRole = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 3);
     $machinery_id   = $data['machinery_id'] ?? '';
     $branch_id      = $data['branch_id'] ?? ($_SESSION["profile"]['branch_id'] ?? '');
     $start_date     = $data['start_date'] ?? '';
@@ -146,7 +146,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     $unit_price     = $data['unit_price'] ?? 0;
     $total_cost     = $data['total_cost'] ?? 0;
 
-    if (!$beneficiary_id || !$machinery_id || !$start_date || !$end_date) {
+    if (!$machinery_id || !$start_date || !$end_date) {
         echo json_encode(["code" => 1, "message" => "Required fields are missing", "data" => null]);
         exit;
     }
@@ -154,6 +154,20 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     $db = DBCon::getConnection();
 
     try {
+        if ($isBeneficiaryRole) {
+            $sessionUserId = $_SESSION['user_id'] ?? ($_SESSION['users_id'] ?? 0);
+            $beneficiary_id = '';
+            if ($sessionUserId) {
+                $stmt = $db->prepare("SELECT id FROM beneficiary WHERE users_id = ? LIMIT 1");
+                $stmt->execute([$sessionUserId]);
+                $beneficiary_id = (int)$stmt->fetchColumn();
+            }
+        }
+        if (!$beneficiary_id) {
+            echo json_encode(["code" => 1, "message" => "Required fields are missing", "data" => null]);
+            exit;
+        }
+
         $db->beginTransaction();
 
         $bookingSchedSql = "SELECT 1
@@ -495,11 +509,19 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
 
 } else if ($trans == "LIST_BENEFICIARY_BOOKING") {
 
-    $beneficiary_id = $_SESSION["profile"]['id'] ?? '';
-
     $db = DBCon::getConnection();
 
     try {
+        // Resolve the beneficiary from the logged-in session user account,
+        // so each user only ever sees their own bookings.
+        $sessionUserId = $_SESSION['user_id'] ?? ($_SESSION['users_id'] ?? 0);
+        $beneficiary_id = '';
+        if ($sessionUserId) {
+            $stmt = $db->prepare("SELECT id FROM beneficiary WHERE users_id = ? LIMIT 1");
+            $stmt->execute([$sessionUserId]);
+            $beneficiary_id = (int)$stmt->fetchColumn();
+        }
+
         if (!$beneficiary_id) {
             echo json_encode(["code" => 0, "message" => "Success", "data" => []]);
             exit;
@@ -632,6 +654,108 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     } catch (Exception $e) {
         error_log("Fetch booked dates error: " . $e->getMessage());
         echo json_encode(["code" => 1, "message" => "An error occurred.", "data" => []]);
+    }
+    exit;
+
+} else if ($trans == "LIST_MACHINERY_REVIEWS") {
+
+    $machinery_id = (int)($data['machinery_id'] ?? 0);
+
+    if (!$machinery_id) {
+        echo json_encode(["code" => 1, "message" => "Machinery ID is required", "data" => null]);
+        exit;
+    }
+
+    $db = DBCon::getConnection();
+
+    try {
+        $sql = "SELECT
+                    mr.id, mr.rating, mr.comment, mr.created_at,
+                    CONCAT(ben.fname, ' ', ben.lname) AS beneficiary_name
+                FROM machinery_reviews mr
+                LEFT JOIN beneficiary ben ON ben.id = mr.beneficiary_id
+                WHERE mr.machinery_id = ?
+                  AND mr.status = 1
+                ORDER BY mr.created_at DESC";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$machinery_id]);
+        $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $average = 0;
+        $count = count($list);
+        if ($count) {
+            $average = round(array_sum(array_map(function ($r) {
+                return (float)$r['rating'];
+            }, $list)) / $count, 1);
+        }
+
+        echo json_encode(["code" => 0, "message" => "Success", "data" => $list, "average" => $average, "count" => $count]);
+    } catch (Exception $e) {
+        error_log("Fetch machinery reviews error: " . $e->getMessage());
+        echo json_encode(["code" => 1, "message" => "An error occurred."]);
+    }
+    exit;
+
+} else if ($trans == "SUBMIT_MACHINERY_RATING") {
+
+    $beneficiary_id = $_SESSION["profile"]['id'] ?? '';
+    $booking_id = (int)($data['booking_id'] ?? 0);
+    $machinery_id = (int)($data['machinery_id'] ?? 0);
+    $rating = (int)($data['rating'] ?? 0);
+    $comment = trim((string)($data['comment'] ?? ''));
+
+    if (!$beneficiary_id || !$booking_id || !$machinery_id) {
+        echo json_encode(["code" => 1, "message" => "Missing required fields", "data" => null]);
+        exit;
+    }
+
+    if ($rating < 1 || $rating > 5) {
+        echo json_encode(["code" => 1, "message" => "Rating must be between 1 and 5.", "data" => null]);
+        exit;
+    }
+
+    $db = DBCon::getConnection();
+
+    try {
+        $stmt = $db->prepare("SELECT id, rated FROM booking WHERE id = ? AND beneficiary_id = ? AND status = 3");
+        $stmt->execute([$booking_id, $beneficiary_id]);
+        $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$booking) {
+            echo json_encode(["code" => 1, "message" => "Booking not found or not yet completed.", "data" => null]);
+            exit;
+        }
+
+        if ((int)$booking['rated'] === 1) {
+            echo json_encode(["code" => 1, "message" => "You have already rated this booking.", "data" => null]);
+            exit;
+        }
+
+        $db->beginTransaction();
+
+        $stmt = $db->prepare("INSERT INTO machinery_reviews (machinery_id, beneficiary_id, rating, comment, status, created_at, updated_at) VALUES (?, ?, ?, ?, 1, NOW(), NOW())");
+        $stmt->execute([$machinery_id, $beneficiary_id, $rating, $comment]);
+
+        $stmt = $db->prepare("UPDATE booking SET rated = 1 WHERE id = ?");
+        $stmt->execute([$booking_id]);
+
+        $stmt = $db->prepare("SELECT AVG(rating) AS avg_rating FROM machinery_reviews WHERE machinery_id = ? AND status = 1");
+        $stmt->execute([$machinery_id]);
+        $avg = $stmt->fetch(PDO::FETCH_ASSOC)['avg_rating'];
+
+        $stmt = $db->prepare("UPDATE machinery SET ratings = ? WHERE id = ?");
+        $stmt->execute([$avg ? round((float)$avg, 1) : 0, $machinery_id]);
+
+        $db->commit();
+
+        echo json_encode(["code" => 0, "message" => "Thank you! Your rating has been submitted.", "data" => null]);
+    } catch (Exception $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        error_log("Submit machinery rating error: " . $e->getMessage());
+        echo json_encode(["code" => 1, "message" => "An error occurred."]);
     }
     exit;
 

@@ -25,10 +25,7 @@ var Mophy = function(){
 	// var homeSearch = function() {}
 	
 	var handleSelectPicker = function(){
-		if(jQuery('.default-select').length > 0 ){
-			jQuery('.default-select').selectpicker();
-		}
-		$('select:not(.select2):not(.single-select):not(.native-select)').selectpicker();
+		$('select:not(.select2):not(.single-select):not(.default-select):not(.native-select)').selectpicker();
 	}
 	
 	var handleTheme = function(){
@@ -451,7 +448,6 @@ var Mophy = function(){
 
 		
 		load:function(){
-			handleSelectPicker();
 			handleTheme();
 		},
 		

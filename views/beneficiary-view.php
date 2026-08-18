@@ -350,6 +350,14 @@
         0%, 100% { transform: translateX(-100%) rotate(25deg); }
         50% { transform: translateX(100%) rotate(25deg); }
     }
+
+    .bv-wallet-card { border-left: 4px solid #198754; }
+    .bv-wallet-card .wallet-stat { text-align: center; padding: 8px 0; }
+    .bv-wallet-card .wallet-stat .stat-value { font-size: 1.2rem; font-weight: 700; }
+    .bv-wallet-card .wallet-stat .stat-label { font-size: 0.7rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-frozen { background: #dc3545; color: #fff; }
+    .badge-active { background: #198754; color: #fff; }
+    .balance-type-badge { font-size: 0.75rem; padding: 4px 8px; }
 </style>
 <?= endSection() ?>
 
@@ -581,6 +589,54 @@
             </div>
         </div>
     </div>
+
+    <!-- WALLET SUMMARY -->
+    <div class="row" id="bvWalletSection" style="display:none;">
+        <div class="col-xl-12">
+            <div class="card bv-wallet-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-wallet me-1"></i> Wallet Summary</h5>
+                    <span class="badge" id="bvWalletStatus">-</span>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Account Number</small>
+                            <code class="fs-6" id="bvWalletAccount">-</code>
+                        </div>
+                        <div class="col-md-2 wallet-stat">
+                            <div class="stat-value text-success" id="bvWalletBalance">₱0.00</div>
+                            <div class="stat-label">Balance</div>
+                        </div>
+                        <div class="col-md-2 wallet-stat">
+                            <div class="stat-value text-primary" id="bvWalletCredit">₱0.00</div>
+                            <div class="stat-label">Credit Limit</div>
+                        </div>
+                        <div class="col-md-2 wallet-stat">
+                            <div class="stat-value text-warning" id="bvWalletBalCount">0</div>
+                            <div class="stat-label">Balance Types</div>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Date Created</small>
+                            <span id="bvWalletCreated">-</span>
+                        </div>
+                    </div>
+
+                    <div id="bvWalletBalances" class="mt-3" style="display:none;">
+                        <h6 class="text-muted mb-2"><i class="fas fa-layer-group me-1"></i> Balance Breakdown</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr><th>Program</th><th>Type</th><th class="text-end">Amount</th></tr>
+                                </thead>
+                                <tbody id="bvWalletBalTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <?= endSection() ?>
 
@@ -664,6 +720,52 @@
             }
         }
 
+        function formatCurrency(val) {
+            return '₱' + parseFloat(val || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function loadWallet(usersId) {
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-wallet.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({ trans: "GET_WALLET", users_id: usersId }),
+                success: function(res) {
+                    if (res.code !== 0 || !res.data) return;
+                    var w = res.data;
+
+                    $("#bvWalletSection").show();
+                    $("#bvWalletAccount").text(w.account_num || '-');
+                    $("#bvWalletCreated").text(w.created_at || '-');
+                    $("#bvWalletBalance").text(formatCurrency(w.total_balance));
+                    $("#bvWalletCredit").text(formatCurrency(w.credit_limit));
+                    $("#bvWalletBalCount").text(w.balances ? w.balances.length : 0);
+
+                    if (w.is_frozen == 1) {
+                        $("#bvWalletStatus").addClass("badge-frozen").text("Frozen");
+                    } else {
+                        $("#bvWalletStatus").addClass("badge-active").text("Active");
+                    }
+
+                    if (w.balances && w.balances.length > 0) {
+                        $("#bvWalletBalances").show();
+                        var tbody = $("#bvWalletBalTbody");
+                        tbody.empty();
+                        w.balances.forEach(function(b) {
+                            tbody.append(
+                                '<tr>' +
+                                '<td>' + (b.program_name || '-') + '</td>' +
+                                '<td><span class="badge balance-type-badge bg-light-primary text-dark">' + (b.balance_type_label || '-') + '</span></td>' +
+                                '<td class="text-end fw-bold">' + formatCurrency(b.amount) + '</td>' +
+                                '</tr>'
+                            );
+                        });
+                    }
+                }
+            });
+        }
+
         showLoader();
         $.ajax({
             url: "<?= $baseURL ?>controller/ctrl-beneficiary.php",
@@ -730,6 +832,8 @@
                 $("#bv_land_tenure").text(d.land_tenure_status || '-');
 
                 renderCard(d);
+
+                loadWallet(d.users_id);
 
                 $("#bvEditBtn").show();
             },

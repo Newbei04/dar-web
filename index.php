@@ -201,6 +201,9 @@ switch ($route) {
 	case 'booking-declined':
 		require_once 'views/booking-declined.php';
 		break;
+	case 'booking-list':
+		require_once 'views/booking-list.php';
+		break;
 	// ==================== Program ====================
 	case 'list-programs':
 		require_once 'views/program-list.php';
@@ -294,6 +297,14 @@ switch ($route) {
 		break;
 	case 'price-history':
 		require_once 'views/price-history.php';
+		break;
+	// ==================== Logs ====================
+	case 'logs':
+		require_once 'views/logs.php';
+		break;
+	// ==================== Wallet ====================
+	case 'wallet-list':
+		require_once 'views/wallet-list.php';
 		break;
 	// ==================== Pages (Standalone) ====================
 	case 'page-login':

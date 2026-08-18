@@ -113,30 +113,32 @@ class Wallet {
     /**
     * Update wallets table simultaneously
     */
-    public function updateBalance(int $walletId, float $amount, string $action) {
-        $this->db->beginTransaction();
+    public static function updateBalance(int $walletId, float $amount, string $action) {
+        $db = DBCon::getConnection();
+        $db->beginTransaction();
         
         try {
             // 1. Get current balance and lock the row for update
-            $stmt = $this->db->prepare("SELECT balance FROM wallets WHERE id = ? FOR UPDATE");
+            $stmt = $db->prepare("SELECT total_balance FROM wallet WHERE id = ? FOR UPDATE");
             $stmt->execute([$walletId]);
             $oldBalance = $stmt->fetchColumn();
             
             $newBalance = $oldBalance + $amount;
             
             // 2. Update wallet
-            $stmt = $this->db->prepare("UPDATE wallets SET balance = ? WHERE id = ?");
+            $stmt = $db->prepare("UPDATE wallet SET total_balance = ? WHERE id = ?");
             $stmt->execute([$newBalance, $walletId]);
             
             // 3. Insert audit log
-            // Inside your WalletRepository (updateBalance method)
-            $metadata = getRequestMetadata();
-            $stmt = $this->db->prepare("INSERT INTO wallet_logs (wallet_id, action, amount, balance_before, balance_after, metadata) VALUES (?, ?, ?, ?, ?, ?)");
+            $metadata = self::getRequestMetadata();
+            $stmt = $db->prepare("INSERT INTO wallet_logs (wallet_id, action, amount, balance_before, balance_after, metadata, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())");
             $stmt->execute([$walletId, $action, $amount, $oldBalance, $newBalance, $metadata]);
             
-            $this->db->commit();
+            $db->commit();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
             throw $e;
         }
     }

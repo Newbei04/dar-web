@@ -83,7 +83,7 @@ if ($trans == "ADD_BENEFICIARY") {
 
         // ── CREATE USER ─────────────────────────────────────────────
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $userSql = "INSERT INTO users (username, password, role_id, type, status, created_at) VALUES (?, ?, 2, 1, 1, NOW())";
+        $userSql = "INSERT INTO users (username, password, role_id, type, status, created_at) VALUES (?, ?, 3, 1, 1, NOW())";
         $userStmt = $db->prepare($userSql);
         $userStmt->execute([$username, $hashed_password]);
 

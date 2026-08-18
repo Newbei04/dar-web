@@ -746,6 +746,7 @@
                 <ul aria-expanded="false">
                     <li><a href="<?= $baseURL ?>module-list">List Module</a></li>
                     <li><a href="<?= $baseURL ?>user-roles">User Roles</a></li>
+                    <li><a href="<?= $baseURL ?>logs">All Logs</a></li>
                 </ul>
             </li>
         </ul>

@@ -42293,6 +42293,7 @@ CREATE TABLE `booking` (
   `unit_price` double DEFAULT NULL,
   `total_cost` double DEFAULT NULL COMMENT 'Total cost of booking',
   `status` int DEFAULT NULL COMMENT '0-Pending\r\n1-Approved\r\n2-Checkout\r\n3-Returned\r\n4-Declined',
+  `rated` tinyint DEFAULT '0' COMMENT '0-Not rated, 1-Rated',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

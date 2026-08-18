@@ -74,17 +74,17 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label>Machinery <span class="text-danger">*</span></label>
-                        <select class="form-control" id="machinery_id"></select>
+                        <select class="form-control single-select" id="machinery_id"></select>
                     </div>
                     <div class="form-group col-md-6">
                         <label>Facility <span class="text-danger">*</span></label>
-                        <select class="form-control" id="facility_id"></select>
+                        <select class="form-control single-select" id="facility_id"></select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label>Type <span class="text-danger">*</span></label>
-                        <select class="form-control" id="type">
+                        <select class="form-control single-select" id="type">
                             <option value="">Select Type</option>
                             <option value="1">Preventive</option>
                             <option value="2">Corrective</option>
@@ -94,7 +94,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                     </div>
                     <div class="form-group col-md-6">
                         <label>Priority <span class="text-danger">*</span></label>
-                        <select class="form-control" id="priority">
+                        <select class="form-control single-select" id="priority">
                             <option value="">Select Priority</option>
                             <option value="1">Low</option>
                             <option value="2">Medium</option>
@@ -367,6 +367,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                     machineryHtml += `<option value="${m.id}">${m.name}</option>`;
                 });
                 $("#machinery_id").html(machineryHtml);
+                reinitSelect2("#machinery_id");
 
                 let facilities = facilityRes[0]?.data?.items || [];
                 let facilityHtml = `<option value="">Select Facility</option>`;
@@ -374,6 +375,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                     facilityHtml += `<option value="${f.id}">${f.name}</option>`;
                 });
                 $("#facility_id").html(facilityHtml);
+                reinitSelect2("#facility_id");
 
                 if (callback) callback();
 
@@ -386,10 +388,10 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
            ADD MAINTENANCE
         ========================== */
         $("#btnAddMaintenance").on("click", function() {
-            $("#machinery_id").val('');
-            $("#facility_id").val('');
-            $("#type").val('');
-            $("#priority").val('');
+            $("#machinery_id").val('').trigger('change');
+            $("#facility_id").val('').trigger('change');
+            $("#type").val('').trigger('change');
+            $("#priority").val('').trigger('change');
             $("#start_date").val('');
             $("#end_date").val('');
             $("#labor_cost").val(0);

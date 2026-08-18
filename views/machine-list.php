@@ -28,25 +28,25 @@
 
                 <div class="card-body">
                     <div class="table-responsive">
-                    <table id="tblData" class="display responsive nowrap w-100">
-                        <thead>
-                            <tr>
-                                <th width="2%">#</th>
-                                <th width="8%">Image</th>
-                                <th width="12%">Branch</th>
-                                <th width="12%">Type</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th width="10%">Model</th>
-                                <th width="12%">Status</th>
-                                <th width="15%">Actions</th>
-                            </tr>
-                        </thead>
+                        <table id="tblData" class="display responsive nowrap w-100">
+                            <thead>
+                                <tr>
+                                    <th width="2%">#</th>
+                                    <th width="8%">Image</th>
+                                    <th width="12%">Branch</th>
+                                    <th width="12%">Type</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th width="10%">Model</th>
+                                    <th width="12%">Status</th>
+                                    <th width="15%">Actions</th>
+                                </tr>
+                            </thead>
 
-                        <tbody>
-                            <!-- Loaded via AJAX -->
-                        </tbody>
-                    </table>
+                            <tbody>
+                                <!-- Loaded via AJAX -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
 </div>
 
 <!-- ================= ADD MACHINE MODAL ================= -->
-<div class="modal fade" id="addMachineModal">
+<div class="modal fade" id="addMachineModal" tabindex="-1" role="dialog" aria-hidden="true" >
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -73,7 +73,7 @@
 
                 <div class="form-group mb-3">
                     <label class="font-weight-semibold">Branch <span class="text-danger">*</span></label>
-                    <select class="form-control" id="add_branch_id"></select>
+                    <select class="single-select" id="add_branch_id"></select>
                 </div>
 
                 <hr>
@@ -82,7 +82,7 @@
 
                 <div class="form-group mb-3">
                     <label class="font-weight-semibold">Machine Type <span class="text-danger">*</span></label>
-                    <select class="form-control" id="add_type_id"></select>
+                    <select class="single-select" id="add_type_id"></select>
                 </div>
 
                 <div class="row">
@@ -122,7 +122,7 @@
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label class="font-weight-semibold">Status</label>
-                            <select class="form-control" id="add_status">
+                            <select class="form-control single-select" id="add_status">
                                 <option value="1">Available</option>
                                 <option value="0">Under Maintenance</option>
                             </select>
@@ -175,7 +175,7 @@
 
                 <div class="form-group mb-3">
                     <label class="font-weight-semibold">Branch</label>
-                    <select class="form-control" id="edit_branch_id"></select>
+                    <select class="form-control single-select" id="edit_branch_id"></select>
                 </div>
 
                 <hr>
@@ -184,7 +184,7 @@
 
                 <div class="form-group mb-3">
                     <label class="font-weight-semibold">Machine Type</label>
-                    <select class="form-control" id="edit_type_id"></select>
+                    <select class="form-control single-select" id="edit_type_id"></select>
                 </div>
 
                 <div class="row">
@@ -224,7 +224,7 @@
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label class="font-weight-semibold">Status</label>
-                            <select class="form-control" id="edit_status">
+                            <select class="form-control single-select" id="edit_status">
                                 <option value="1">Available</option>
                                 <option value="0">Under Maintenance</option>
                             </select>
@@ -472,7 +472,9 @@
                     branchHtml += `<option value="${b.id}">${b.name}</option>`;
                 });
                 $("#add_branch_id").html(branchHtml);
+                reinitSelect2("#add_branch_id");
                 $("#edit_branch_id").html(branchHtml);
+                reinitSelect2("#edit_branch_id");
 
                 let types = typeRes[0]?.data?.result || [];
                 let typeHtml = `<option value="">Select Type</option>`;
@@ -480,7 +482,9 @@
                     typeHtml += `<option value="${t.id}">${t.name}</option>`;
                 });
                 $("#add_type_id").html(typeHtml);
+                reinitSelect2("#add_type_id");
                 $("#edit_type_id").html(typeHtml);
+                reinitSelect2("#edit_type_id");
 
                 if (callback) callback();
 

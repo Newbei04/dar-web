@@ -125,6 +125,7 @@ require_once "navbar_1.php";
 	</script>
 	<script src="<?= $baseURL ?>assets/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/select2/js/select2.full.min.js"></script>
+	<script src="<?= $baseURL ?>assets/js/plugins-init/select2-init.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/chart-js/chart.bundle.min.js"></script>
 	<script src="<?= $baseURL ?>assets/vendor/owl-carousel/owl.carousel.js"></script>
 	<!-- Chart piety plugin files -->

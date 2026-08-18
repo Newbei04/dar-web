@@ -6,6 +6,18 @@
         transition: transform .15s ease, box-shadow .15s ease;
         border-radius: 0.75rem;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .machine-card .card-body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .machine-card .card-body .btn-group-bottom {
+        margin-top: auto;
     }
 
     .machine-card:hover {
@@ -350,6 +362,27 @@
     </div>
 </div>
 
+<!-- ================= VIEW REVIEWS MODAL ================= -->
+<div class="modal fade" id="reviewsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-star text-warning me-1"></i>
+                    Reviews <small class="text-muted fs-13" id="reviewsSub"></small>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reviewsBody"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= endSection() ?>
 
 <?= startSection('scripts') ?>
@@ -362,6 +395,23 @@
 
         const baseURL = '<?= $baseURL ?>';
         const IMG_BASE = baseURL + 'assets/images/machinery/';
+
+        const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[m]);
+
+        const starsHtml = (val) => {
+            const filled = Math.round(parseFloat(val || 0));
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += `<i class="fa fa-star ${i <= filled ? 'text-warning' : 'text-muted'}"></i>`;
+            }
+            return html;
+        };
 
         if ($('#beneficiary_id').length) {
             loadBeneficiaries();
@@ -547,43 +597,51 @@
         let allMachines = [];
 
         function machineCardHtml(item) {
-            const image = item.image
-                ? IMG_BASE + item.image
-                : '';
+            const image = item.image ?
+                IMG_BASE + item.image :
+                '';
             const stars = parseFloat(item.ratings || 0);
             return `
-                <div class="col-xl-3 col-md-4 col-sm-6 mb-3">
-                    <div class="card machine-card h-100">
-                        ${image
-                            ? `<img src="${image}" class="machine-thumb" alt="${item.name ?? ''}" onerror="this.outerHTML=machineFallback();">`
-                            : machineFallback()}
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h5 class="mb-1">${item.name ?? '-'}</h5>
-                            </div>
-                            <div class="text-muted" style="font-size:13px;">
-                                ${item.machinery_type ?? ''}${item.model ? ' · ' + item.model : ''}
-                            </div>
-                            <div class="text-muted" style="font-size:13px;">
-                                <i class="fa fa-location-dot me-1"></i>${item.facility_name ?? '-'}
-                            </div>
-                            <div class="d-flex justify-content-between align-items-end mt-3">
-                                <div>
-                                    <small class="text-muted d-block">Daily Rate</small>
-                                    <span class="fw-bold">₱ ${parseFloat(item.daily_rate || 0).toFixed(2)}</span>
-                                </div>
-                                <div class="text-warning">
-                                    <i class="fa fa-star me-1"></i>${stars ? stars.toFixed(1) : '-'}
-                                </div>
-                            </div>
-                            <button class="btn btn-primary btn-block mt-3 viewBookBtn"
-                                data-id="${item.id}"
-                                data-branch="${item.branch_id}">
-                                <i class="fas fa-calendar-check mr-1"></i> View & Book
-                            </button>
+        <div class="col-xl-3 col-md-4 col-sm-6 mb-3">
+            <div class="card machine-card h-100">
+                ${image
+                    ? `<img src="${image}" class="machine-thumb" alt="${item.name ?? ''}" onerror="this.outerHTML=machineFallback();">`
+                    : machineFallback()}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="mb-1">${item.name ?? '-'}</h5>
+                    </div>
+                    <div class="text-muted" style="font-size:13px;">
+                        ${item.machinery_type ?? ''}${item.model ? ' · ' + item.model : ''}
+                    </div>
+                    <div class="text-muted" style="font-size:13px;">
+                        <i class="fa fa-location-dot me-1"></i>${item.facility_name ?? '-'}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end mt-3">
+                        <div>
+                            <small class="text-muted d-block">Daily Rate</small>
+                            <span class="fw-bold">₱ ${parseFloat(item.daily_rate || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fa fa-star me-1"></i>${stars ? stars.toFixed(1) : '-'}
                         </div>
                     </div>
-                </div>`;
+
+                    <div class="btn-group-bottom pt-3">
+                        <button class="btn btn-primary w-100 viewBookBtn"
+                            data-id="${item.id}"
+                            data-branch="${item.branch_id}">
+                            <i class="fas fa-calendar-check mr-1"></i> View & Book
+                        </button>
+                        <button class="btn btn-outline-warning w-100 mt-2 viewReviewsBtn"
+                            data-machinery-id="${item.id}"
+                            data-name="${escapeHtml(item.name || '')}">
+                            <i class="fa fa-star me-1"></i> View Reviews
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
         }
 
         function renderMachines() {
@@ -616,9 +674,9 @@
             if (!list.length) {
                 const hasFilters = !!term || !!type;
                 $('#machineEmptyTitle').text(hasFilters ? 'No matches found' : 'No available machinery');
-                $('#machineEmptyText').text(hasFilters
-                    ? 'Try adjusting your search or filter.'
-                    : 'Machines will appear here once they are available.');
+                $('#machineEmptyText').text(hasFilters ?
+                    'Try adjusting your search or filter.' :
+                    'Machines will appear here once they are available.');
                 $('#machineEmpty').removeClass('d-none');
             } else {
                 $('#machineEmpty').addClass('d-none');
@@ -632,6 +690,7 @@
             types.forEach(t => {
                 $sel.append(`<option value="${t.replace(/"/g, '&quot;')}">${t}</option>`);
             });
+            $sel.select2('destroy').select2();
         }
 
         $('#machineSearch').on('input', renderMachines);
@@ -723,6 +782,53 @@
             loadBookedDates(macId);
 
             $('#bookDetailModal').modal('show');
+        });
+
+        /* ── View reviews ── */
+        $(document).on('click', '.viewReviewsBtn', function() {
+            const machineryId = $(this).data('machinery-id');
+            const name = $(this).data('name') || 'this machinery';
+            $('#reviewsSub').text(' · ' + name);
+            $('#reviewsBody').html('<div class="text-center text-muted py-4"><i class="fa fa-spinner fa-spin me-1"></i> Loading reviews...</div>');
+            $('#reviewsModal').modal('show');
+
+            $.ajax({
+                url: baseURL + 'controller/ctrl-booking.php',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    trans: 'LIST_MACHINERY_REVIEWS',
+                    machinery_id: machineryId
+                }),
+                success: function(res) {
+                    if (res.code != 0) {
+                        $('#reviewsBody').html('<div class="text-center text-muted py-4">' + (res.message || 'Failed to load reviews.') + '</div>');
+                        return;
+                    }
+                    const list = res.data || [];
+                    if (!list.length) {
+                        $('#reviewsBody').html('<div class="text-center text-muted py-4"><i class="fa fa-star fa-2x d-block mb-2"></i>No reviews yet for this machinery.</div>');
+                        return;
+                    }
+                    let html = '';
+                    list.forEach(function(r) {
+                        html += `
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold">${escapeHtml(r.beneficiary_name || 'Anonymous')}</span>
+                                    <span class="text-muted fs-12">${r.created_at ?? '-'}</span>
+                                </div>
+                                <div class="text-warning mb-2">${starsHtml(parseFloat(r.rating || 0))}</div>
+                                ${r.comment ? `<p class="mb-0">${escapeHtml(r.comment)}</p>` : '<p class="text-muted mb-0">No comment.</p>'}
+                            </div>`;
+                    });
+                    $('#reviewsBody').html(html);
+                },
+                error: function() {
+                    $('#reviewsBody').html('<div class="text-center text-muted py-4">Failed to load reviews.</div>');
+                }
+            });
         });
 
         /* ── Machine detail + gallery ── */
@@ -869,6 +975,9 @@
                                 </option>`);
                         });
                     }
+                    $('#beneficiary_id').select2('destroy').select2({
+                        dropdownParent: $('#bookDetailModal')
+                    });
                 }
             });
         }

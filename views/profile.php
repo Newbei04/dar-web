@@ -172,6 +172,14 @@
         object-fit: cover;
         border-radius: 50%;
     }
+
+    .pf-wallet-card { border-left: 4px solid #198754; }
+    .pf-wallet-card .wallet-stat { text-align: center; padding: 8px 0; }
+    .pf-wallet-card .wallet-stat .stat-value { font-size: 1.2rem; font-weight: 700; }
+    .pf-wallet-card .wallet-stat .stat-label { font-size: 0.7rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-frozen { background: #dc3545; color: #fff; }
+    .badge-active { background: #198754; color: #fff; }
+    .balance-type-badge { font-size: 0.75rem; padding: 4px 8px; }
 </style>
 <?= endSection() ?>
 
@@ -309,6 +317,77 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- WALLET SUMMARY -->
+                        <div id="walletSection" class="mt-4" style="display:none;">
+                            <div class="card pf-wallet-card">
+                                <div class="card-header d-flex align-items-center">
+                                    <h6 class="card-title mb-0"><i class="fas fa-wallet me-2 text-success"></i>Wallet Summary</h6>
+                                    <span class="badge bg-success ms-auto" id="walletCountBadge">0</span>
+                                </div>
+                                <div class="card-body" id="walletBody">
+                                    <!-- single wallet: beneficiary view -->
+                                    <div id="walletSingleView" style="display:none;">
+                                        <div class="row g-3 text-center mb-3">
+                                            <div class="col-6 col-md-3">
+                                                <div class="wallet-stat">
+                                                    <div class="stat-value text-success" id="pfWBalance">₱0.00</div>
+                                                    <div class="stat-label">Total Balance</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <div class="wallet-stat">
+                                                    <div class="stat-value" id="pfWCreditLimit">₱0.00</div>
+                                                    <div class="stat-label">Credit Limit</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <div class="wallet-stat">
+                                                    <div class="stat-value" id="pfWAccountNum">—</div>
+                                                    <div class="stat-label">Account No.</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <div class="wallet-stat">
+                                                    <div id="pfWStatus">—</div>
+                                                    <div class="stat-label">Status</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr><th>Program</th><th>Balance Type</th><th class="text-end">Amount</th></tr>
+                                                </thead>
+                                                <tbody id="pfWBalances"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!-- multiple wallets: admin view -->
+                                    <div id="walletMultiView" style="display:none;">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover align-middle mb-0" id="pfWTable">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Account No.</th>
+                                                        <th>Beneficiary</th>
+                                                        <th>Branch</th>
+                                                        <th class="text-end">Balance</th>
+                                                        <th class="text-end">Credit Limit</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pfWTableBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div id="walletEmpty" class="text-center text-muted py-4" style="display:none;">
+                                        <i class="fas fa-wallet fa-2x mb-2 d-block"></i>
+                                        No wallet found.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- ==================== EDIT MODE ==================== -->
@@ -389,7 +468,7 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
-                                        <select id="gender" class="form-control" required>
+                                        <select id="gender" class="form-control single-select" required>
                                             <option value="" disabled selected>Select</option>
                                             <option value="M">Male</option>
                                             <option value="F">Female</option>
@@ -399,7 +478,7 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="marital" class="form-label">Marital Status <span class="text-danger">*</span></label>
-                                        <select id="marital" class="form-control" required>
+                                        <select id="marital" class="form-control single-select" required>
                                             <option value="" disabled selected>Select</option>
                                             <option value="S">Single</option>
                                             <option value="M">Married</option>
@@ -434,7 +513,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="region" class="form-label">Region <span class="text-danger">*</span></label>
-                                        <select class="form-control default-select" id="region">
+                                        <select class="form-control single-select" id="region">
                                             <option value="">Select Region</option>
                                         </select>
                                     </div>
@@ -442,7 +521,7 @@
                                 <div class="col-md-6" id="provinceField">
                                     <div class="mb-3">
                                         <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
-                                        <select class="form-control default-select" id="province" disabled>
+                                        <select class="form-control single-select" id="province" disabled>
                                             <option value="">Select Province</option>
                                         </select>
                                     </div>
@@ -453,7 +532,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="city" class="form-label">City / Municipality <span class="text-danger">*</span></label>
-                                        <select class="form-control default-select" id="city" disabled>
+                                        <select class="form-control single-select" id="city" disabled>
                                             <option value="">Select City</option>
                                         </select>
                                     </div>
@@ -461,7 +540,7 @@
                                 <div class="col-md-6" id="submuniField" style="display:none;">
                                     <div class="mb-3">
                                         <label for="submuni" class="form-label">District</label>
-                                        <select class="form-control default-select" id="submuni" disabled>
+                                        <select class="form-control single-select" id="submuni" disabled>
                                             <option value="">Select District</option>
                                         </select>
                                     </div>
@@ -472,7 +551,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="barangay" class="form-label">Barangay <span class="text-danger">*</span></label>
-                                        <select class="form-control default-select" id="barangay" disabled>
+                                        <select class="form-control single-select" id="barangay" disabled>
                                             <option value="">Select Barangay</option>
                                         </select>
                                     </div>
@@ -540,6 +619,8 @@
     const API_URL = "<?= $baseURL ?>controller/ctrl-location.php";
     const BASE = "<?= $baseURL ?>";
     const SESSION_USER_ID = "<?= $_SESSION['users_id'] ?? '' ?>";
+    const SESSION_ROLE_ID = <?= (int)($_SESSION['role_id'] ?? 0) ?>;
+    const WALLET_API = "<?= $baseURL ?>controller/ctrl-wallet.php";
 
     const ROLE_MAP = {
         1: 'Administrator',

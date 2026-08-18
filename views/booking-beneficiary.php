@@ -138,6 +138,14 @@
     .booking-card .icon-box i {
         line-height: 1;
     }
+
+    .booking-toggle-icon {
+        transition: transform .2s ease;
+    }
+
+    [aria-expanded="true"] .booking-toggle-icon {
+        transform: rotate(180deg);
+    }
 </style>
 <?= endSection() ?>
 
@@ -197,6 +205,64 @@
     </div>
 </div>
 
+<!-- View Reviews Modal -->
+<div class="modal fade" id="reviewsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-star text-warning me-1"></i>
+                    Reviews <small class="text-muted fs-13" id="reviewsSub"></small>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reviewsBody"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rate Booking Modal -->
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa fa-star text-warning me-1"></i> Rate Your Booking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3" id="ratingMachineName"></p>
+                <div class="text-center mb-3">
+                    <div id="rateStars" class="fs-2">
+                        <i class="fa fa-star text-muted" data-val="1"></i>
+                        <i class="fa fa-star text-muted" data-val="2"></i>
+                        <i class="fa fa-star text-muted" data-val="3"></i>
+                        <i class="fa fa-star text-muted" data-val="4"></i>
+                        <i class="fa fa-star text-muted" data-val="5"></i>
+                    </div>
+                    <div class="text-muted fs-13" id="ratingLabel">Select a rating</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Comment (optional)</label>
+                    <textarea class="form-control" id="ratingComment" rows="3" placeholder="Share your experience..."></textarea>
+                </div>
+                <input type="hidden" id="ratingBookingId" value="">
+                <input type="hidden" id="ratingMachineryId" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitRating">
+                    <i class="fa fa-star me-1"></i> Submit Rating
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= endSection() ?>
 
 <?= startSection('scripts') ?>
@@ -213,10 +279,31 @@
             if (!val) return '-';
             const d = new Date(val.replace(' ', 'T'));
             if (isNaN(d.getTime())) return val;
-            return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+            return d.toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric'
+            });
         };
 
         const money = (val) => "₱ " + parseFloat(val || 0).toFixed(2);
+
+        const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[m]);
+
+        const starsHtml = (val) => {
+            const filled = Math.round(parseFloat(val || 0));
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += `<i class="fa fa-star ${i <= filled ? 'text-warning' : 'text-muted'}"></i>`;
+            }
+            return html;
+        };
 
         function statusBadge(status) {
             switch (String(status)) {
@@ -233,6 +320,27 @@
                 default:
                     return `<span class="badge light badge-secondary">Unknown</span>`;
             }
+        }
+
+        function schedRows(item) {
+            const days = parseInt(item.total_days || 0, 10);
+            const rate = parseFloat(item.unit_price || 0);
+            if (!item.start_at || days < 1) {
+                return '<tr><td colspan="3" class="text-center text-muted">No schedule available</td></tr>';
+            }
+            const start = new Date(String(item.start_at).replace(' ', 'T'));
+            let rows = '';
+            for (let d = 0; d < days; d++) {
+                const dt = new Date(start);
+                dt.setDate(start.getDate() + d);
+                rows += `
+                    <tr>
+                        <td class="fw-bold">Day ${d + 1}</td>
+                        <td>${fmtDate(dt.toISOString().slice(0, 10))}</td>
+                        <td class="text-end">${money(rate)}</td>
+                    </tr>`;
+            }
+            return rows;
         }
 
         function statusTimeline(status) {
@@ -258,40 +366,49 @@
         }
 
         function bookingCard(item) {
-            const image = item.image
-                ? baseURL + "assets/images/machinery/" + item.image
-                : baseURL + "assets/images/machinery/default.png";
+            const image = item.image ?
+                baseURL + "assets/images/machinery/" + item.image :
+                baseURL + "assets/images/machinery/default.png";
 
-            const declinedBlock = item.status == 4
-                ? `
-                <div class="alert alert-danger light alert-dismissible fade show mb-0 py-2">
-                    <i class="fa fa-circle-exclamation me-2"></i>
-                    <strong>Reason:</strong> ${item.declined_remarks || 'No remarks provided.'}
-                </div>`
-                : '';
+            const declinedBlock = item.status == 4 ?
+                `
+            <div class="alert alert-danger light alert-dismissible fade show mb-0 py-2">
+                <i class="fa fa-circle-exclamation me-2"></i>
+                <strong>Reason:</strong> ${item.declined_remarks || 'No remarks provided.'}
+            </div>` :
+                    '';
 
-            return `
-                <div class="card booking-card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap align-items-start">
-                            <img src="${image}" class="avatar booking-avatar me-3" alt="Machinery">
-                            <div class="flex-grow-1">
-                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-                                    <div>
-                                        <div class="fs-12 text-muted">${item.booking_num ?? '-'}</div>
-                                        <h4 class="mb-1">${item.machinery_name ?? '-'}</h4>
-                                        <div class="fs-13 text-muted">
-                                            ${item.machinery_type ?? ''}${item.model ? ' &middot; ' + item.model : ''}
-                                        </div>
-                                        <div class="fs-13 text-muted">
-                                            <i class="fa fa-location-dot me-1"></i>${item.branch_name ?? '-'}
-                                        </div>
+                const collapseId = `bookingDetail_${item.id}`;
+
+                return `
+            <div class="card booking-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-start collapsed" role="button"
+                        data-bs-toggle="collapse" data-bs-target="#${collapseId}"
+                        aria-expanded="false" aria-controls="${collapseId}"
+                        style="cursor:pointer;">
+                        <img src="${image}" class="avatar booking-avatar me-3" alt="Machinery">
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                <div>
+                                    <div class="fs-12 text-muted">${item.booking_num ?? '-'}</div>
+                                    <h4 class="mb-1">${item.machinery_name ?? '-'}</h4>
+                                    <div class="fs-13 text-muted">
+                                        ${item.machinery_type ?? ''}${item.model ? ' &middot; ' + item.model : ''}
                                     </div>
-                                    <div class="text-end">${statusBadge(item.status)}</div>
+                                    <div class="fs-13 text-muted">
+                                        <i class="fa fa-location-dot me-1"></i>${item.branch_name ?? '-'}
+                                    </div>
+                                </div>
+                                <div class="text-end d-flex align-items-center gap-2">
+                                    ${statusBadge(item.status)}
+                                    <i class="fa fa-chevron-down booking-toggle-icon text-muted"></i>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="collapse" id="${collapseId}">
                         <hr class="my-3">
 
                         <div class="row g-3">
@@ -345,8 +462,45 @@
                         <div class="fs-13 fw-bold text-muted mb-3">Booking Status</div>
                         <div class="d-flex mb-3">${statusTimeline(item.status)}</div>
                         ${declinedBlock}
+
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-sm btn-outline-primary view-reviews-btn"
+                                data-machinery-id="${item.machinery_id}"
+                                data-name="${escapeHtml(item.machinery_name || '')}">
+                                <i class="fa fa-star me-1"></i>View Reviews
+                            </button>
+                            ${String(item.status) === '3' && String(item.rated) !== '1' ? `
+                            <button class="btn btn-sm btn-primary rate-btn"
+                                data-booking-id="${item.id}"
+                                data-machinery-id="${item.machinery_id}"
+                                data-name="${escapeHtml(item.machinery_name || '')}">
+                                <i class="fa fa-star me-1"></i>Rate This Booking
+                            </button>` : ''}
+                        </div>
+
+                                            <hr class="my-3">
+                        <div class="fs-13 fw-bold text-muted mb-3">Booking Schedule</div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Date</th>
+                                        <th class="text-end">Daily Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${schedRows(item)}</tbody>
+                                <tfoot>
+                                    <tr class="table-light">
+                                        <th colspan="2" class="text-end">Total</th>
+                                        <th class="text-end">${money(item.total_cost)}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
-                </div>`;
+                </div>
+            </div>`;
         }
 
         let allBookings = [];
@@ -407,6 +561,127 @@
         });
 
         $('#bookingSearch').on('input', renderBookings);
+
+        /* ================= VIEW REVIEWS ================= */
+        $(document).on('click', '.view-reviews-btn', function() {
+            const machineryId = $(this).data('machinery-id');
+            const name = $(this).data('name') || 'this machinery';
+            $('#reviewsSub').text(' · ' + name);
+            $('#reviewsBody').html('<div class="text-center text-muted py-4"><i class="fa fa-spinner fa-spin me-1"></i> Loading reviews...</div>');
+            $('#reviewsModal').modal('show');
+
+            $.ajax({
+                url: baseURL + 'controller/ctrl-booking.php',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "LIST_MACHINERY_REVIEWS",
+                    machinery_id: machineryId
+                }),
+                success: function(res) {
+                    if (res.code != 0) {
+                        $('#reviewsBody').html('<div class="text-center text-muted py-4">' + (res.message || 'Failed to load reviews.') + '</div>');
+                        return;
+                    }
+                    const list = res.data || [];
+                    if (!list.length) {
+                        $('#reviewsBody').html('<div class="text-center text-muted py-4"><i class="fa fa-star fa-2x d-block mb-2"></i>No reviews yet for this machinery.</div>');
+                        return;
+                    }
+                    let html = '';
+                    list.forEach(function(r) {
+                        html += `
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold">${escapeHtml(r.beneficiary_name || 'Anonymous')}</span>
+                                    <span class="text-muted fs-12">${fmtDate(r.created_at)}</span>
+                                </div>
+                                <div class="text-warning mb-2">${starsHtml(parseFloat(r.rating || 0))}</div>
+                                ${r.comment ? `<p class="mb-0">${escapeHtml(r.comment)}</p>` : '<p class="text-muted mb-0">No comment.</p>'}
+                            </div>`;
+                    });
+                    $('#reviewsBody').html(html);
+                },
+                error: function() {
+                    $('#reviewsBody').html('<div class="text-center text-muted py-4">Failed to load reviews.</div>');
+                }
+            });
+        });
+
+        /* ================= RATE BOOKING ================= */
+        let selectedRating = 0;
+
+        function setRating(val) {
+            selectedRating = val;
+            $('#rateStars i').each(function() {
+                const v = parseInt($(this).data('val'), 10);
+                $(this).toggleClass('text-warning', v <= val).toggleClass('text-muted', v > val);
+            });
+            const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            $('#ratingLabel').text(val ? labels[val] : 'Select a rating');
+        }
+
+        $('#rateStars i').on('mouseenter', function() {
+            const v = parseInt($(this).data('val'), 10);
+            $('#rateStars i').each(function() {
+                const sv = parseInt($(this).data('val'), 10);
+                $(this).toggleClass('text-warning', sv <= v).toggleClass('text-muted', sv > v);
+            });
+        });
+
+        $('#rateStars').on('mouseleave', function() {
+            setRating(selectedRating);
+        });
+
+        $('#rateStars i').on('click', function() {
+            setRating(parseInt($(this).data('val'), 10));
+        });
+
+        $(document).on('click', '.rate-btn', function() {
+            $('#ratingBookingId').val($(this).data('booking-id'));
+            $('#ratingMachineryId').val($(this).data('machinery-id'));
+            $('#ratingMachineName').text($(this).data('name') || '');
+            $('#ratingComment').val('');
+            setRating(0);
+            $('#ratingModal').modal('show');
+        });
+
+        $('#btnSubmitRating').on('click', function() {
+            if (!selectedRating) {
+                Swal.fire('Rating Required', 'Please select a rating from 1 to 5.', 'warning');
+                return;
+            }
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Submitting...');
+            $.ajax({
+                url: baseURL + 'controller/ctrl-booking.php',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "SUBMIT_MACHINERY_RATING",
+                    booking_id: $('#ratingBookingId').val(),
+                    machinery_id: $('#ratingMachineryId').val(),
+                    rating: selectedRating,
+                    comment: $('#ratingComment').val()
+                }),
+                success: function(res) {
+                    $('#btnSubmitRating').prop('disabled', false).html('<i class="fa fa-star me-1"></i> Submit Rating');
+                    if (res.code == 0) {
+                        $('#ratingModal').modal('hide');
+                        Swal.fire('Thank You', res.message, 'success').then(function() {
+                            loadData();
+                        });
+                    } else {
+                        Swal.fire('Error', res.message || 'Failed to submit rating.', 'error');
+                    }
+                },
+                error: function() {
+                    $('#btnSubmitRating').prop('disabled', false).html('<i class="fa fa-star me-1"></i> Submit Rating');
+                    Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+                }
+            });
+        });
 
         function loadData() {
             showLoader();

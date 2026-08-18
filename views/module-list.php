@@ -312,14 +312,14 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label>Show in Menu?</label>
-                        <select id="add_is_menu" class="form-control">
+                        <select id="add_is_menu" class="form-control single-select">
                             <option value="1">Yes</option>
                             <option value="0">No</option>
                         </select>
                     </div>
                     <div class="form-group col-md-6">
                         <label>Status</label>
-                        <select id="add_status" class="form-control">
+                        <select id="add_status" class="form-control single-select">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
@@ -442,14 +442,14 @@
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label>Show in Menu?</label>
-                        <select id="edit_is_menu" class="form-control">
+                        <select id="edit_is_menu" class="form-control single-select">
                             <option value="1">Yes</option>
                             <option value="0">No</option>
                         </select>
                     </div>
                     <div class="form-group col-md-4">
                         <label>Status</label>
-                        <select id="edit_status" class="form-control">
+                        <select id="edit_status" class="form-control single-select">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
@@ -737,9 +737,10 @@
             $("#add_page").val('');
             $("#add_filename").val('');
             $("#add_sort_order").val('1');
-            $("#add_is_menu").val('1');
-            $("#add_status").val('1');
+            $("#add_is_menu").val('1').trigger('change');
+            $("#add_status").val('1').trigger('change');
             $("#add_parent_id").html(loadParentOptions(null));
+            reinitSelect2("#add_parent_id");
             $("#addModal").modal("show");
         });
 
@@ -844,14 +845,15 @@
                         let d = res.data;
                         $("#edit_id").val(d.id);
                         $("#edit_parent_id").html(loadParentOptions(d.id));
-                        $("#edit_parent_id").val(d.parent_id);
+                        reinitSelect2("#edit_parent_id");
+                        $("#edit_parent_id").val(d.parent_id).trigger('change');
                         $("#edit_title").val(d.title);
                         $("#edit_icon").val(d.icon);
                         $("#edit_page").val(d.page);
                         $("#edit_filename").val(d.filename);
                         $("#edit_sort_order").val(d.sort_order);
-                        $("#edit_is_menu").val(d.is_menu);
-                        $("#edit_status").val(d.status);
+                        $("#edit_is_menu").val(d.is_menu).trigger('change');
+                        $("#edit_status").val(d.status).trigger('change');
                         $("#editModal").modal("show");
                     } else {
                         Swal.fire("Error", res.message, "error");

@@ -47,7 +47,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="branch_id" class="form-label fw-bold">Branch <span class="text-muted">(Optional)</span></label>
-                                        <select id="branch_id" class="form-control default-select">
+                                        <select id="branch_id" class="form-control single-select">
                                             <option value="" disabled selected>Select Branch (Optional)</option>
                                         </select>
                                     </div>
@@ -117,7 +117,7 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
-                                    <select id="gender" class="form-control" required>
+                                    <select id="gender" class="form-control single-select" required>
                                         <option value="" disabled selected>Select</option>
                                         <option value="M">Male</option>
                                         <option value="F">Female</option>
@@ -127,7 +127,7 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="marital" class="form-label">Marital Status <span class="text-danger">*</span></label>
-                                    <select id="marital" class="form-control" required>
+                                    <select id="marital" class="form-control single-select" required>
                                         <option value="" disabled selected>Select</option>
                                         <option value="S">Single</option>
                                         <option value="M">Married</option>
@@ -163,7 +163,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status</label>
-                                    <select id="status" class="form-control default-select" required>
+                                    <select id="status" class="form-control single-select" required>
                                         <option value="0">For Verification</option>
                                         <option value="1">Verified</option>
                                         <option value="2">Inactive</option>
@@ -182,7 +182,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="region" class="form-label">Region <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="region">
+                                    <select class="form-control single-select" id="region">
                                         <option value="">Select Region</option>
                                     </select>
                                 </div>
@@ -190,7 +190,7 @@
                             <div class="col-md-6" id="provinceField">
                                 <div class="mb-3">
                                     <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="province" disabled>
+                                    <select class="form-control single-select" id="province" disabled>
                                         <option value="">Select Province</option>
                                     </select>
                                 </div>
@@ -201,7 +201,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="city" class="form-label">City / Municipality <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="city" disabled>
+                                    <select class="form-control single-select" id="city" disabled>
                                         <option value="">Select City</option>
                                     </select>
                                 </div>
@@ -209,7 +209,7 @@
                             <div class="col-md-6" id="submuniField" style="display:none;">
                                 <div class="mb-3">
                                     <label for="submuni" class="form-label">District</label>
-                                    <select class="form-control default-select" id="submuni" disabled>
+                                    <select class="form-control single-select" id="submuni" disabled>
                                         <option value="">Select District</option>
                                     </select>
                                 </div>
@@ -220,7 +220,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="barangay" class="form-label">Barangay <span class="text-danger">*</span></label>
-                                    <select class="form-control default-select" id="barangay" disabled>
+                                    <select class="form-control single-select" id="barangay" disabled>
                                         <option value="">Select Barangay</option>
                                     </select>
                                 </div>
@@ -322,7 +322,7 @@
                         </option>
                     `);
                     });
-                    $('#branch_id').selectpicker('refresh');
+                    reinitSelect2('#branch_id');
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
@@ -371,18 +371,18 @@
                             'Divorced': 'D',
                             'Widowed': 'W'
                         };
-                        $("#gender").val(genderMap[p.gender] || p.gender || '');
-                        $("#marital").val(maritalMap[p.marital] || p.marital || '');
+                        $("#gender").val(genderMap[p.gender] || p.gender || '').trigger('change');
+                        $("#marital").val(maritalMap[p.marital] || p.marital || '').trigger('change');
                         $("#birthday").val(p.birthday || '');
                         $("#doc_num").val(p.doc_num || '');
 
                         $("#email").val(p.email);
                         $("#mobile").val(p.mobile);
                         $("#street").val(p.street);
-                        $("#status").val(p.status != null ? p.status : 1).selectpicker('refresh');
+                        $("#status").val(p.status != null ? p.status : 1).trigger('change');
 
                         if (p.branch_id) {
-                            $("#branch_id").val(p.branch_id).selectpicker('refresh');
+                            $("#branch_id").val(p.branch_id).trigger('change');
                         }
 
                         // Load existing profile photo
@@ -399,8 +399,8 @@
                             setProvince(p.province_id, function() {
                                 setCity(p.city_id, function() {
                                     setSubmuni(p.district_id, function() {
-                                        $("#barangay").val(p.barangay_id).selectpicker('refresh');
-                                        $("#region, #province, #city, #submuni, #barangay").selectpicker('refresh');
+                                        $("#barangay").val(p.barangay_id).trigger('change');
+                                        $("#region, #province, #city, #submuni, #barangay").trigger('change');
                                         cascading = false;
                                     });
                                 });
@@ -715,11 +715,11 @@
                 if (callback) callback();
                 return;
             }
-            $("#region").val(val).selectpicker('refresh');
+            $("#region").val(val).trigger('change');
             $("#submuniField").hide();
             if (val == NCR_CODE) {
                 $("#provinceField").hide();
-                $("#province").val("").selectpicker('refresh');
+                $("#province").val("").trigger('change');
                 getNCRCityList(callback);
             } else {
                 $("#provinceField").show();
@@ -732,7 +732,7 @@
                 if (callback) callback();
                 return;
             }
-            $("#province").val(val).selectpicker('refresh');
+            $("#province").val(val).trigger('change');
             getCityList(val, callback);
         }
 
@@ -741,7 +741,7 @@
                 if (callback) callback();
                 return;
             }
-            $("#city").val(val).selectpicker('refresh');
+            $("#city").val(val).trigger('change');
             if (val == MANILA_CODE) {
                 $("#submuniField").show();
                 getDistrictList(callback);
@@ -756,7 +756,7 @@
                 if (callback) callback();
                 return;
             }
-            $("#submuni").val(val).selectpicker('refresh');
+            $("#submuni").val(val).trigger('change');
             getBarangayByDistrict(val, callback);
         }
 

@@ -501,6 +501,8 @@
                     (res.data || []).forEach(function(item, i) {
                         let statusText = item.status == 1 ?
                             `<span class="badge light badge-success">Available</span>` :
+                            item.status == 0 ?
+                            `<span class="badge light badge-warning">Under Maintenance</span>` :
                             `<span class="badge light badge-secondary">Unavailable</span>`;
                         tbl.row.add([
                             i + 1,
@@ -549,6 +551,7 @@
                     `);
                         });
                     }
+                    $('#beneficiary_id').select2('destroy').select2({ dropdownParent: $('#bookModal') });
                 }
             });
         }

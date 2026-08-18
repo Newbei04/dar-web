@@ -30,9 +30,9 @@ START TRANSACTION;
 -- users_role
 -- ---------------------------------------------------------------
 INSERT INTO `users_role` (`id`, `title`, `description`, `access`, `status`, `created_dt`, `updated_dt`) VALUES
-(1, 'Administrator',      'Full system access',        '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71', 1, NOW(), NOW()),
-(2, 'Employee/Cooperative','Branch & facility staff',   '1,2,3,4,5,6,7,8,9,10,11,13,15,16,17,18,19,20,21,22,23,24,25,27,29,30,31,32,33,34,35,36,37,38,43,44,45,46,47,49,50,51,52,53,54,55,56,62,66,67,68,69,70', 1, NOW(), NOW()),
-(3, 'Beneficiary (ARB)',  'Farmer beneficiary portal', '1,23,30,31,32,44,45,62',                                  1, NOW(), NOW());
+(1, 'Administrator',      'Full system access',        '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74', 1, NOW(), NOW()),
+(2, 'Employee/Cooperative','Branch & facility staff',   '1,2,3,4,5,6,7,8,9,10,11,13,15,16,17,18,19,20,21,22,23,24,25,27,29,30,31,32,33,34,35,36,37,38,43,44,45,46,47,49,50,51,52,53,54,55,56,62,66,67,68,69,70,72,73,74', 1, NOW(), NOW()),
+(3, 'Beneficiary (ARB)',  'Farmer beneficiary portal', '1,23,30,31,32,44,45,62,72,73',                              1, NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- users   (password = 12345678, bcrypt hash)
@@ -195,14 +195,17 @@ INSERT INTO `product_inventory_logs` (`id`, `inventory_id`, `action_type`, `quan
 (1, 1, 1, 100, 100, NULL, 1, 'Initial restock of rice seeds',          NOW()),
 (2, 2, 1, 200, 200, NULL, 1, 'Initial restock of urea',               NOW()),
 (3, 1, 2,  30,  70, NULL, 4, 'Sold 30 bags to beneficiary',          NOW()),
-(4, 4, 4,  -10,  15, NULL, 1, 'Low stock adjustment',                 NOW());
+(4, 4, 4,  -10,  15, NULL, 1, 'Low stock adjustment',                 NOW()),
+(5, 3, 5,  -40,  80, NULL, 1, 'Batch partially expired, written off', NOW()),
+(6, 2, 6,  -15, 135, NULL, 3, 'Damaged bags during handling',         NOW());
 
 -- ---------------------------------------------------------------
 -- product_price_history
 -- ---------------------------------------------------------------
 INSERT INTO `product_price_history` (`id`, `product_id`, `facility_id`, `price_type`, `old_price`, `new_price`, `remarks`, `created_by`, `effective_date`, `created_at`) VALUES
 (1, 1, 1, 'SELLING', NULL, 1350.00, 'Initial selling price',       1, '2026-01-01', NOW()),
-(2, 2, 1, 'SELLING',  950.00,  980.00, 'Price increased due to demand', 1, '2026-02-01', NOW());
+(2, 2, 1, 'SELLING',  950.00,  980.00, 'Price increased due to demand', 1, '2026-02-01', NOW()),
+(3, 3, 1, 'SELLING', 1280.00, 1250.00, 'Promo price adjustment',       2, '2026-03-15', NOW());
 
 -- ---------------------------------------------------------------
 -- program
@@ -240,7 +243,8 @@ INSERT INTO `system_treasury` (`id`, `program_id`, `total_budget_allocated`, `cu
 INSERT INTO `booking` (`id`, `booking_num`, `beneficiary_id`, `branch_id`, `machinery_id`, `latitude`, `longitude`, `total_days`, `unit_price`, `total_cost`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'BK-2026-0001', 1, 1, 1, 18.1966, 120.5921, 2, 1500.00, 3000.00, 1, NOW(), NOW()),
 (2, 'BK-2026-0002', 2, 1, 2, 18.2010, 120.5830, 1, 5000.00, 5000.00, 3, NOW(), NOW()),
-(3, 'BK-2026-0003', 3, 1, 3, 18.1900, 120.5900, 3, 8000.00, 24000.00, 1, NOW(), NOW());
+(3, 'BK-2026-0003', 3, 1, 3, 18.1900, 120.5900, 3, 8000.00, 24000.00, 1, NOW(), NOW()),
+(4, 'BK-2026-0004', 3, 1, 5, 18.1900, 120.5900, 2, 3000.00, 6000.00, 4, NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- booking_schedules
@@ -255,7 +259,9 @@ INSERT INTO `booking_schedules` (`id`, `booking_id`, `start_at`, `end_at`, `stat
 -- ---------------------------------------------------------------
 INSERT INTO `booking_logs` (`id`, `booking_id`, `wallet_balance_id`, `booked_by`, `approved_at`, `approved_staff_id`, `checkout_at`, `checkout_signature`, `checkout_staff_id`, `returned_at`, `returned_signature`, `returned_staff_id`, `declined_at`, `declined_staff_id`, `declined_remarks`, `remarks`, `created_at`, `updated_at`) VALUES
 (1, 1, NULL, 4, '2026-05-28 09:00:00', 2, '2026-06-01 08:05:00', 'sample-sig', 2, '2026-06-02 17:10:00', 'sample-sig', 2, NULL, NULL, NULL, 'Approved by staff', NOW(), NOW()),
-(2, 2, NULL, 5, '2026-05-18 09:00:00', 2, '2026-05-20 08:05:00', 'sample-sig', 2, '2026-05-21 17:10:00', 'sample-sig', 2, NULL, NULL, NULL, 'Completed booking',  NOW(), NOW());
+(2, 2, NULL, 5, '2026-05-18 09:00:00', 2, '2026-05-20 08:05:00', 'sample-sig', 2, '2026-05-21 17:10:00', 'sample-sig', 2, NULL, NULL, NULL, 'Completed booking',  NOW(), NOW()),
+(3, 3, NULL, 6, '2026-06-12 09:00:00', 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Approved booking',  NOW(), NOW()),
+(4, 4, NULL, 6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-14 14:30:00', 3, 'Machine unavailable on requested dates', 'Declined booking', NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- service_reviews
@@ -286,13 +292,15 @@ INSERT INTO `wallet_balances` (`id`, `wallet_id`, `program_id`, `balance_type`, 
 INSERT INTO `wallet_logs` (`id`, `wallet_id`, `action`, `amount`, `balance_before`, `balance_after`, `metadata`, `created_at`, `updated_at`) VALUES
 (1, 1, 2, 15000.00, 0.00, 15000.00, '{"program":1,"note":"RFFA credit"}', NOW(), NOW()),
 (2, 2, 2, 12000.00, 0.00, 12000.00, '{"program":1,"note":"RFFA credit"}', NOW(), NOW()),
-(3, 3, 2,  5000.00, 0.00,  5000.00, '{"program":2,"note":"Fuel subsidy"}', NOW(), NOW());
+(3, 3, 2,  5000.00, 0.00,  5000.00, '{"program":2,"note":"Fuel subsidy"}', NOW(), NOW()),
+(4, 1, 1, 1000.00, 15000.00, 14000.00, '{"program":1,"note":"Store purchase TRX-2026-0001"}', NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- store_transactions
 -- ---------------------------------------------------------------
 INSERT INTO `store_transactions` (`id`, `reference_no`, `facility_id`, `beneficiary_id`, `emp_id`, `program_id`, `wallet_balance_id`, `gross_amount`, `discount_amount`, `net_amount`, `payment_method`, `settlement_status`, `card_tap_payload`, `transaction_dt`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 'TRX-2026-0001', 1, 1, 2, 1, 1, 1000.00, 0.00, 1000.00, 1, 1, 'payload-payload', '2026-05-30 10:00:00', 'Purchased rice seeds', NOW(), NOW());
+(1, 'TRX-2026-0001', 1, 1, 2, 1, 1, 1000.00, 0.00, 1000.00, 1, 1, 'payload-payload', '2026-05-30 10:00:00', 'Purchased rice seeds', NOW(), NOW()),
+(2, 'TRX-2026-0002', 1, 2, 2, 1, 2,  490.00, 0.00,  490.00, 3, 0, 'payload-payload', '2026-06-05 15:30:00', 'Purchased urea (wallet)', NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- terminal / facility_terminal
@@ -442,7 +450,10 @@ INSERT INTO `user_modules` (`id`, `parent_id`, `title`, `icon`, `page`, `filenam
 (62, 57, 'User Profile',        'fas fa-user',              'profile',                'profile.php',                     5,  0, 1, NOW(), NOW()),
 (63, 0,  'Settings',            'fas fa-gear',              NULL,                     NULL,                              14, 1, 1, NOW(), NOW()),
 (64, 63, 'List Module',         'fas fa-list',              'module-list',            'module-list.php',                 1,  1, 1, NOW(), NOW()),
-(65, 63, 'User Roles',          'fas fa-user-gear',         'user-roles',             'user-role.php',                   2,  1, 1, NOW(), NOW());
+(65, 63, 'User Roles',          'fas fa-user-gear',         'user-roles',             'user-role.php',                   2,  1, 1, NOW(), NOW()),
+(72, 0,  'Wallet',              'fas fa-wallet',            NULL,                     '',                                15, 1, 1, NOW(), NOW()),
+(73, 72, 'Wallet List',         'fas fa-list',              'wallet-list',            'wallet-list.php',                 1,  1, 1, NOW(), NOW()),
+(74, 63, 'All Logs',            'fas fa-clipboard-list',    'logs',                   'logs.php',                        3,  1, 1, NOW(), NOW());
 
 SET FOREIGN_KEY_CHECKS=1;
 COMMIT;

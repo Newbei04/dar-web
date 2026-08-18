@@ -177,7 +177,7 @@
                 <div class="card-body">
                     <div class="toolbar">
                         <input type="text" class="form-control" id="searchBox" placeholder="Search training title, reference no…">
-                        <select class="form-select" id="filterType">
+                        <select class="form-select single-select" id="filterType">
                             <option value="">All Types</option>
                             <option value="Other">Other</option>
                             <option value="Onsite Training">Onsite Training</option>
@@ -330,7 +330,8 @@
                 html += `<option value="${t}">${t}</option>`;
             });
             $('#filterType').html(html);
-            if (cur) $('#filterType').val(cur);
+            reinitSelect2('#filterType');
+            if (cur) $('#filterType').val(cur).trigger('change');
         }
 
         // ================= RENDER CARDS =================
