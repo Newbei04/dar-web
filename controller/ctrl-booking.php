@@ -138,7 +138,7 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
     $beneficiary_id = $data['beneficiary_id'] ?? '';
     $isBeneficiaryRole = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 3);
     $machinery_id   = $data['machinery_id'] ?? '';
-    $branch_id      = $data['branch_id'] ?? ($_SESSION["profile"]['branch_id'] ?? '');
+    $branch_id      = ($data['branch_id'] ?? ($_SESSION["profile"]['branch_id'] ?? '')) ?: null;
     $start_date     = $data['start_date'] ?? '';
     $end_date       = $data['end_date'] ?? '';
     $booked_by      = $data['booked_by'] ?? ($_SESSION['users_id'] ?? '');

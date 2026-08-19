@@ -4,6 +4,7 @@ date_default_timezone_set('Asia/Manila');
 
 include_once __DIR__ . '/../config/dbcon.php';
 include_once __DIR__ . '/../model/gbl.php';
+include_once __DIR__ . '/../model/wallet.php';
 
 GblFn::errorReporting();
 
@@ -274,7 +275,7 @@ if ($trans == "LIST_WALLET") {
                 ->execute([$walletId, $programId, $balanceType, $amount]);
         }
 
-        $metadata = self::getRequestMetadata();
+        $metadata = Wallet::getRequestMetadata();
         $db->prepare("INSERT INTO wallet_logs (wallet_id, action, amount, balance_before, balance_after, metadata, created_at, updated_at) VALUES (?, 2, ?, ?, ?, ?, NOW(), NOW())")
             ->execute([$walletId, $amount, $oldBalance, $newBalance, $metadata]);
 

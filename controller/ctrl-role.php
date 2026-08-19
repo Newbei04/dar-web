@@ -164,8 +164,8 @@ else if ($trans == "LIST_MODULES") {
 else if ($trans == "UPDATE_ROLE_ACCESS") {
 
     $id       = $data['id'] ?? '';
-    $title    = mysqli_real_escape_string($conn, trim($data['title']));
-    $desc     = mysqli_real_escape_string($conn, trim($data['description']));
+    $title    = mysqli_real_escape_string($conn, trim($data['title'] ?? ''));
+    $desc     = mysqli_real_escape_string($conn, trim($data['description'] ?? ''));
     $status   = $data['status'] ?? 1;
     $access   = $data['access'] ?? [];
 

@@ -27,7 +27,7 @@ if ($trans == "ADD_BENEFICIARY") {
     $doc_num    = $data['doc_num'] ?? '';
 
     // ── Check username if empty ──────────────────────────────────────────────
-    if ($username === '' || $email === '' || $mobile === '' || $doc_num === '') {
+    if ($username === '' || $email === '' || $mobile === '') {
         echo json_encode([
             "code" => 1,
             "message" => "Missing required fields"
@@ -66,14 +66,7 @@ if ($trans == "ADD_BENEFICIARY") {
     }
 
     // ── Check Document number if already exists ──────────────────────────────────────────────
-    $is_mobile = GblFn::recordExists('beneficiary', 'doc_num', $doc_num  ?? '');
-    if ($is_mobile) {
-        echo json_encode([
-            "code" => 1,
-            "message" => "Document number already exists"
-        ]);
-        exit;
-    }
+    // NOTE: doc_num is auto-generated later with its own uniqueness loop, so no pre-check needed here.
 
     // ── STRT PDO Transaction ──────────────────────────────────────────────
     $db = DBCon::getConnection();
@@ -118,10 +111,10 @@ if ($trans == "ADD_BENEFICIARY") {
             $users_id, $data['branch_id'] ?? null,
             $doc_num,
             $data['fname'] ?? '', $data['mname'] ?? '', $data['lname'] ?? '',
-            $data['gender'] ?? '', $data['marital'] ?? '', $data['birthday'] ?? '',
+            $data['gender'] ?? '', $data['marital'] ?? '', ($data['birthday'] ?? '') ?: null,
             $data['email'] ?? '', $data['mobile'] ?? '', $data['street'] ?? '',
-            $data['address'] ?? '', $data['barangay_id'] ?: null, $data['district_id'] ?: null,
-            $data['city_id'] ?: null, $data['province_id'] ?: null, $data['region_id'] ?: null,
+            $data['address'] ?? '', ($data['barangay_id'] ?? '') ?: null, ($data['district_id'] ?? '') ?: null,
+            ($data['city_id'] ?? '') ?: null, ($data['province_id'] ?? '') ?: null, ($data['region_id'] ?? '') ?: null,
             ($data['zip_code'] ?? '') ?: null, $data['country'] ?? 'PH', $photo_name
         ]);
 
@@ -623,37 +616,6 @@ if ($trans == "ADD_BENEFICIARY") {
         "code" => 0,
         "message" => "Success",
         "data" => $list
-    ]);
-
-    $id = $data['id'] ?? '';
-
-    if (empty($id)) {
-        echo json_encode([
-            "code" => 1,
-            "message" => "ID is required",
-            "data" => null
-        ]);
-        exit;
-    }
-
-    $delete = mysqli_query($conn, "
-        DELETE FROM facility
-        WHERE id='$id'
-    ");
-
-    if (!$delete) {
-        echo json_encode([
-            "code" => 1,
-            "message" => mysqli_error($conn),
-            "data" => null
-        ]);
-        exit;
-    }
-
-    echo json_encode([
-        "code" => 0,
-        "message" => "Facility deleted successfully",
-        "data" => null
     ]);
 
     exit;

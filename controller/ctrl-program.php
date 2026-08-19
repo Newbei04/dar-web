@@ -112,7 +112,7 @@ if ($trans == "ADD_PROGRAM") {
     $name             = $data['name'] ?? '';
     $agency_id        = $data['agency_id'] ?? '';
     $total_budget     = $data['total_budget'] ?? 0;
-    $remaining_budget = $data['remaining_budget'] ?? 0;
+    $remaining_budget = $data['remaining_budget'] ?? null;
     $start_date       = $data['start_date'] ?? '';
     $end_date         = $data['end_date'] ?? '';
     $status           = $data['status'] ?? 1;
@@ -127,16 +127,27 @@ if ($trans == "ADD_PROGRAM") {
         exit;
     }
 
+    // Preserve the current remaining budget when not explicitly provided.
+    if ($remaining_budget === null) {
+        $currentRow = mysqli_fetch_assoc(mysqli_query($conn, "SELECT remaining_budget FROM program WHERE id='$id' LIMIT 1"));
+        $remaining_budget = $currentRow['remaining_budget'] ?? 0;
+    }
+
+    $agency_id_sql  = $agency_id !== '' ? "'$agency_id'" : "NULL";
+    $product_id_sql = $product_id ? $product_id : "NULL";
+    $start_sql      = $start_date !== '' ? "'$start_date'" : "NULL";
+    $end_sql        = $end_date !== '' ? "'$end_date'" : "NULL";
+
     $update = mysqli_query($conn, "
         UPDATE program SET 
         code='$code',
         name='$name',
-        agency_id='$agency_id',
-        product_id=$product_id,
+        agency_id=$agency_id_sql,
+        product_id=$product_id_sql,
         total_budget='$total_budget',
         remaining_budget='$remaining_budget',
-        start_date='$start_date',
-        end_date='$end_date',
+        start_date=$start_sql,
+        end_date=$end_sql,
         asset_type='$asset_type',
         status='$status',
         updated_at=NOW()

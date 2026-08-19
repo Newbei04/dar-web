@@ -8,7 +8,7 @@ $trans = $_GET['trans'] ?? ($data['trans'] ?? '');
 
 if (!$conn) {
     echo json_encode([
-        "code" => 0,
+        "code" => 1,
         "message" => "Database connection failed",
         "data" => null
     ]);
@@ -35,7 +35,7 @@ if ($trans == "ADD_MAINTENANCE") {
 
     if (empty($machinery_id) || empty($facility_id) || empty($type) || empty($priority)) {
         echo json_encode([
-            "code" => 0,
+            "code" => 1,
             "message" => "Missing required fields",
             "data" => null
         ]);
@@ -88,13 +88,13 @@ if ($trans == "ADD_MAINTENANCE") {
         ");
 
         echo json_encode([
-            "code" => 1,
+            "code" => 0,
             "message" => "Maintenance added and machinery set to Under Maintenance",
             "data" => ["id" => $stmt->insert_id]
         ]);
     } else {
         echo json_encode([
-            "code" => 0,
+            "code" => 1,
             "message" => "Failed to add maintenance",
             "data" => $stmt->error
         ]);
@@ -108,7 +108,7 @@ if ($trans == "ADD_MAINTENANCE") {
 
     if (empty($id) || empty($status)) {
         echo json_encode([
-            "code" => 0,
+            "code" => 1,
             "message" => "Missing parameters",
             "data" => null
         ]);
@@ -146,7 +146,7 @@ if ($trans == "ADD_MAINTENANCE") {
     }
 
     echo json_encode([
-        "code" => 1,
+        "code" => 0,
         "message" => "Maintenance status updated",
         "data" => null
     ]);
@@ -245,14 +245,14 @@ if ($trans == "ADD_MAINTENANCE") {
     }
 
     echo json_encode([
-        "code" => 1,
+        "code" => 0,
         "message" => "Success",
         "data" => $data
     ]);
 
     exit;
 } echo json_encode([
-    "code" => 0,
+    "code" => 1,
     "message" => "Invalid transaction",
     "data" => null
 ]);

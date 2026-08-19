@@ -301,6 +301,63 @@ if ($trans == "LIST_MACHINERY_TYPE") {
 
     echo json_encode(["code" => 0, "message" => "Image deleted"]);
     exit;
+} else if ($trans == "DELETE_MACHINERY") {
+
+    $id = $data['id'] ?? '';
+
+    if (!$id) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "Machinery ID is required",
+            "data" => null
+        ]);
+        exit;
+    }
+
+    // Prevent deletion while there are active bookings (status 0,1,2)
+    $active = mysqli_query($conn, "
+        SELECT id FROM booking
+        WHERE machinery_id = '$id' AND status IN ('0','1','2')
+        LIMIT 1
+    ");
+
+    if ($active && mysqli_num_rows($active) > 0) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "Cannot delete machinery with active bookings",
+            "data" => null
+        ]);
+        exit;
+    }
+
+    // Remove images from disk
+    $imgRes = mysqli_query($conn, "SELECT name FROM machinery_images WHERE machinery_id = '$id'");
+    while ($row = mysqli_fetch_assoc($imgRes)) {
+        $filePath = "../assets/images/machinery/" . $row['name'];
+        if ($row['name'] && file_exists($filePath)) {
+            unlink($filePath);
+        }
+    }
+
+    mysqli_query($conn, "DELETE FROM machinery_images WHERE machinery_id = '$id'");
+    mysqli_query($conn, "DELETE FROM machinery_maintenance WHERE machinery_id = '$id'");
+
+    $del = mysqli_query($conn, "DELETE FROM machinery WHERE id = '$id'");
+
+    if ($del) {
+        echo json_encode([
+            "code" => 0,
+            "message" => "Machinery deleted successfully",
+            "data" => null
+        ]);
+    } else {
+        echo json_encode([
+            "code" => 1,
+            "message" => mysqli_error($conn),
+            "data" => null
+        ]);
+    }
+    exit;
 } else {
     echo json_encode([
         "code" => 1,

@@ -13,23 +13,23 @@ if ($trans == "ADD_TRAINING") {
     $reference_no = "TRN-" . time();
 
     // ================= TEXT FIELDS =================
-    $accreditation_no   = mysqli_real_escape_string($conn, $_POST['accreditation_no'] ?? '');
-    $accreditation_date = $_POST['accreditation_date'] ?? null;
+    $accreditation_no   = mysqli_real_escape_string($conn, $data['accreditation_no'] ?? '');
+    $accreditation_date = $data['accreditation_date'] ?? null;
 
-    $title        = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
-    $summary      = mysqli_real_escape_string($conn, $_POST['summary'] ?? '');
-    $objectives   = mysqli_real_escape_string($conn, $_POST['objectives'] ?? '');
+    $title        = mysqli_real_escape_string($conn, $data['title'] ?? '');
+    $summary      = mysqli_real_escape_string($conn, $data['summary'] ?? '');
+    $objectives   = mysqli_real_escape_string($conn, $data['objectives'] ?? '');
 
-    $start_at     = $_POST['start_at'] ?? null;
-    $end_at       = $_POST['end_at'] ?? null;
+    $start_at     = $data['start_at'] ?? null;
+    $end_at       = $data['end_at'] ?? null;
 
-    $program_type = $_POST['program_type'] ?? '';
+    $program_type = $data['program_type'] ?? 0;
 
-    $street       = mysqli_real_escape_string($conn, $_POST['street'] ?? '');
-    $barangay_id  = $_POST['barangay_id'] ?? null;
-    $city_id      = $_POST['city_id'] ?? null;
-    $province_id  = $_POST['province_id'] ?? null;
-    $region_id    = $_POST['region_id'] ?? null;
+    $street       = mysqli_real_escape_string($conn, $data['street'] ?? '');
+    $barangay_id  = $data['barangay_id'] ?? null;
+    $city_id      = $data['city_id'] ?? null;
+    $province_id  = $data['province_id'] ?? null;
+    $region_id    = $data['region_id'] ?? null;
 
     // ================= VALIDATION =================
     if (!$title || !$accreditation_no) {
@@ -491,6 +491,11 @@ if ($trans == "ADD_TRAINING") {
 
     $id = $data['id'] ?? 0;
 
+    if (!$id) {
+        echo json_encode(["code" => 1, "message" => "ID is required"]);
+        return;
+    }
+
     $accreditation_no   = mysqli_real_escape_string($conn, $data['accreditation_no'] ?? '');
     $accreditation_date = $data['accreditation_date'] ?? null;
     $title              = mysqli_real_escape_string($conn, $data['title'] ?? '');
@@ -498,7 +503,7 @@ if ($trans == "ADD_TRAINING") {
     $objectives         = mysqli_real_escape_string($conn, $data['objectives'] ?? '');
     $start_at           = $data['start_at'] ?? null;
     $end_at             = $data['end_at'] ?? null;
-    $program_type       = $data['program_type'] ?? '';
+    $program_type       = $data['program_type'] ?? 0;
     $street             = mysqli_real_escape_string($conn, $data['street'] ?? '');
     $barangay_id        = $data['barangay_id'] ?? null;
     $city_id            = $data['city_id'] ?? null;

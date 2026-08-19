@@ -186,9 +186,9 @@ if ($trans == "ADD_USER") {
                     profile, 
                     status, created_at
                 ) VALUES (
-                    '$users_id', $facility_id, CONCAT('EMP-', '$users_id'),
+                    '$users_id', " . ($facility_id ? "'$facility_id'" : "NULL") . ", CONCAT('EMP-', '$users_id'),
                     '$fname', '$mname', '$lname', 
-                    '$gender', '$marital', '$birthday', '$email', '$mobile',
+                    '$gender', '$marital', " . ($birthday ? "'$birthday'" : "NULL") . ", '$email', '$mobile',
                     '$street', '$address',
                     " . ($barangay_id ? "'$barangay_id'" : "NULL") . ",
                     " . ($district_id ? "'$district_id'" : "NULL") . ",
@@ -514,7 +514,7 @@ if ($trans == "ADD_USER") {
                 f.name as facility_name
             FROM users u
             INNER JOIN employee e ON u.id = e.users_id
-            LEFT JOIN facility f ON f.employee_id = e.id AND f.status = 1
+            LEFT JOIN facility f ON f.id = e.facility_id AND f.status = 1
             WHERE u.id = $cooperative_id
             LIMIT 1";
 

@@ -48,7 +48,7 @@ if ($trans == "ADD_LAND_PARCEL") {
         INSERT INTO cocrom_land_parcels
         (beneficiary_id, title_number, total_area_hectares, latitude, longitude, land_use_type, productivity_score, last_survey_date, created_at, updated_at)
         VALUES
-        ('$beneficiary_id', '$title_number', '$total_area_hectares', '$latitude', '$longitude', '$land_use_type', '$productivity_score', '$last_survey_date', NOW(), NOW())
+        ('$beneficiary_id', '$title_number', " . ($total_area_hectares !== '' ? "'$total_area_hectares'" : "NULL") . ", " . ($latitude !== '' ? "'$latitude'" : "NULL") . ", " . ($longitude !== '' ? "'$longitude'" : "NULL") . ", '$land_use_type', " . ($productivity_score !== '' ? "'$productivity_score'" : "NULL") . ", " . ($last_survey_date !== '' ? "'$last_survey_date'" : "NULL") . ", NOW(), NOW())
     ";
 
     $insert = mysqli_query($conn, $query);
@@ -96,12 +96,12 @@ if ($trans == "ADD_LAND_PARCEL") {
         SET 
             beneficiary_id='$beneficiary_id',
             title_number='$title_number',
-            total_area_hectares='$total_area_hectares',
-            latitude='$latitude',
-            longitude='$longitude',
+            total_area_hectares=" . ($total_area_hectares !== '' ? "'$total_area_hectares'" : "NULL") . ",
+            latitude=" . ($latitude !== '' ? "'$latitude'" : "NULL") . ",
+            longitude=" . ($longitude !== '' ? "'$longitude'" : "NULL") . ",
             land_use_type='$land_use_type',
-            productivity_score='$productivity_score',
-            last_survey_date='$last_survey_date',
+            productivity_score=" . ($productivity_score !== '' ? "'$productivity_score'" : "NULL") . ",
+            last_survey_date=" . ($last_survey_date !== '' ? "'$last_survey_date'" : "NULL") . ",
             updated_at=NOW()
         WHERE id='$id'
     ";

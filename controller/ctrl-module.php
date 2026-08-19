@@ -230,10 +230,10 @@ if ($trans == "ADD_MODULE") {
 
     $id         = $data['id'] ?? '';
     $parent_id  = $data['parent_id'] ?? 0;
-    $title      = mysqli_real_escape_string($conn, trim($data['title']));
-    $icon       = mysqli_real_escape_string($conn, trim($data['icon']));
-    $page       = mysqli_real_escape_string($conn, trim($data['page']));
-    $filename   = mysqli_real_escape_string($conn, trim($data['filename']));
+    $title      = mysqli_real_escape_string($conn, trim($data['title'] ?? ''));
+    $icon       = mysqli_real_escape_string($conn, trim($data['icon'] ?? ''));
+    $page       = mysqli_real_escape_string($conn, trim($data['page'] ?? ''));
+    $filename   = mysqli_real_escape_string($conn, trim($data['filename'] ?? ''));
     $sort_order = $data['sort_order'] ?? 0;
     $is_menu    = $data['is_menu'] ?? 1;
     $status     = $data['status'] ?? 1;

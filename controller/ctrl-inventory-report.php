@@ -25,6 +25,9 @@ $to          = trim($data['to'] ?? '');
 // Optional facility scoping for facility-level users.
 $fac_where = $facility_id ? " AND pi.facility_id = '$facility_id'" : "";
 
+// Alias wrapper so subqueries can use the "pi" alias (facility_id exists on product_inventory).
+$fac_where_pi = $fac_where;
+
 // Date window helper for ledger/movement reports (based on log created_at).
 function dateWindow($conn, $from, $to) {
     $w = "";
@@ -83,13 +86,13 @@ elseif ($report === "inventory_summary") {
         SELECT
             (SELECT COUNT(*) FROM product WHERE status = 1) AS total_products,
             (SELECT COUNT(*) FROM facility WHERE status = 1) AS total_facilities,
-            (SELECT COUNT(*) FROM product_inventory WHERE status = 1 $fac_where) AS total_batches,
-            (SELECT COALESCE(SUM(current_stock),0) FROM product_inventory WHERE status = 1 $fac_where) AS current_stock,
-            (SELECT COALESCE(SUM(reserved_stock),0) FROM product_inventory WHERE status = 1 $fac_where) AS reserved_stock,
-            (SELECT COALESCE(SUM(current_stock - reserved_stock),0) FROM product_inventory WHERE status = 1 $fac_where) AS available_stock,
-            (SELECT COALESCE(SUM(current_stock * cost_price),0) FROM product_inventory WHERE status = 1 $fac_where) AS inventory_value,
-            (SELECT COUNT(*) FROM product_inventory WHERE status = 1 AND current_stock > 0 AND current_stock <= reorder_level $fac_where) AS low_stock,
-            (SELECT COUNT(*) FROM product_inventory WHERE status = 1 AND expiry_date IS NOT NULL AND expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) $fac_where) AS expiring
+            (SELECT COUNT(*) FROM product_inventory pi WHERE pi.status = 1 $fac_where_pi) AS total_batches,
+            (SELECT COALESCE(SUM(pi.current_stock),0) FROM product_inventory pi WHERE pi.status = 1 $fac_where_pi) AS current_stock,
+            (SELECT COALESCE(SUM(pi.reserved_stock),0) FROM product_inventory pi WHERE pi.status = 1 $fac_where_pi) AS reserved_stock,
+            (SELECT COALESCE(SUM(pi.current_stock - pi.reserved_stock),0) FROM product_inventory pi WHERE pi.status = 1 $fac_where_pi) AS available_stock,
+            (SELECT COALESCE(SUM(pi.current_stock * pi.cost_price),0) FROM product_inventory pi WHERE pi.status = 1 $fac_where_pi) AS inventory_value,
+            (SELECT COUNT(*) FROM product_inventory pi WHERE pi.status = 1 AND pi.current_stock > 0 AND pi.current_stock <= pi.reorder_level $fac_where_pi) AS low_stock,
+            (SELECT COUNT(*) FROM product_inventory pi WHERE pi.status = 1 AND pi.expiry_date IS NOT NULL AND pi.expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) $fac_where_pi) AS expiring
     "));
 
     echo json_encode(["code" => 0, "message" => "Success", "data" => $row ?: []]);
