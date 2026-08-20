@@ -9,7 +9,7 @@
 	<meta name="author" content="">
 	<meta name="robots" content="index, follow">
 	<meta name="twitter:card" content="summary_large_image">
-	<link rel="icon" href="<?= $baseURL ?>assets/images/hand.png" type="image/png">
+	<!-- <link rel="icon" href="<?= $baseURL ?>assets/images/hand.png" type="image/png"> -->
 	<title>DAR - Department of Agrarian Reform</title>
 	<link rel="icon" type="image/png" sizes="16x16" href="<?= $baseURL ?>assets/images/dar.png">
 	<link href="<?= $baseURL ?>assets/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">

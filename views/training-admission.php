@@ -18,9 +18,9 @@
             <div class="card">
                 <div class="card-header d-flex flex-wrap align-items-center">
                     <h4 class="card-title me-auto mb-2 mb-md-0">Training Admissions</h4>
-                    <button class="btn btn-primary btn-sm" id="addAdmissionBtn">
+                    <!-- <button class="btn btn-primary btn-sm" id="addAdmissionBtn">
                         <i class="fas fa-plus me-1"></i> Add Admission
-                    </button>
+                    </button> -->
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">

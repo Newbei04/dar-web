@@ -55,6 +55,17 @@
                         </div>
                     </div>
 
+                    <!-- PROGRAM BUDGET INFO BAR -->
+                    <div id="budgetBar" class="row g-3 mt-1 d-none">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-center flex-wrap gap-3 mb-0 py-2">
+                                <span class="small mb-0"><i class="fas fa-info-circle me-1"></i> <strong>Program Budget</strong></span>
+                                <span class="small mb-0 ms-3">Total: <strong id="budget_total">—</strong></span>
+                                <span class="small mb-0 ms-3">Remaining: <strong id="budget_remaining">—</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- PRODUCT SECTION -->
                     <div id="productSection" class="row g-3 mt-2 d-none">
                         <div class="col-12">
@@ -88,6 +99,14 @@
                         <div class="col-md-4">
                             <label class="form-label text-uppercase fw-semibold small text-muted">Status</label>
                             <span id="status_badge"></span>
+                        </div>
+                    </div>
+
+                    <!-- LIVE BUDGET CHECKER -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-12">
+                            <small id="allocation_limit" class="text-muted d-block mb-1"></small>
+                            <div id="budgetAlert" class="alert alert-danger d-none mb-0 py-2"></div>
                         </div>
                     </div>
 
@@ -145,6 +164,15 @@
                     $('#distributed_budget').text(d.distributed_budget ?? 0);
                     $('#reserved_budget').text(d.reserved_budget ?? 0);
 
+                    var programBudget = parseFloat(d.program_budget) || 0;
+                    var programRemaining = parseFloat(d.program_remaining_budget) || 0;
+                    if (programBudget > 0) {
+                        var bFmt = isProduct ? function(n) { return n.toLocaleString() + ' units'; } : function(n) { return '₱' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+                        $('#budget_total').text(bFmt(programBudget));
+                        $('#budget_remaining').text(bFmt(programRemaining));
+                        $('#budgetBar').removeClass('d-none');
+                    }
+
                     if (isProduct) {
                         $('#productSection').removeClass('d-none');
                         $('#product_name').val(d.product_name || '-');
@@ -159,6 +187,8 @@
                     var statusText = d.status == 0 ? 'warning' : d.status == 1 ? 'info' : d.status == 2 ? 'success' : 'secondary';
                     var statusLabel = d.status == 0 ? 'Pending' : d.status == 1 ? 'In-progress' : d.status == 2 ? 'Processed' : 'Unknown';
                     $('#status_badge').html('<span class="badge light badge-' + statusText + '">' + statusLabel + '</span>');
+
+                    runBudgetCheck();
                 },
                 error: function() {
                     closeLoader();
@@ -166,6 +196,43 @@
                 }
             });
         }
+
+        function runBudgetCheck() {
+            var amount = parseFloat($('#allocation_budget').val()) || 0;
+            var max = parseFloat($('#max_per_beneficiary').val()) || 0;
+            var distributed = parseFloat($('#distributed_budget').text()) || 0;
+            var isProduct = parseFloat($('#unit_subsidy_value').val()) > 0;
+            var programBudget = parseFloat($('#budget_total').text().replace(/[^0-9.,]/g, '').replace(/,/g, '')) || 0;
+            var $alert = $('#budgetAlert');
+            var $save = $('#saveBtn');
+
+            var moneyFmt = function(n) { return '₱' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+            var fmt = isProduct ? function(n) { return n.toLocaleString() + ' units'; } : moneyFmt;
+
+            var errors = [];
+            if (amount <= 0) errors.push('Enter a valid allocation amount/quantity.');
+            if (amount < distributed) errors.push('Allocation cannot be lower than the distributed amount (' + fmt(distributed) + ').');
+            if (programBudget > 0 && amount > programBudget) errors.push('Allocation exceeds the program total budget (' + fmt(programBudget) + ').');
+            if (max > 0 && max > amount) errors.push('Max per beneficiary cannot exceed the allocation amount.');
+
+            var $limit = $('#allocation_limit');
+            if (amount > 0 && distributed >= 0) {
+                $limit.text('Reserved after save: ' + fmt(Math.max(amount - distributed, 0)) + '.');
+            } else {
+                $limit.text('');
+            }
+
+            if (errors.length) {
+                $alert.removeClass('alert-success').addClass('alert-danger').removeClass('d-none')
+                    .html('<i class="fas fa-exclamation-circle me-1"></i>' + errors.join('<br><i class="fas fa-exclamation-circle me-1"></i>'));
+            } else {
+                $alert.addClass('d-none').html('');
+            }
+
+            $save.prop('disabled', errors.length > 0);
+        }
+
+        $('#allocation_budget, #max_per_beneficiary').on('input', runBudgetCheck);
 
         $('#saveBtn').click(function() {
             var allocated_budget = $('#allocation_budget').val();

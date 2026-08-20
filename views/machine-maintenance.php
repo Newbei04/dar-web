@@ -245,7 +245,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                 }),
                 success: function(res) {
                     closeLoader();
-                    if (res.code != 1) {
+                    if (res.code == 1) {
                         Swal.fire("Error", res.message || "Failed to load maintenance records.", "error");
                         return;
                     }
@@ -263,17 +263,17 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                             `<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>`;
 
                         let statusBadge =
-                            item.status_label == 'Completed' ? '<span class="badge light badge-success">Completed</span>' :
-                            item.status_label == 'In Progress' ? '<span class="badge light badge-info">In Progress</span>' :
-                            '<span class="badge light badge-warning">Scheduled</span>';
+                            item.status_label == 'Completed' ? '<span class="badge light badge-success badge-sm">Completed</span>' :
+                            item.status_label == 'In Progress' ? '<span class="badge light badge-info badge-sm">In Progress</span>' :
+                            '<span class="badge light badge-warning badge-sm">Scheduled</span>';
 
                         let priorityBadge =
-                            item.priority_label == 'Low' ? '<span class="badge light badge-secondary">Low</span>' :
-                            item.priority_label == 'Medium' ? '<span class="badge light badge-info">Medium</span>' :
-                            item.priority_label == 'High' ? '<span class="badge light badge-warning">High</span>' :
-                            '<span class="badge light badge-danger">Critical</span>';
+                            item.priority_label == 'Low' ? '<span class="badge light badge-secondary badge-sm">Low</span>' :
+                            item.priority_label == 'Medium' ? '<span class="badge light badge-info badge-sm">Medium</span>' :
+                            item.priority_label == 'High' ? '<span class="badge light badge-warning badge-sm">High</span>' :
+                            '<span class="badge light badge-danger badge-sm">Critical</span>';
 
-                        let typeBadge = '<span class="badge light badge-primary">' + (item.type_label || '-') + '</span>';
+                        let typeBadge = '<span class="badge light badge-primary badge-sm">' + (item.type_label || '-') + '</span>';
 
                         let cost = parseFloat(item.total_cost ?? (parseFloat(item.labor_cost) + parseFloat(item.parts_cost)));
                         let costHtml = isNaN(cost) ? '₱0.00' : '₱' + cost.toFixed(2);
@@ -439,12 +439,12 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                 success: function(res) {
                     closeLoader();
                     Swal.fire({
-                        icon: res.code == 1 ? "success" : "error",
-                        title: res.code == 1 ? "Success" : "Error",
+                        icon: res.code == 0 ? "success" : "error",
+                        title: res.code == 0 ? "Success" : "Error",
                         text: res.message
                     });
 
-                    if (res.code == 1) {
+                    if (res.code == 0) {
                         $("#addMaintenanceModal").modal("hide");
                         loadMaintenance();
                     }
@@ -504,7 +504,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         status: 3
                     }),
                     success: function(res) {
-                        if (res.code == 1) {
+                        if (res.code == 0) {
                             Swal.fire("Success", res.message, "success");
                             loadMaintenance();
                         } else {

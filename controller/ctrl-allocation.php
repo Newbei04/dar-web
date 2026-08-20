@@ -28,11 +28,14 @@ if ($trans == "ADD_ALLOCATION") {
     $unit_subsidy_value    = $data['unit_subsidy_value'] ?? 0;
     $max_per_beneficiary   = $data['max_per_beneficiary'] ?? 0;
 
-    $checkProgram = mysqli_query($conn, "SELECT id FROM program WHERE id='$program_id'");
+    $checkProgram = mysqli_query($conn, "SELECT id, total_budget, remaining_budget, asset_type FROM program WHERE id='$program_id'");
     if (mysqli_num_rows($checkProgram) == 0) {
         echo json_encode(["code" => 1, "message" => "Invalid program", "data" => null]);
         exit;
     }
+    $programRow          = mysqli_fetch_assoc($checkProgram);
+    $programBudget       = (float)($programRow['total_budget'] ?? 0);
+    $programRemaining    = (float)($programRow['remaining_budget'] ?? 0);
 
     if (!empty($branch_id)) {
         $checkBranch = mysqli_query($conn, "SELECT id FROM branch WHERE id='$branch_id'");
@@ -42,12 +45,37 @@ if ($trans == "ADD_ALLOCATION") {
         }
     }
 
-    if ($subsidy_type == 0) {
+    // ── BUDGET / QUANTITY CHECKER (shared by both types) ──────────────
+    if ($allocated_budget <= 0) {
+        echo json_encode(["code" => 1, "message" => "Invalid allocation amount", "data" => null]);
+        exit;
+    }
 
-        if ($allocated_budget <= 0) {
-            echo json_encode(["code" => 1, "message" => "Invalid budget", "data" => null]);
-            exit;
-        }
+    if ($allocated_budget > $programBudget) {
+        echo json_encode(["code" => 1, "message" => $subsidy_type == 0
+            ? "Allocation amount exceeds the program total budget (₱" . number_format($programBudget, 2) . ")"
+            : "Allocated quantity exceeds the program available units (max " . number_format($programBudget, 0) . " units)",
+            "data" => null]);
+        exit;
+    }
+
+    if ($allocated_budget > $programRemaining) {
+        echo json_encode(["code" => 1, "message" => $subsidy_type == 0
+            ? "Allocation amount exceeds the program remaining budget (₱" . number_format($programRemaining, 2) . ")"
+            : "Allocated quantity exceeds the program remaining units (max " . number_format($programRemaining, 0) . " units)",
+            "data" => null]);
+        exit;
+    }
+
+    if ($max_per_beneficiary > 0 && $max_per_beneficiary > $allocated_budget) {
+        echo json_encode(["code" => 1, "message" => $subsidy_type == 0
+            ? "Max per beneficiary cannot exceed the allocation amount"
+            : "Max quantity per beneficiary cannot exceed the allocated quantity",
+            "data" => null]);
+        exit;
+    }
+
+    if ($subsidy_type == 0) {
 
         $insert = mysqli_query($conn, "
             INSERT INTO program_allocation
@@ -173,6 +201,9 @@ if ($trans == "ADD_ALLOCATION") {
             pa.*,
             p.name AS program_name,
             p.product_id AS product_id,
+            p.asset_type AS asset_type,
+            p.total_budget AS program_budget,
+            p.remaining_budget AS program_remaining_budget,
             COALESCE(pr.name, 'Cash') AS product_name,
             b.name AS branch_name
         FROM program_allocation pa
@@ -213,7 +244,41 @@ if ($trans == "ADD_ALLOCATION") {
 
     $check = mysqli_query($conn, "SELECT distributed_budget FROM program_allocation WHERE id='$id'");
     $existing = mysqli_fetch_assoc($check);
-    $distributed = $existing['distributed_budget'] ?? 0;
+    if (!$existing) {
+        echo json_encode(["code" => 1, "message" => "Allocation not found", "data" => null]);
+        exit;
+    }
+    $distributed = (float)($existing['distributed_budget'] ?? 0);
+
+    if ($allocated_budget <= 0) {
+        echo json_encode(["code" => 1, "message" => "Invalid allocation amount", "data" => null]);
+        exit;
+    }
+
+    if ($allocated_budget < $distributed) {
+        echo json_encode(["code" => 1, "message" => "Allocation cannot be lower than the already distributed amount (₱" . number_format($distributed, 2) . ")", "data" => null]);
+        exit;
+    }
+
+    // ── BUDGET CHECKER ──
+    $pRow = mysqli_fetch_assoc(mysqli_query($conn, "
+        SELECT p.total_budget AS program_budget
+        FROM program_allocation pa
+        JOIN program p ON p.id = pa.program_id
+        WHERE pa.id='$id'
+    "));
+    $programBudget = (float)($pRow['program_budget'] ?? 0);
+
+    if ($allocated_budget > $programBudget) {
+        echo json_encode(["code" => 1, "message" => "Allocation amount exceeds the program total budget (₱" . number_format($programBudget, 2) . ")", "data" => null]);
+        exit;
+    }
+
+    if ($max_per_beneficiary > 0 && $max_per_beneficiary > $allocated_budget) {
+        echo json_encode(["code" => 1, "message" => "Max per beneficiary cannot exceed the allocation amount", "data" => null]);
+        exit;
+    }
+
     $reserved_budget = $allocated_budget - $distributed;
 
     $update = mysqli_query($conn, "

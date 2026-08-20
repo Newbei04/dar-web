@@ -63,7 +63,7 @@ if ($trans == "ADD_MAINTENANCE") {
     ");
 
     $stmt->bind_param(
-        "iissssssdssi",
+        "iiiiissdddsi",
         $machinery_id,
         $emp_id,
         $facility_id,
@@ -78,27 +78,42 @@ if ($trans == "ADD_MAINTENANCE") {
         $status
     );
 
-    if ($stmt->execute()) {
+    $conn->begin_transaction();
 
-        // 🔥 SET MACHINERY = UNDER MAINTENANCE
-        $conn->query("
-            UPDATE machinery 
-            SET status = 0 
-            WHERE id = '$machinery_id'
-        ");
-
-        echo json_encode([
-            "code" => 0,
-            "message" => "Maintenance added and machinery set to Under Maintenance",
-            "data" => ["id" => $stmt->insert_id]
-        ]);
-    } else {
+    if (!$stmt->execute()) {
+        $conn->rollback();
         echo json_encode([
             "code" => 1,
             "message" => "Failed to add maintenance",
             "data" => $stmt->error
         ]);
+        exit;
     }
+
+    // 🔥 SET MACHINERY = UNDER MAINTENANCE
+    $machineryUpdate = $conn->query("
+        UPDATE machinery 
+        SET status = 0 
+        WHERE id = '$machinery_id'
+    ");
+
+    if (!$machineryUpdate) {
+        $conn->rollback();
+        echo json_encode([
+            "code" => 1,
+            "message" => "Maintenance saved but failed to set machinery under maintenance",
+            "data" => $conn->error
+        ]);
+        exit;
+    }
+
+    $conn->commit();
+
+    echo json_encode([
+        "code" => 0,
+        "message" => "Maintenance added and machinery set to Under Maintenance",
+        "data" => ["id" => $stmt->insert_id]
+    ]);
 
     exit;
 } else if ($trans == "UPDATE_MAINTENANCE_STATUS") {
@@ -122,7 +137,14 @@ if ($trans == "ADD_MAINTENANCE") {
         WHERE id = ?
     ");
     $stmt->bind_param("ii", $status, $id);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        echo json_encode([
+            "code" => 1,
+            "message" => "Failed to update maintenance status",
+            "data" => $stmt->error
+        ]);
+        exit;
+    }
 
     // if completed → set machinery available
     if ($status == 3) {
@@ -137,11 +159,20 @@ if ($trans == "ADD_MAINTENANCE") {
         $machinery_id = $row['machinery_id'] ?? null;
 
         if ($machinery_id) {
-            $conn->query("
+            $machineryUpdate = $conn->query("
                 UPDATE machinery 
                 SET status = 1 
                 WHERE id = '$machinery_id'
             ");
+
+            if (!$machineryUpdate) {
+                echo json_encode([
+                    "code" => 1,
+                    "message" => "Maintenance completed but failed to set machinery available",
+                    "data" => $conn->error
+                ]);
+                exit;
+            }
         }
     }
 
