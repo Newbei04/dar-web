@@ -309,6 +309,7 @@
                 data: JSON.stringify(Object.assign({ trans: trans }, extra || {})),
                 success: cb,
                 error: function(xhr) {
+                    closeLoader();
                     console.log(trans + " failed:", xhr.responseText);
                     Swal.fire("Error", "Server error occurred", "error");
                 }
@@ -434,7 +435,9 @@
 
             $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Previewing...');
 
+            showLoader();
             simRequest('SIM_PREVIEW', extra, function(res) {
+                closeLoader();
                 $('#btnSimPreview').prop('disabled', false).html('<i class="fas fa-eye me-1"></i> Preview Simulation');
                 if (res.code != 0) {
                     Swal.fire("Error", res.message, "error");
@@ -510,7 +513,9 @@
 
                 $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Recording...');
 
+                showLoader();
                 simRequest('SIM_EXECUTE', extra, function(res) {
+                    closeLoader();
                     $('#btnSimExecute').prop('disabled', false).html('<i class="fas fa-play me-1"></i> Confirm &amp; Record Simulation');
                     applyStats(res.data.stats);
                     renderHistory(res.data.history);

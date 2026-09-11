@@ -145,6 +145,7 @@
 
             $("#addLandParcelForm button[type='submit']").prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -162,6 +163,7 @@
                     last_survey_date: $('#last_survey_date').val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire({
                             icon: "success",
@@ -173,6 +175,9 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
                 },
                 complete: function() {
                     $("#addLandParcelForm button[type='submit']").prop("disabled", false).html('<i class="fa fa-save me-1"></i> Save Land Parcel');

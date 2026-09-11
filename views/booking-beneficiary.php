@@ -653,6 +653,7 @@
                 return;
             }
             $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Submitting...');
+            showLoader('Submitting rating...');
             $.ajax({
                 url: baseURL + 'controller/ctrl-booking.php',
                 type: "POST",
@@ -666,6 +667,7 @@
                     comment: $('#ratingComment').val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     $('#btnSubmitRating').prop('disabled', false).html('<i class="fa fa-star me-1"></i> Submit Rating');
                     if (res.code == 0) {
                         $('#ratingModal').modal('hide');
@@ -677,6 +679,7 @@
                     }
                 },
                 error: function() {
+                    closeLoader();
                     $('#btnSubmitRating').prop('disabled', false).html('<i class="fa fa-star me-1"></i> Submit Rating');
                     Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
                 }

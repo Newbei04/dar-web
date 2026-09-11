@@ -213,6 +213,7 @@
 
             $("#saveBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -229,6 +230,7 @@
                     product_id: isQuantity ? productId : null
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success").then(() => {
                             window.location.href = "<?= $baseURL ?>list-programs";
@@ -238,6 +240,7 @@
                     }
                 },
                 error: function() {
+                    closeLoader();
                     Swal.fire("Error", "Server error occurred.", "error");
                 },
                 complete: function() {

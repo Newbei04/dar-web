@@ -780,6 +780,7 @@
                     confirmButtonColor: '#dc3545'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        showLoader();
                         $.ajax({
                             url: "<?= $baseURL ?>controller/ctrl-auth.php",
                             type: "POST",
@@ -789,6 +790,7 @@
                                 trans: "LOGOUT"
                             }),
                             success: function(res) {
+                                closeLoader();
                                 if (res.code == 0) {
                                     window.location.href = "<?= $baseURL ?>login";
                                 } else {
@@ -796,6 +798,7 @@
                                 }
                             },
                             error: function(xhr) {
+                                closeLoader();
                                 console.log(xhr.responseText);
                                 Swal.fire("Error", "Logout failed. Please try again.", "error");
                             }

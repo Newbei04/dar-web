@@ -463,6 +463,7 @@
                 formData.append('new_images[]', file);
             }
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -471,6 +472,7 @@
                 contentType: false,
                 dataType: "json",
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success");
                         $('#editModal').modal('hide');
@@ -478,6 +480,9 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
                 },
                 complete: function() {
                     $("#editSaveBtn").prop("disabled", false).html('<i class="fe fe-save mr-1"></i> Save Changes');
@@ -527,6 +532,7 @@
                 formData.append('images[]', file);
             }
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -535,6 +541,7 @@
                 contentType: false,
                 dataType: "json",
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success");
                         $('#addModal').modal('hide');
@@ -547,6 +554,9 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
                 },
                 complete: function() {
                     $("#addSaveBtn").prop("disabled", false).html('<i class="fe fe-save mr-1"></i> Save Log');
@@ -566,6 +576,7 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -576,12 +587,16 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Deleted!", res.message, "success");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
                         }
                     });
                 }

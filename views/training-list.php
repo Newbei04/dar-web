@@ -851,6 +851,7 @@
             let training_id = $('#prog_training_id').val();
             let prog_id = $('#prog_id').val();
             let isEdit = prog_id ? true : false;
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -869,6 +870,7 @@
                     $("button[type='submit']").prop("disabled", true).text("Saving...");
                 },
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         resetProgramForm();
                         $('#prog_training_id').val(training_id);
@@ -877,6 +879,10 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
+                    Swal.fire("Error", "Request failed. Please try again.", "error");
                 },
                 complete: function() {
                     $("button[type='submit']").prop("disabled", false).text(isEdit ? "Update Program" : "Add Program");
@@ -898,6 +904,7 @@
                 confirmButtonText: "Yes, delete it!"
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -908,12 +915,17 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Deleted!", res.message, "success");
                                 loadPrograms(activeTrainingId);
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Request failed. Please try again.", "error");
                         }
                     });
                 }
@@ -1103,6 +1115,7 @@
             let docFile = $('#edit_discussion_file')[0].files[0];
             if (docFile) fd.append("discussion_file", docFile);
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -1114,6 +1127,7 @@
                     $('#updateBtn').prop("disabled", true).text("Updating...");
                 },
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire({
                             icon: "success",
@@ -1129,6 +1143,10 @@
                             text: res.message
                         });
                     }
+                },
+                error: function() {
+                    closeLoader();
+                    Swal.fire("Error", "Request failed. Please try again.", "error");
                 },
                 complete: function() {
                     $('#updateBtn').prop("disabled", false).text("Update");
@@ -1150,6 +1168,7 @@
                 confirmButtonText: "Yes, delete it!"
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -1160,12 +1179,17 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Deleted!", res.message, "success");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Request failed. Please try again.", "error");
                         }
                     });
                 }
@@ -1185,6 +1209,7 @@
                 confirmButtonText: 'Yes, Approve'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -1196,12 +1221,17 @@
                             reason: ""
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Approved!", res.message, "success");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Request failed. Please try again.", "error");
                         }
                     });
                 }
@@ -1223,6 +1253,7 @@
                 confirmButtonText: 'Yes, Reject'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -1234,12 +1265,17 @@
                             reason: result.value || ""
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Rejected!", res.message, "info");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Request failed. Please try again.", "error");
                         }
                     });
                 }
@@ -1259,6 +1295,7 @@
                 confirmButtonText: 'Yes, Start'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -1269,12 +1306,17 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Started!", res.message, "success");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Request failed. Please try again.", "error");
                         }
                     });
                 }
@@ -1294,6 +1336,7 @@
                 confirmButtonText: 'Yes, Close'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -1304,12 +1347,17 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Closed!", res.message, "success");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Request failed. Please try again.", "error");
                         }
                     });
                 }

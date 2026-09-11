@@ -642,6 +642,7 @@
 
             $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-inventory.php",
                 type: "POST",
@@ -649,6 +650,7 @@
                 dataType: "json",
                 data: JSON.stringify(payload),
                 success: function(res) {
+                    closeLoader();
                     $("#btnInvActionSave").prop('disabled', false).text('Confirm');
                     if (res.code == 0) {
                         $("#invActionModal").modal('hide');
@@ -659,6 +661,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
                     $("#btnInvActionSave").prop('disabled', false).text('Confirm');
                     console.log(xhr.responseText);
                     Swal.fire("Error", "Server error occurred", "error");
@@ -683,6 +686,7 @@
             }).then(function(result) {
                 if (!result.isConfirmed) return;
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-inventory.php",
                     type: "POST",
@@ -694,6 +698,7 @@
                         status: newStatus
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Success", res.message, "success");
                             loadInventory();
@@ -702,6 +707,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         console.log(xhr.responseText);
                         Swal.fire("Error", "Server error occurred", "error");
                     }

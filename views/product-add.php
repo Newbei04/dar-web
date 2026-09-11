@@ -247,6 +247,7 @@
                 base64Array.push(await fileToBase64(file));
             }
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-products.php",
                 type: "POST",
@@ -264,6 +265,7 @@
                     images: base64Array
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire({
                             icon: "success",
@@ -277,6 +279,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
                     console.error("ADD_PRODUCT failed:", xhr.responseText);
                     Swal.fire("Error", "Server error. Please try again.", "error");
                 },

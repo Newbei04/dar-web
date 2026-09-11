@@ -583,6 +583,7 @@
         });
 
         $('#confirmActionBtn').click(function() {
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>/controller/ctrl-program-beneficiary.php",
                 type: "POST",
@@ -594,6 +595,7 @@
                     action: $('#pb_action').val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     $('#statusModal').modal('hide');
 
                     if (res.code == 0) {
@@ -604,6 +606,7 @@
                     }
                 },
                 error: function() {
+                    closeLoader();
                     Swal.fire("Error", "Server error occurred", "error");
                 }
             });
@@ -622,6 +625,7 @@
             }).then((result) => {
                 if (!result.isConfirmed) return;
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>/controller/ctrl-program-beneficiary.php",
                     type: "POST",
@@ -632,6 +636,7 @@
                         id: id
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Deleted", res.message, "success");
                             loadData();
@@ -640,6 +645,7 @@
                         }
                     },
                     error: function() {
+                        closeLoader();
                         Swal.fire("Error", "Something went wrong.", "error");
                     }
                 });

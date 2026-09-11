@@ -558,6 +558,7 @@ $(document).ready(function() {
                 .prop("disabled", true)
                 .html('<span class="spinner-border spinner-border-sm me-1"></span> Processing...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-wallet.php",
                 type: "POST",
@@ -571,6 +572,7 @@ $(document).ready(function() {
                     balance_type: balanceType
                 }),
                 success: function(res) {
+                    closeLoader();
                     $('#btnConfirmCashIn')
                         .prop("disabled", false)
                         .html('<i class="fas fa-check me-1"></i> Confirm Cash In');
@@ -590,6 +592,7 @@ $(document).ready(function() {
                     }
                 },
                 error: function() {
+                    closeLoader();
                     $('#btnConfirmCashIn')
                         .prop("disabled", false)
                         .html('<i class="fas fa-check me-1"></i> Confirm Cash In');

@@ -402,6 +402,7 @@
                 formData.append("discussion_file", discussionFile);
             }
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -415,6 +416,7 @@
                         .text("Saving...");
                 },
                 success: function(res) {
+                    closeLoader();
 
                     if (res.code == 0) {
 
@@ -437,6 +439,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
 
                     Swal.fire({
                         icon: "error",

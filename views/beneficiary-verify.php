@@ -417,6 +417,7 @@
         });
 
         function submitRequest(data) {
+            showLoader();
             $.ajax({
                 url: '<?= $baseURL ?>controller/ctrl-patient.php',
                 type: "POST",
@@ -426,6 +427,7 @@
                     result: data
                 }),
                 success: function(response) {
+                    closeLoader();
                     if (response.code == "0") {
                         $('#start-consultation').prop("disabled", true);
                         $('#end-consultation').prop("disabled", false);
@@ -448,6 +450,16 @@
                             confirmButtonColor: "#0f766e",
                         });
                     }
+                },
+                error: function(xhr) {
+                    closeLoader();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Request Failed',
+                        text: 'Something went wrong while processing the card. Please try again.',
+                        confirmButtonText: 'OKAY',
+                        confirmButtonColor: "#0f766e",
+                    });
                 }
             });
         }

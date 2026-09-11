@@ -294,6 +294,7 @@
             }).then((result) => {
                 if (!result.isConfirmed) return;
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-facility-type.php",
                     type: "POST",
@@ -304,6 +305,7 @@
                         id: id
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Deleted", res.message, "success");
                             loadData();
@@ -312,6 +314,7 @@
                         }
                     },
                     error: function() {
+                        closeLoader();
                         Swal.fire("Error", "Something went wrong.", "error");
                     }
                 });

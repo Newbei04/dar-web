@@ -265,6 +265,7 @@
                     .prop("disabled", true)
                     .html(`<span class="spinner-border spinner-border-sm mr-1"></span> Updating...`);
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>/controller/ctrl-auth.php",
                     type: "POST",
@@ -276,6 +277,7 @@
                         password: password
                     }),
                     success: function(res) {
+                        closeLoader();
                         $("#btnSavePassword")
                             .prop("disabled", false)
                             .html(`<i class="fa fa-save mr-1"></i> Update Password`);
@@ -288,6 +290,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         $("#btnSavePassword")
                             .prop("disabled", false)
                             .html(`<i class="fa fa-save mr-1"></i> Update Password`);
@@ -310,6 +313,7 @@
                 confirmButtonText: "Yes, delete"
             }).then((result) => {
                 if (!result.isConfirmed) return;
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>/controller/ctrl-users.php",
                     type: "POST",
@@ -320,6 +324,7 @@
                         id: id
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Deleted", res.message, "success");
                             loadUsers();
@@ -328,6 +333,7 @@
                         }
                     },
                     error: function() {
+                        closeLoader();
                         Swal.fire("Error", "Something went wrong.", "error");
                     }
                 });

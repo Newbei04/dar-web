@@ -33,42 +33,109 @@ class GblFn {
     }
 
     /**
-     * @param array $fileData 
+     * Handles file uploads. Supports single files, multiple files,
+     * base64 data URIs, and native $_FILES uploads.
+     *
+     * @param mixed $fileData
+     *   - string: A single base64 data URI (e.g. "data:image/png;base64,...")
+     *   - array of strings: Multiple base64 data URIs (a sequential list)
+     *   - array: A single native $_FILES entry, e.g. $_FILES['profile']
+     *   - array: A multi-upload $_FILES entry, e.g. $_FILES['images']
+     *            where 'name'/'tmp_name'/'error' are arrays
      * @param string $uploadFolder The folder to save to
      * @param string $prefix Prefix for the filename (e.g., 'mac')
      * @param int|string $id The ID associated with the record
+     * @return string|array Single filename string for a single file,
+     *                      or an array of filenames for multiple files.
      */
     public static function processUpload($fileData, $uploadFolder, $prefix, $id) {
-        $filename = '';
-
         $uploadDir = dirname(__DIR__) . '/assets/images/'.$uploadFolder.'/';
         // Ensure directory exists
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $unique = uniqid();
-
-        // 1. Handle Base64
-        if (!empty($fileData) && preg_match('/^data:image\/(\w+);base64,/', $fileData, $matches)) {
-            $ext = ($matches[1] === 'jpeg') ? 'jpg' : strtolower($matches[1]);
-            $image_data = base64_decode(substr($fileData, strpos($fileData, ',') + 1));
-            $filename = $prefix . '_' . $id . '_' . time() . '_' . $unique . '.' . $ext;
-            
-            if (file_put_contents($uploadDir . $filename, $image_data) !== false) {
-                return $filename;
+        // 1. Multiple native files: $_FILES['x']['name'] is an array
+        if (is_array($fileData) && isset($fileData['name']) && is_array($fileData['name'])) {
+            $filenames = [];
+            foreach ($fileData['name'] as $key => $name) {
+                $single = [
+                    'name'     => $fileData['name'][$key],
+                    'tmp_name' => $fileData['tmp_name'][$key] ?? '',
+                    'error'    => $fileData['error'][$key] ?? UPLOAD_ERR_NO_FILE,
+                    'size'     => $fileData['size'][$key] ?? 0,
+                ];
+                if (!empty($single['tmp_name']) && (int)$single['error'] === UPLOAD_ERR_OK) {
+                    $saved = self::saveFromFiles($single, $uploadDir, $prefix, $id);
+                    if ($saved !== '') {
+                        $filenames[] = $saved;
+                    }
+                }
             }
-        } 
-        // 2. Handle $_FILES
-        else if (!empty($fileData['name'])) {
-            $ext = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
-            $filename = $prefix . '_' . $id . '_' . time() . '_' . $unique . '.' . $ext;
-            
-            if (move_uploaded_file($fileData['tmp_name'], $uploadDir . $filename)) {
-                return $filename;
-            }
+            return $filenames;
         }
-        return $filename; 
+
+        // 2. Single native file: $_FILES['profile']
+        if (is_array($fileData) && isset($fileData['name']) && is_string($fileData['name'])) {
+            if (!empty($fileData['tmp_name']) && (int)($fileData['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+                return self::saveFromFiles($fileData, $uploadDir, $prefix, $id);
+            }
+            return '';
+        }
+
+        // 3. Multiple base64 strings: a sequential list of strings
+        if (is_array($fileData)) {
+            $filenames = [];
+            foreach ($fileData as $item) {
+                if (is_string($item)) {
+                    $saved = self::saveFromBase64($item, $uploadDir, $prefix, $id);
+                    if ($saved !== '') {
+                        $filenames[] = $saved;
+                    }
+                }
+            }
+            return $filenames;
+        }
+
+        // 4. Single base64 string
+        if (is_string($fileData)) {
+            return self::saveFromBase64($fileData, $uploadDir, $prefix, $id);
+        }
+
+        return '';
+    }
+
+    /**
+     * Saves a single base64 data URI and returns the generated filename.
+     */
+    private static function saveFromBase64($fileData, $uploadDir, $prefix, $id) {
+        if (empty($fileData) || !preg_match('/^data:image\/(\w+);base64,/', $fileData, $matches)) {
+            return '';
+        }
+        $ext = ($matches[1] === 'jpeg') ? 'jpg' : strtolower($matches[1]);
+        $image_data = base64_decode(substr($fileData, strpos($fileData, ',') + 1));
+        $filename = $prefix . '_' . $id . '_' . time() . '_' . uniqid() . '.' . $ext;
+
+        if (file_put_contents($uploadDir . $filename, $image_data) !== false) {
+            return $filename;
+        }
+        return '';
+    }
+
+    /**
+     * Saves a single native $_FILES entry and returns the generated filename.
+     */
+    private static function saveFromFiles($fileData, $uploadDir, $prefix, $id) {
+        if (empty($fileData['name']) || empty($fileData['tmp_name'])) {
+            return '';
+        }
+        $ext = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
+        $filename = $prefix . '_' . $id . '_' . time() . '_' . uniqid() . '.' . $ext;
+
+        if (move_uploaded_file($fileData['tmp_name'], $uploadDir . $filename)) {
+            return $filename;
+        }
+        return '';
     }
 
     /**

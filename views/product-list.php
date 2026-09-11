@@ -199,6 +199,7 @@
             }).then(function(result) {
                 if (!result.isConfirmed) return;
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-products.php",
                     type: "POST",
@@ -210,6 +211,7 @@
                         status: newStatus
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Success", res.message, "success");
                             loadProducts();
@@ -218,6 +220,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         console.error(xhr.responseText);
                         Swal.fire("Error", "Server error occurred", "error");
                     }

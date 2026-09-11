@@ -246,6 +246,7 @@
 
             $('#saveBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>/controller/ctrl-allocation.php",
                 type: "POST",
@@ -259,6 +260,7 @@
                     max_per_beneficiary: max_per_beneficiary
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success").then(function() {
                             window.location.href = "<?= $basePath ?>/list-allocations";
@@ -268,6 +270,7 @@
                     }
                 },
                 error: function() {
+                    closeLoader();
                     Swal.fire("Error", "Server error occurred.", "error");
                 },
                 complete: function() {

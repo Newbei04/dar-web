@@ -552,6 +552,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 
                 btn.prop("disabled", true);
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-machinery-maintenance.php",
                     type: "POST",
@@ -563,6 +564,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         status: 3
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Success", res.message, "success");
                             loadMaintenance();
@@ -572,6 +574,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         }
                     },
                     error: function() {
+                        closeLoader();
                         btn.prop("disabled", false);
                         Swal.fire("Error", "Something went wrong.", "error");
                     }

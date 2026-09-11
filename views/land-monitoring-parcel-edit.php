@@ -195,6 +195,7 @@
 
             $("#saveBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Updating...');
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -213,6 +214,7 @@
                     last_survey_date: $('#last_survey_date').val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire("Success", "Land parcel updated successfully!", "success").then(() => {
                             window.location.href = '<?= $baseURL ?>list-land-parcel';
@@ -220,6 +222,9 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
                 },
                 complete: function() {
                     $("#saveBtn").prop("disabled", false).html('<i class="fe fe-save mr-1"></i> Update Land Parcel');

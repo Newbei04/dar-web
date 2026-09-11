@@ -262,6 +262,7 @@
                 confirmButtonText: "Yes, update"
             }).then((result) => {
                 if (!result.isConfirmed) return;
+                showLoader();
 
                 $("#btnSavePassword")
                     .prop("disabled", true)
@@ -278,6 +279,7 @@
                         password: password
                     }),
                     success: function(res) {
+                        closeLoader();
                         $("#btnSavePassword")
                             .prop("disabled", false)
                             .html(`<i class="fas fa-save mr-1"></i> Update Password`);
@@ -290,6 +292,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         $("#btnSavePassword")
                             .prop("disabled", false)
                             .html(`<i class="fas fa-save mr-1"></i> Update Password`);

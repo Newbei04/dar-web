@@ -282,6 +282,7 @@
             }
 
             $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+            showLoader();
 
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-product-price.php",
@@ -300,6 +301,7 @@
                     created_by: <?= $_SESSION['users_id'] ?? 0 ?>
                 }),
                 success: function(res) {
+                    closeLoader();
                     $('#btnSavePrice').prop('disabled', false).html('<i class="fas fa-save me-1"></i> Save Price');
                     if (res.code == 0) {
                         Swal.fire("Saved", res.message + ' (old: ₱' + formatNumber(res.data.old_price) + ' → new: ₱' + formatNumber(res.data.new_price) + ')', "success");
@@ -310,6 +312,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
                     $('#btnSavePrice').prop('disabled', false).html('<i class="fas fa-save me-1"></i> Save Price');
                     console.log(xhr.responseText);
                     Swal.fire("Error", "Server error while saving price.", "error");

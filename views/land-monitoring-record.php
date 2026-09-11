@@ -160,6 +160,7 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -170,12 +171,16 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 Swal.fire("Deleted!", res.message, "success");
                                 loadData();
                             } else {
                                 Swal.fire("Error", res.message, "error");
                             }
+                        },
+                        error: function() {
+                            closeLoader();
                         }
                     });
                 }

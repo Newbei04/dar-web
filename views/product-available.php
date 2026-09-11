@@ -997,6 +997,7 @@
 
             $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-checkout.php",
                 type: "POST",
@@ -1011,6 +1012,7 @@
                     items: items
                 }),
                 success: function(res) {
+                    closeLoader();
                     $('#btnPlaceCheckout').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Place Checkout');
                     if (res.code == 0) {
                         const d = res.data || {};
@@ -1047,6 +1049,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
                     $('#btnPlaceCheckout').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Place Checkout');
                     console.log("PLACE_CHECKOUT failed:", xhr.responseText);
                     Swal.fire("Error", "Server error during checkout", "error");

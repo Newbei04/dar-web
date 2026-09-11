@@ -400,6 +400,7 @@
 
         $("#updateBtn").click(function() {
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -419,6 +420,7 @@
                     asset_type: $("#edit_asset_switch").is(":checked") ? 1 : 0
                 }),
                 success: function(res) {
+                    closeLoader();
 
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success");
@@ -448,6 +450,7 @@
 
                 if (res.isConfirmed) {
 
+                    showLoader();
                     $.ajax({
                         url: API,
                         type: "POST",
@@ -458,6 +461,7 @@
                             id: id
                         }),
                         success: function(res) {
+                            closeLoader();
 
                             if (res.code == 0) {
                                 Swal.fire("Deleted", res.message, "success");

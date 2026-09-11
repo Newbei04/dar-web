@@ -468,6 +468,7 @@
 
             $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Saving...');
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -479,6 +480,7 @@
                     beneficiary_ids: selected
                 }),
                 success: function(res) {
+                    closeLoader();
                     $('#addModal').modal('hide');
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success");
@@ -488,6 +490,10 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
+                    Swal.fire("Error", "Request failed. Please try again.", "error");
                 },
                 complete: function() {
                     $('#confirmAddBtn').prop('disabled', false).html('Enroll Selected');
@@ -507,6 +513,7 @@
             let id = $('#update_admission_id').val();
             let status = $('#update_status').val();
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -518,6 +525,7 @@
                     status: status
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire("Success", res.message, "success");
                         $('#statusModal').modal('hide');
@@ -525,6 +533,10 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
+                    Swal.fire("Error", "Request failed. Please try again.", "error");
                 }
             });
         });

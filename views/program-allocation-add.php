@@ -382,6 +382,7 @@
             /* ================= SEND ================= */
             $("#saveBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>/controller/ctrl-allocation.php",
                 type: "POST",
@@ -399,6 +400,7 @@
                     product_id: subsidy_type === "1" ? product_id : null,
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire({
                             icon: "success",
@@ -415,6 +417,7 @@
                     }
                 },
                 error: function() {
+                    closeLoader();
                     Swal.fire("Error", "Server error occurred.", "error");
                 },
                 complete: function() {

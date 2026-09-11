@@ -196,6 +196,7 @@
 
             $("#addRecordForm button[type='submit']").prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: API,
                 type: "POST",
@@ -212,6 +213,7 @@
                     encrypted_signature: $('#encrypted_signature').val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         Swal.fire({
                             icon: "success",
@@ -223,6 +225,9 @@
                     } else {
                         Swal.fire("Error", res.message, "error");
                     }
+                },
+                error: function() {
+                    closeLoader();
                 },
                 complete: function() {
                     $("#addRecordForm button[type='submit']").prop("disabled", false).html('<i class="fa fa-save me-1"></i> Save Record');

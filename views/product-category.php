@@ -215,6 +215,7 @@
 
             $("#saveCategoryBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Saving...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-product-category.php",
                 type: "POST",
@@ -227,6 +228,7 @@
                     status: $("#add_status").val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         $("#addCategoryModal").modal("hide");
                         Swal.fire("Success", res.message, "success");
@@ -236,6 +238,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
                     console.error("ADD_PRODUCT_CATEGORY failed:", xhr.responseText);
                     Swal.fire("Error", "Failed to save category.", "error");
                 },
@@ -261,6 +264,7 @@
 
             $("#updateCategoryBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Updating...');
 
+            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-product-category.php",
                 type: "POST",
@@ -274,6 +278,7 @@
                     status: $("#edit_status").val()
                 }),
                 success: function(res) {
+                    closeLoader();
                     if (res.code == 0) {
                         $("#editCategoryModal").modal("hide");
                         Swal.fire("Success", res.message, "success");
@@ -283,6 +288,7 @@
                     }
                 },
                 error: function(xhr) {
+                    closeLoader();
                     console.error("UPDATE_PRODUCT_CATEGORY failed:", xhr.responseText);
                     Swal.fire("Error", "Failed to update category.", "error");
                 },
@@ -306,6 +312,7 @@
             }).then(function(result) {
                 if (!result.isConfirmed) return;
 
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-product-category.php",
                     type: "POST",
@@ -316,6 +323,7 @@
                         id: id
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Deleted", res.message, "success");
                             loadData();
@@ -324,6 +332,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         console.error("DELETE_PRODUCT_CATEGORY failed:", xhr.responseText);
                         Swal.fire("Error", "Failed to delete category.", "error");
                     }

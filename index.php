@@ -98,6 +98,10 @@ switch ($route) {
 	case '':
 	case '/':
 	case 'login':
+		if ($_SESSION["IS_LOGIN"]) {
+			header("Location: " . $baseURL . "home");
+			exit;
+		}
 		require_once 'views/page-login.php';
 		break;
 	// ==================== Dashboard ====================

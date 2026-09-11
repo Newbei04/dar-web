@@ -140,6 +140,8 @@
                     <small class="form-text text-muted">You can select multiple images. The first one will be set as primary.</small>
                 </div>
 
+                <div class="row mt-2" id="addImagePreview"></div>
+
             </div>
 
             <div class="modal-footer">
@@ -251,6 +253,8 @@
                     <input type="file" class="form-control" id="edit_image_input" accept="image/*" multiple>
                     <small class="form-text text-muted">Selecting new images will replace all current images.</small>
                 </div>
+
+                <div class="row mt-2" id="editImagePreview"></div>
 
             </div>
 
@@ -503,6 +507,7 @@
             $("#add_daily_rate").val('');
             $("#add_status").val('1');
             $("#add_image_input").val('');
+            $("#addImagePreview").empty();
 
             loadDropdowns(function() {
                 $("#addMachineModal").modal("show");
@@ -529,6 +534,7 @@
             showLoader("Uploading images...");
             const files = Array.from($("#add_image_input")[0].files || []);
             data.images = await filesToBase64(files);
+            setUploadPreviewState("addImagePreview", "uploading");
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-machinery.php",
                 type: "POST",
@@ -538,15 +544,20 @@
                 success: function(res) {
                     closeLoader();
                     if (res.code == 0) {
+                        setUploadPreviewState("addImagePreview", "done");
                         Swal.fire("Success", res.message, "success");
-                        $("#addMachineModal").modal("hide");
                         loadData();
+                        setTimeout(function() {
+                            $("#addMachineModal").modal("hide");
+                        }, 600);
                     } else {
+                        setUploadPreviewState("addImagePreview", "failed");
                         Swal.fire("Error", res.message, "error");
                     }
                 },
                 error: function(xhr) {
                     closeLoader();
+                    setUploadPreviewState("addImagePreview", "failed");
                     console.error("ADD_MACHINERY failed:", xhr.responseText);
                     Swal.fire("Error", "Failed to add machine.", "error");
                 }
@@ -566,6 +577,7 @@
             let status = $(this).data("status");
 
             $("#edit_image_input").val('');
+            $("#editImagePreview").empty();
             loadEditImages(id);
             loadDropdowns(function() {
 
@@ -648,6 +660,7 @@
                 confirmButtonText: "Yes, remove it"
             }).then((result) => {
                 if (result.isConfirmed) {
+                    showLoader();
                     $.ajax({
                         url: "<?= $baseURL ?>controller/ctrl-machinery.php",
                         type: "POST",
@@ -659,6 +672,7 @@
                             name: imgName
                         }),
                         success: function(res) {
+                            closeLoader();
                             if (res.code == 0) {
                                 loadEditImages(machineryId);
                             } else {
@@ -666,6 +680,7 @@
                             }
                         },
                         error: function() {
+                            closeLoader();
                             Swal.fire("Error", "Failed to delete image.", "error");
                         }
                     });
@@ -688,12 +703,59 @@
             return Promise.all(promises);
         }
 
+        // ================= IMAGE UPLOAD PREVIEW =================
+        function renderUploadPreviews(containerId, files) {
+            $("#" + containerId).empty();
+
+            files.forEach(function(file, idx) {
+                const url = URL.createObjectURL(file);
+                const $item = $(
+                    '<div class="col-6 col-md-3 mt-2" data-preview-idx="' + idx + '">' +
+                    '<div class="position-relative rounded-3 overflow-hidden border" style="height:90px;">' +
+                    '<img src="' + url + '" alt="' + (file.name || '').replace(/"/g, '') + '"' +
+                    ' class="w-100 h-100 d-block" style="object-fit:cover;">' +
+                    '<div class="upload-status position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:rgba(0,0,0,.45);">' +
+                    '<span class="spinner-border spinner-border-sm mb-1"></span>' +
+                    '<small class="font-weight-semibold">Uploading...</small>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>'
+                );
+                $item.find("img").on("load", function() {
+                    URL.revokeObjectURL(url);
+                });
+                $("#" + containerId).append($item);
+            });
+        }
+
+        function setUploadPreviewState(containerId, state) {
+            $("#" + containerId + " .upload-status").each(function() {
+                const $status = $(this);
+                if (state === "uploading") {
+                    $status.html('<span class="spinner-border spinner-border-sm mb-1"></span><small class="font-weight-semibold">Uploading...</small>');
+                } else if (state === "done") {
+                    $status.html('<i class="fas fa-check-circle" style="font-size:1.15rem;color:#7CFC00;"></i><small class="font-weight-semibold">Uploaded</small>');
+                } else if (state === "failed") {
+                    $status.html('<i class="fas fa-times-circle" style="font-size:1.15rem;color:#ff6b6b;"></i><small class="font-weight-semibold">Failed</small>');
+                }
+            });
+        }
+
+        $("#add_image_input").on("change", function() {
+            renderUploadPreviews("addImagePreview", Array.from(this.files || []));
+        });
+
+        $("#edit_image_input").on("change", function() {
+            renderUploadPreviews("editImagePreview", Array.from(this.files || []));
+        });
+
         // ================= UPDATE =================
         $("#updateMachineBtn").on("click", async function() {
 
             showLoader("Uploading images...");
             const files = Array.from($("#edit_image_input")[0].files || []);
             const base64Array = await filesToBase64(files);
+            setUploadPreviewState("editImagePreview", "uploading");
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-machinery.php",
                 type: "POST",
@@ -714,15 +776,20 @@
                 success: function(res) {
                     closeLoader();
                     if (res.code == 0) {
+                        setUploadPreviewState("editImagePreview", "done");
                         Swal.fire("Success", res.message, "success");
-                        $("#editMachineModal").modal("hide");
                         loadData();
+                        setTimeout(function() {
+                            $("#editMachineModal").modal("hide");
+                        }, 600);
                     } else {
+                        setUploadPreviewState("editImagePreview", "failed");
                         Swal.fire("Error", res.message, "error");
                     }
                 },
                 error: function(xhr) {
                     closeLoader();
+                    setUploadPreviewState("editImagePreview", "failed");
                     console.error("UPDATE_MACHINERY failed:", xhr.responseText);
                     Swal.fire("Error", "Something went wrong. Please try again.", "error");
                 }

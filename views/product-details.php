@@ -1541,6 +1541,7 @@
                 cancelButtonText: 'Cancel'
             }).then(function(result) {
                 if (!result.isConfirmed) return;
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-products.php",
                     type: "POST",
@@ -1552,6 +1553,7 @@
                         product_id: productId
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Updated", "Primary image updated.", "success").then(function() {
                                 loadProduct();
@@ -1561,6 +1563,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         console.error("SET_PRIMARY_IMAGE failed:", xhr.responseText);
                         Swal.fire("Error", "Failed to set primary image.", "error");
                     }
@@ -1584,6 +1587,7 @@
                 cancelButtonText: 'Cancel'
             }).then(function(result) {
                 if (!result.isConfirmed) return;
+                showLoader();
                 $.ajax({
                     url: "<?= $baseURL ?>controller/ctrl-products.php",
                     type: "POST",
@@ -1596,6 +1600,7 @@
                         updated_by: "<?= $_SESSION['users_id'] ?? 0 ?>"
                     }),
                     success: function(res) {
+                        closeLoader();
                         if (res.code == 0) {
                             Swal.fire("Updated", archived ? "Product restored." : "Product archived.", "success").then(function() {
                                 loadProduct();
@@ -1605,6 +1610,7 @@
                         }
                     },
                     error: function(xhr) {
+                        closeLoader();
                         console.error("UPDATE_PRODUCT_STATUS failed:", xhr.responseText);
                         Swal.fire("Error", "Failed to update status.", "error");
                     }
