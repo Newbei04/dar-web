@@ -31,6 +31,7 @@
                                 <tr>
                                     <th>No.</th>
                                     <th>Title Number</th>
+                                    <th>Beneficiary</th>
                                     <th>Credit Limit</th>
                                     <th>Certificate Status</th>
                                     <th>Issued Date</th>
@@ -43,6 +44,34 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= RECORD DETAIL MODAL ================= -->
+<div class="modal fade" id="recordDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title"><i class="fas fa-file-alt me-2 text-primary"></i>Land Record Details</h5>
+                    <small class="text-muted" id="recordDetailSub"></small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="text-uppercase text-muted fw-bold mb-2"><small>Record Information</small></h6>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <tbody id="recordDetailInfo"></tbody>
+                    </table>
+                </div>
+                <h6 class="text-uppercase text-muted fw-bold mb-2"><small>Digital Signature</small></h6>
+                <div id="recordDetailSig"><p class="text-muted mb-0">No signature.</p></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -93,6 +122,7 @@
                             let row = [
                                 i + 1,
                                 item.title_number ?? '-',
+                                item.beneficiary_name ?? '-',
                                 '\u20b1' + (item.credit_limit ?? '0'),
                                 (item.certificate_status || '').toLowerCase() == 'pending' ? '<span class="badge light badge-warning">Pending</span>' :
                                 (item.certificate_status || '').toLowerCase() == 'active' ? '<span class="badge light badge-success">Active</span>' :
@@ -137,9 +167,66 @@
         }
 
         // ================= VIEW RECORD =================
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c];
+            });
+        }
+
+        function certBadge(status) {
+            let s = (status || '').toLowerCase();
+            let cls = { pending: 'warning', active: 'success', approved: 'primary', released: 'success', expired: 'danger' }[s] || 'secondary';
+            return `<span class="badge light badge-${cls}">${escapeHtml(status) || '-'}</span>`;
+        }
+
         $(document).on('click', '.viewRecordBtn', function() {
             let id = $(this).data('id');
-            window.location.href = '<?= $baseURL ?>record-detail?id=' + id;
+
+            $('#recordDetailInfo').html('<tr><td colspan="2" class="text-center text-muted py-3">Loading...</td></tr>');
+            $('#recordDetailSig').html('<p class="text-muted mb-0">Loading...</p>');
+            $('#recordDetailSub').text('');
+
+            $.ajax({
+                url: API,
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "GET_RECORD_DETAIL",
+                    id: id
+                }),
+                success: function(res) {
+                    if (res.code != 0 || !res.data) {
+                        Swal.fire("Error", res.message || "Failed to load record details.", "error");
+                        return;
+                    }
+                    const d = res.data;
+
+                    $('#recordDetailSub').text(escapeHtml(d.title_number) || '');
+
+                    let rows = `
+                        <tr><th style="width:32%;">Title Number</th><td>${escapeHtml(d.title_number) || '-'}</td></tr>
+                        <tr><th>Beneficiary</th><td>${escapeHtml(d.beneficiary_name) || '-'}</td></tr>
+                        <tr><th>Certificate Status</th><td>${certBadge(d.certificate_status)}</td></tr>
+                        <tr><th>Credit Limit</th><td>&#8369; ${escapeHtml(d.credit_limit) ?? '-'}</td></tr>
+                        <tr><th>Issued Date</th><td>${escapeHtml(d.issued_date) || '-'}</td></tr>
+                        <tr><th>Expiry Date</th><td>${escapeHtml(d.expiry_date) || '-'}</td></tr>
+                        <tr><th>Created At</th><td>${escapeHtml(d.created_at) || '-'}</td></tr>
+                        <tr><th>Updated At</th><td>${escapeHtml(d.updated_at) || '-'}</td></tr>
+                    `;
+                    $('#recordDetailInfo').html(rows);
+
+                    $('#recordDetailSig').html(d.encrypted_signature
+                        ? `<pre class="mb-0 p-2 bg-light rounded" style="white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:auto;">${escapeHtml(d.encrypted_signature)}</pre>`
+                        : '<p class="text-muted mb-0">No signature.</p>');
+
+                    $('#recordDetailModal').modal('show');
+                },
+                error: function(xhr) {
+                    console.error("GET_RECORD_DETAIL failed:", xhr.responseText);
+                    Swal.fire("Error", "Failed to load record details.", "error");
+                }
+            });
         });
 
         // ================= EDIT RECORD =================

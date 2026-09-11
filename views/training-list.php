@@ -180,86 +180,36 @@
 
 <!-- VIEW TRAINING MODAL -->
 <div class="modal fade" id="viewModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Training Details</h5>
+                <div>
+                    <h5 class="modal-title"><i class="fas fa-chalkboard-user me-2 text-primary"></i>Training Details</h5>
+                    <small class="text-muted" id="viewSub"></small>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <table class="table table-bordered">
-                    <tr>
-                        <th style="width:30%">Reference No</th>
-                        <td id="view_reference_no"></td>
-                    </tr>
-                    <tr>
-                        <th>Accreditation No</th>
-                        <td id="view_accreditation_no"></td>
-                    </tr>
-                    <tr>
-                        <th>Accreditation Date</th>
-                        <td id="view_accreditation_date"></td>
-                    </tr>
-                    <tr>
-                        <th>Title</th>
-                        <td id="view_title"></td>
-                    </tr>
-                    <tr>
-                        <th>Summary</th>
-                        <td id="view_summary"></td>
-                    </tr>
-                    <tr>
-                        <th>Objectives</th>
-                        <td id="view_objectives"></td>
-                    </tr>
-                    <tr>
-                        <th>Program Type</th>
-                        <td id="view_program_type"></td>
-                    </tr>
-                    <tr>
-                        <th>Start Date</th>
-                        <td id="view_start_at"></td>
-                    </tr>
-                    <tr>
-                        <th>End Date</th>
-                        <td id="view_end_at"></td>
-                    </tr>
-                    <tr>
-                        <th>Region</th>
-                        <td id="view_region"></td>
-                    </tr>
-                    <tr>
-                        <th>Province</th>
-                        <td id="view_province"></td>
-                    </tr>
-                    <tr>
-                        <th>City / Municipality</th>
-                        <td id="view_city"></td>
-                    </tr>
-                    <tr>
-                        <th>Barangay</th>
-                        <td id="view_barangay"></td>
-                    </tr>
-                    <tr>
-                        <th>Street</th>
-                        <td id="view_street"></td>
-                    </tr>
-                    <tr>
-                        <th>Promotional Image</th>
-                        <td id="view_image"></td>
-                    </tr>
-                    <tr>
-                        <th>Created At</th>
-                        <td id="view_created_at"></td>
-                    </tr>
-                    <tr>
-                        <th>Updated At</th>
-                        <td id="view_updated_at"></td>
-                    </tr>
-                </table>
+                <h6 class="text-uppercase text-muted fw-bold mb-2"><small>Training Information</small></h6>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <tbody id="viewInfo"></tbody>
+                    </table>
+                </div>
+                <h6 class="text-uppercase text-muted fw-bold mb-2"><small>Address</small></h6>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <tbody id="viewAddress"></tbody>
+                    </table>
+                </div>
+                <h6 class="text-uppercase text-muted fw-bold mb-2"><small>Media &amp; Attachments</small></h6>
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <div id="viewImage"><span class="text-muted">No image</span></div>
+                    <div id="viewDiscussion"><span class="text-muted">No file</span></div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -934,8 +884,21 @@
 
         // ================= VIEW =================
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c];
+            });
+        }
+
         $(document).on('click', '.viewBtn', function() {
             let id = $(this).data('id');
+
+            $('#viewInfo').html('<tr><td colspan="2" class="text-center text-muted py-3">Loading...</td></tr>');
+            $('#viewAddress').html('<tr><td colspan="2" class="text-center text-muted py-3">Loading...</td></tr>');
+            $('#viewImage').html('<span class="text-muted">No image</span>');
+            $('#viewDiscussion').html('<span class="text-muted">No file</span>');
+            $('#viewSub').text('');
+
             $.ajax({
                 url: API,
                 type: "POST",
@@ -946,37 +909,60 @@
                     id: id
                 }),
                 success: function(res) {
-                    if (res.code == 0) {
-                        let d = res.data;
-                        let base = "<?= $baseURL ?>";
-                        $('#view_reference_no').text(d.reference_no ?? '-');
-                        $('#view_accreditation_no').text(d.accreditation_no ?? '-');
-                        $('#view_accreditation_date').text(d.accreditation_date ?? '-');
-                        $('#view_title').text(d.title ?? '-');
-                        $('#view_summary').text(d.summary ?? '-');
-                        $('#view_objectives').text(d.objectives ?? '-');
-                        let ptype = {
-                            0: 'OTHER',
-                            1: 'ONSITE TRAINING',
-                            2: 'VIRTUAL LEARNING'
-                        };
-                        $('#view_program_type').text(ptype[d.program_type] ?? d.program_type ?? '-');
-                        $('#view_start_at').text(d.start_at ?? '-');
-                        $('#view_end_at').text(d.end_at ?? '-');
-                        $('#view_street').text(d.street ?? '-');
-                        $('#view_region').text(d.region_name ?? d.region_id ?? '-');
-                        $('#view_province').text(d.province_name ?? d.province_id ?? '-');
-                        $('#view_city').text(d.city_name ?? d.city_id ?? '-');
-                        $('#view_barangay').text(d.barangay_name ?? d.barangay_id ?? '-');
-                        $('#view_image').html(d.promotional_image ?
-                            `<img src="${base}assets/images/training/${d.promotional_image}" width="120" style="border-radius:4px;">` :
-                            '-');
-                        $('#view_created_at').text(d.created_at ?? '-');
-                        $('#view_updated_at').text(d.updated_at ?? '-');
-                        $('#viewModal').modal('show');
-                    } else {
-                        Swal.fire("Error", res.message, "error");
+                    if (res.code != 0 || !res.data) {
+                        Swal.fire("Error", res.message || "Failed to load training details.", "error");
+                        return;
                     }
+                    const d = res.data;
+                    const base = "<?= $baseURL ?>";
+
+                    const ptype = { 0: 'OTHER', 1: 'ONSITE TRAINING', 2: 'VIRTUAL LEARNING' };
+                    const approvalBadge = d.approval_status == 1 ? '<span class="badge light badge-success">Approved</span>' :
+                        d.approval_status == 2 ? '<span class="badge light badge-danger">Rejected</span>' :
+                        '<span class="badge light badge-warning">Pending</span>';
+                    const statusBadge = d.status == 1 ? '<span class="badge light badge-primary">Started</span>' :
+                        d.status == 2 ? '<span class="badge light badge-secondary">Closed</span>' :
+                        '<span class="badge light badge-light">Not Started</span>';
+
+                    $('#viewSub').text(d.reference_no ? 'Ref: ' + d.reference_no : '');
+
+                    const ptypeLabel = ptype[d.program_type] || escapeHtml(d.program_type) || '-';
+
+                    $('#viewInfo').html(`
+                        <tr><th style="width:32%;">Reference No</th><td>${escapeHtml(d.reference_no) || '-'}</td></tr>
+                        <tr><th>Accreditation No</th><td>${escapeHtml(d.accreditation_no) || '-'}</td></tr>
+                        <tr><th>Accreditation Date</th><td>${fmtDate(d.accreditation_date)}</td></tr>
+                        <tr><th>Title</th><td>${escapeHtml(d.title) || '-'}</td></tr>
+                        <tr><th>Program Type</th><td><span class="badge-type">${ptypeLabel}</span></td></tr>
+                        <tr><th>Status</th><td>${approvalBadge} ${statusBadge}</td></tr>
+                        <tr><th>Summary</th><td>${escapeHtml(d.summary) || '-'}</td></tr>
+                        <tr><th>Objectives</th><td>${escapeHtml(d.objectives) || '-'}</td></tr>
+                        <tr><th>Schedule</th><td>${d.start_at ? fmtDate(d.start_at) : '-'}${d.end_at ? ' &rarr; ' + fmtDate(d.end_at) : ''}</td></tr>
+                        <tr><th>Created At</th><td>${escapeHtml(d.created_at) || '-'}</td></tr>
+                        <tr><th>Updated At</th><td>${escapeHtml(d.updated_at) || '-'}</td></tr>
+                    `);
+
+                    $('#viewAddress').html(`
+                        <tr><th style="width:32%;">Region</th><td>${escapeHtml(d.region_name) || escapeHtml(d.region_id) || '-'}</td></tr>
+                        <tr><th>Province</th><td>${escapeHtml(d.province_name) || escapeHtml(d.province_id) || '-'}</td></tr>
+                        <tr><th>City / Municipality</th><td>${escapeHtml(d.city_name) || escapeHtml(d.city_id) || '-'}</td></tr>
+                        <tr><th>Barangay</th><td>${escapeHtml(d.barangay_name) || escapeHtml(d.barangay_id) || '-'}</td></tr>
+                        <tr><th>Street</th><td>${escapeHtml(d.street) || '-'}</td></tr>
+                    `);
+
+                    $('#viewImage').html(d.promotional_image
+                        ? `<img src="${base}assets/images/training/${escapeHtml(d.promotional_image)}" alt="Promotional Image" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;" onerror="this.style.display='none'">`
+                        : '<span class="text-muted">No image</span>');
+
+                    $('#viewDiscussion').html(d.discussion
+                        ? `<a href="${base}assets/files/training/${escapeHtml(d.discussion)}" target="_blank" class="btn btn-sm btn-outline-info"><i class="fas fa-file-pdf me-1"></i> View Discussion File</a>`
+                        : '<span class="text-muted">No file</span>');
+
+                    $('#viewModal').modal('show');
+                },
+                error: function(xhr) {
+                    console.error("GET_TRAINING failed:", xhr.responseText);
+                    Swal.fire("Error", "Failed to load training details.", "error");
                 }
             });
         });
@@ -1057,7 +1043,7 @@
                         $('#edit_objectives').val(d.objectives);
                         $('#edit_start_at').val(d.start_at ? d.start_at.slice(0, 10) : '');
                         $('#edit_end_at').val(d.end_at ? d.end_at.slice(0, 10) : '');
-                        $('#edit_program_type').val(d.program_type);
+                        $('#edit_program_type').val(String(d.program_type ?? '')).selectpicker('refresh');
                         $('#edit_street').val(d.street);
                         $('#edit_current_image').html(d.promotional_image ?
                             `<img src="${base}assets/images/training/${d.promotional_image}" width="100" class="mb-2">` :

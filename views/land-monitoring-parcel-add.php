@@ -63,10 +63,10 @@
                                     <label for="land_use_type" class="form-label">Land Use Type <span class="text-danger">*</span></label>
                                     <select id="land_use_type" class="form-control select2" required>
                                         <option value="">Select type</option>
-                                        <option value="agricultural">Agricultural</option>
-                                        <option value="residential">Residential</option>
-                                        <option value="commercial">Commercial</option>
-                                        <option value="industrial">Industrial</option>
+                                        <option value="Rice">Rice</option>
+                                        <option value="Corn">Corn</option>
+                                        <option value="High-Value Crops">High-Value Crops</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                             </div>
@@ -106,9 +106,6 @@
 <script src="<?= $baseURL ?>assets/vendor/select2/js/select2.full.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('.select2').select2({
-            theme: 'bootstrap4',
-        });
 
         const API = "<?= $baseURL ?>controller/ctrl-land-parcel.php";
 
@@ -137,6 +134,7 @@
                     }
 
                     $("#beneficiary_id").html(html);
+                    reinitSelect2('#beneficiary_id');
                 }
             });
         }

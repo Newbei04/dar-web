@@ -3,111 +3,103 @@
 <?= endSection() ?>
 <?= startSection('content') ?>
 <div class="container-fluid">
-    <div class="card-deck">
+    <div class="page-titles">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="<?= $baseURL ?>list-land-parcel">Land</a></li>
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Land Parcel</a></li>
+        </ol>
+    </div>
 
-        <div class="card shadow border-0 mt-4">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">Edit Land Parcel</h4>
+                    <a href="<?= $baseURL ?>list-land-parcel" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form id="editLandParcelForm">
+                        <input type="hidden" id="id">
 
-            <!-- HEADER -->
-            <div class="card-header">
-                <h3 class="mb-0 font-weight-bold">Edit Land Parcel</h3>
-                <small class="text-muted">Update agricultural land information</small>
-            </div>
+                        <!-- PARCEL INFORMATION -->
+                        <h6 class="text-uppercase text-muted mb-4 fw-bold"><small>Parcel Information</small></h6>
 
-            <div class="card-body">
-
-                <form id="editLandParcelForm">
-                    <input type="hidden" id="id">
-
-                    <!-- SECTION 1 -->
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3">Parcel Information</h5>
-
-                        <div class="form-row">
-
-                            <div class="col-md-6 mb-3">
-                                <label class="font-weight-semibold">Beneficiary</label>
-                                <select class="form-control select2" id="beneficiary_id">
-                                    <option value="">Select beneficiary</option>
-                                </select>
-                                <small class="text-muted">Select the land owner / beneficiary</small>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="beneficiary_id" class="form-label">Beneficiary <span class="text-danger">*</span></label>
+                                    <select id="beneficiary_id" class="form-control select2" required>
+                                        <option value="">Select beneficiary</option>
+                                    </select>
+                                    <small class="text-muted">Select the land owner / beneficiary</small>
+                                </div>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="font-weight-semibold">Title Number</label>
-                                <input type="text"
-                                    class="form-control"
-                                    id="title_number"
-                                    placeholder="e.g. TN-2026-00001">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="title_number" class="form-label">Title Number <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="title_number" placeholder="e.g. TN-2026-00001" required>
+                                </div>
                             </div>
-
                         </div>
-                    </div>
 
-                    <hr>
+                        <hr>
 
-                    <!-- SECTION 2 -->
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3">Land Details</h5>
+                        <!-- LAND DETAILS -->
+                        <h6 class="text-uppercase text-muted mb-4 fw-bold"><small>Land Details</small></h6>
 
-                        <div class="form-row">
-
-                            <div class="col-md-6 mb-3">
-                                <label class="font-weight-semibold">Total Area</label>
-                                <div class="input-group">
-                                    <input type="number"
-                                        step="0.01"
-                                        class="form-control"
-                                        id="total_area_hectares"
-                                        placeholder="0.00">
-                                    <div class="input-group-append">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="total_area_hectares" class="form-label">Total Area <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.01" class="form-control" id="total_area_hectares" placeholder="0.00" required>
                                         <span class="input-group-text">Ha</span>
                                     </div>
+                                    <small class="text-muted">Enter area in hectares</small>
                                 </div>
-                                <small class="text-muted">Enter area in hectares</small>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="font-weight-semibold">Land Use Type</label>
-                                <select class="form-control select2" id="land_use_type">
-                                    <option value="">Select type</option>
-                                    <option value="agricultural">Agricultural</option>
-                                    <option value="residential">Residential</option>
-                                    <option value="commercial">Commercial</option>
-                                    <option value="industrial">Industrial</option>
-                                </select>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="land_use_type" class="form-label">Land Use Type <span class="text-danger">*</span></label>
+                                    <select id="land_use_type" class="form-control select2" required>
+                                        <option value="">Select type</option>
+                                        <option value="Rice">Rice</option>
+                                        <option value="Corn">Corn</option>
+                                        <option value="High-Value Crops">High-Value Crops</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
                             </div>
-
                         </div>
-                    </div>
 
-                    <hr>
+                        <hr>
 
-                    <!-- SECTION 3 -->
-                    <div class="mb-2">
-                        <h5 class="text-primary mb-3">Survey Information</h5>
+                        <!-- SURVEY INFORMATION -->
+                        <h6 class="text-uppercase text-muted mb-4 fw-bold"><small>Survey Information</small></h6>
 
-                        <div class="form-row">
-
-                            <div class="col-md-6 mb-3">
-                                <label class="font-weight-semibold">Last Survey Date</label>
-                                <input type="date" class="form-control" id="last_survey_date">
-                                <small class="text-muted">Optional but recommended</small>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="last_survey_date" class="form-label">Last Survey Date</label>
+                                    <input type="date" class="form-control" id="last_survey_date">
+                                    <small class="text-muted">Optional but recommended</small>
+                                </div>
                             </div>
-
                         </div>
-                    </div>
 
-                </form>
+                        <hr>
 
+                        <div class="d-flex justify-content-end">
+                            <a href="<?= $baseURL ?>list-land-parcel" class="btn btn-outline-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4" id="saveBtn">
+                                <i class="fa fa-save me-1"></i> Update Land Parcel
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="card-footer d-flex justify-content-end">
-                <a href="<?= $baseURL ?>list-land-parcel" class="btn btn-outline-secondary mr-2">Cancel</a>
-                <button type="submit" form="editLandParcelForm" class="btn btn-primary px-4" id="saveBtn">
-                    <i class="fe fe-save mr-1"></i> Update Land Parcel
-                </button>
-            </div>
-
         </div>
     </div>
 </div>
@@ -116,9 +108,6 @@
 <script src="<?= $baseURL ?>assets/vendor/select2/js/select2.full.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('.select2').select2({
-            theme: 'bootstrap4',
-        });
 
         const API = "<?= $baseURL ?>controller/ctrl-land-parcel.php";
         const urlParams = new URLSearchParams(window.location.search);
@@ -155,9 +144,32 @@
                         });
                     }
                     $("#beneficiary_id").html(html);
+                    reinitSelect2('#beneficiary_id');
                     cb && cb();
                 }
             });
+        }
+
+        // Select a saved value case-insensitively; if nothing matches, append the
+        // stored value as an option so the field always reflects the data.
+        function setSelectValue($sel, value, fallbackLabel) {
+            if (value === null || value === undefined || value === '') {
+                $sel.val('').trigger('change');
+                return;
+            }
+            let matched = false;
+            $sel.find('option').each(function() {
+                if (String($(this).val()).trim().toLowerCase() === String(value).trim().toLowerCase()) {
+                    $(this).prop('selected', true);
+                    matched = true;
+                    return false;
+                }
+            });
+            if (!matched) {
+                $sel.append(new Option(fallbackLabel || value, value, true, true));
+                reinitSelect2($sel);
+            }
+            $sel.trigger('change');
         }
 
         function loadParcel() {
@@ -174,10 +186,10 @@
                     if (res.code == 0 && res.data) {
                         const p = res.data.parcel;
                         $("#id").val(p.id);
-                        $("#beneficiary_id").val(p.beneficiary_id || '').trigger('change');
+                        setSelectValue($("#beneficiary_id"), p.beneficiary_id, p.beneficiary_name);
                         $("#title_number").val(p.title_number || '');
                         $("#total_area_hectares").val(p.total_area_hectares || '');
-                        $("#land_use_type").val(p.land_use_type || '').trigger('change');
+                        setSelectValue($("#land_use_type"), p.land_use_type, p.land_use_type);
                         $("#last_survey_date").val(p.last_survey_date || '');
                     } else {
                         Swal.fire("Error", res.message || "Parcel not found.", "error").then(() => {
@@ -194,6 +206,11 @@
         $('#editLandParcelForm').on('submit', function(e) {
             e.preventDefault();
 
+            if (!$('#beneficiary_id').val() || !$('#title_number').val().trim() || !$('#total_area_hectares').val() || !$('#land_use_type').val()) {
+                Swal.fire("Error", "Please complete the required fields.", "error");
+                return;
+            }
+
             $("#saveBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Updating...');
 
             showLoader();
@@ -206,7 +223,7 @@
                     trans: "EDIT_LAND_PARCEL",
                     id: $('#id').val(),
                     beneficiary_id: $('#beneficiary_id').val(),
-                    title_number: $('#title_number').val(),
+                    title_number: $('#title_number').val().trim(),
                     total_area_hectares: $('#total_area_hectares').val(),
                     latitude: null,
                     longitude: null,
@@ -217,7 +234,11 @@
                 success: function(res) {
                     closeLoader();
                     if (res.code == 0) {
-                        Swal.fire("Success", "Land parcel updated successfully!", "success").then(() => {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Updated!",
+                            text: res.message || "Land parcel updated successfully!"
+                        }).then(() => {
                             window.location.href = '<?= $baseURL ?>list-land-parcel';
                         });
                     } else {
@@ -228,7 +249,7 @@
                     closeLoader();
                 },
                 complete: function() {
-                    $("#saveBtn").prop("disabled", false).html('<i class="fe fe-save mr-1"></i> Update Land Parcel');
+                    $("#saveBtn").prop("disabled", false).html('<i class="fa fa-save me-1"></i> Update Land Parcel');
                 }
             });
         });

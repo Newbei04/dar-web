@@ -81,6 +81,7 @@ else if ($trans == "EDIT_RECORD") {
 
     $id                  = $data['id'] ?? '';
     $land_parcel_id      = $data['land_parcel_id'] ?? '';
+    $beneficiary_id      = $data['beneficiary_id'] ?? '';
     $credit_limit        = $data['credit_limit'] ?? '';
     $certificate_status  = $data['certificate_status'] ?? '';
     $issued_date         = $data['issued_date'] ?? '';
@@ -100,6 +101,7 @@ else if ($trans == "EDIT_RECORD") {
         UPDATE cocrom_records
         SET 
             land_parcel_id='$land_parcel_id',
+            beneficiary_id='$beneficiary_id',
             credit_limit='$credit_limit',
             certificate_status='$certificate_status',
             issued_date='$issued_date',
@@ -132,6 +134,7 @@ else if ($trans == "EDIT_RECORD") {
             r.id,
             r.land_parcel_id,
             lp.title_number,
+            CONCAT(b.fname, ' ', b.mname, ' ', b.lname) AS beneficiary_name,
             r.credit_limit,
             r.certificate_status,
             r.issued_date,
@@ -139,6 +142,7 @@ else if ($trans == "EDIT_RECORD") {
             r.encrypted_signature
         FROM cocrom_records r
         LEFT JOIN cocrom_land_parcels lp ON lp.id = r.land_parcel_id
+        LEFT JOIN beneficiary b ON b.id = r.beneficiary_id
         ORDER BY r.id DESC
     ";
 

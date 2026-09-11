@@ -55,11 +55,11 @@
                                     <label for="certificate_status" class="form-label">Certificate Status <span class="text-danger">*</span></label>
                                     <select id="certificate_status" class="form-control select2" required>
                                         <option value="">Select status</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="active">Active</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="released">Released</option>
-                                        <option value="expired">Expired</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Approved">Approved</option>
+                                        <option value="Released">Released</option>
+                                        <option value="Expired">Expired</option>
                                     </select>
                                 </div>
                             </div>
@@ -124,11 +124,6 @@
 <script>
     $(document).ready(function() {
 
-        $('.select2').select2({
-            theme: 'bootstrap4',
-            width: '100%'
-        });
-
         const API = "<?= $baseURL ?>controller/ctrl-land-records.php";
 
         // ======================
@@ -156,6 +151,7 @@
                     }
 
                     $("#land_parcel_id").html(html);
+                    reinitSelect2('#land_parcel_id');
                 }
             });
         }
@@ -185,6 +181,7 @@
                     }
 
                     $("#beneficiary_id").html(html);
+                    reinitSelect2('#beneficiary_id');
                     cb && cb();
                 }
             });
