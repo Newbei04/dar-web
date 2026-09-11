@@ -204,10 +204,13 @@ if ($trans == "ADD_MAINTENANCE") {
         SELECT 
             mm.*,
             m.name AS machinery_name,
+            m.model AS machinery_model,
+            br.name AS branch_name,
             f.name AS facility_name,
             (SELECT name FROM machinery_images WHERE machinery_id = m.id AND is_primary = 1 LIMIT 1) AS image
         FROM machinery_maintenance mm
         LEFT JOIN machinery m ON m.id = mm.machinery_id
+        LEFT JOIN branch br ON br.id = m.branch_id
         LEFT JOIN facility f ON f.id = mm.facility_id
         $where
         ORDER BY mm.created_at DESC

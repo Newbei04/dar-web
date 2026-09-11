@@ -2,6 +2,12 @@
 <?= startSection('css') ?>
 <link href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css" rel="stylesheet">
+<style>
+    .is-invalid-group .select2-selection,
+    .is-invalid-group input {
+        border-color: #ff5e5e !important;
+    }
+</style>
 <?= endSection() ?>
 
 <?= startSection('content') ?>
@@ -37,13 +43,14 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                                 <th width="2%">#</th>
                                 <th width="8%">Image</th>
                                 <th>Machinery</th>
+                                <th>Branch</th>
                                 <th>Facility</th>
                                 <th>Type</th>
                                 <th>Priority</th>
                                 <th>Status</th>
                                 <th>Cost</th>
                                 <th>Date</th>
-                                <th width="18%">Actions</th>
+                                <th width="16%">Actions</th>
                             </tr>
                         </thead>
 
@@ -59,7 +66,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 </div>
 
 <!-- ================= ADD MAINTENANCE MODAL ================= -->
-<div class="modal fade" id="addMaintenanceModal">
+<div class="modal fade" id="addMaintenanceModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -70,80 +77,125 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                 <button type="button" class="btn-close" data-bs-dismiss="modal">
                 </button>
             </div>
+
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label>Machine Type <span class="text-danger">*</span></label>
-                        <select class="form-control single-select" id="machinery_type_id">
-                            <option value="">Select Machine Type</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Machinery <span class="text-danger">*</span></label>
-                        <select class="form-control single-select" id="machinery_id"></select>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Facility <span class="text-danger">*</span></label>
-                        <select class="form-control single-select" id="facility_id"></select>
-                    </div>
+
+                <h6 class="text-muted text-uppercase mb-3">Machine</h6>
+
+                <div class="form-group mb-3">
+                    <label class="font-weight-semibold">Machine Type <span class="text-danger">*</span></label>
+                    <select class="form-control single-select" id="machinery_type_id">
+                        <option value="">Select Machine Type</option>
+                    </select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Type <span class="text-danger">*</span></label>
-                        <select class="form-control single-select" id="type">
-                            <option value="">Select Type</option>
-                            <option value="1">Preventive</option>
-                            <option value="2">Corrective</option>
-                            <option value="4">Emergency</option>
-                            <option value="5">Inspection</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Priority <span class="text-danger">*</span></label>
-                        <select class="form-control single-select" id="priority">
-                            <option value="">Select Priority</option>
-                            <option value="1">Low</option>
-                            <option value="2">Medium</option>
-                            <option value="3">High</option>
-                            <option value="4">Critical</option>
-                        </select>
-                    </div>
+
+                <div class="form-group mb-3">
+                    <label class="font-weight-semibold">Machinery <span class="text-danger">*</span></label>
+                    <select class="form-control single-select" id="machinery_id">
+                        <option value="">Select Machinery</option>
+                    </select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Start Date</label>
-                        <input type="datetime-local" class="form-control" id="start_date">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>End Date</label>
-                        <input type="datetime-local" class="form-control" id="end_date">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label>Labor Cost (₱)</label>
-                        <input type="number" class="form-control" id="labor_cost" value="0" min="0">
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Parts Cost (₱)</label>
-                        <input type="number" class="form-control" id="parts_cost" value="0" min="0">
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label>Odometer Reading</label>
-                        <input type="number" class="form-control" id="odometer" value="0" min="0">
-                    </div>
-                </div>
+
                 <div class="form-group mb-0">
-                    <label>Description</label>
+                    <label class="font-weight-semibold">Facility <span class="text-danger">*</span></label>
+                    <select class="form-control single-select" id="facility_id">
+                        <option value="">Select Facility</option>
+                    </select>
+                    <small class="form-text text-muted">Auto-selected from the machine's branch.</small>
+                </div>
+
+                <hr>
+
+                <h6 class="text-muted text-uppercase mb-3">Schedule</h6>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="font-weight-semibold">Type <span class="text-danger">*</span></label>
+                            <select class="form-control single-select" id="type">
+                                <option value="">Select Type</option>
+                                <option value="1">Preventive</option>
+                                <option value="2">Corrective</option>
+                                <option value="4">Emergency</option>
+                                <option value="5">Inspection</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="font-weight-semibold">Priority <span class="text-danger">*</span></label>
+                            <select class="form-control single-select" id="priority">
+                                <option value="">Select Priority</option>
+                                <option value="1">Low</option>
+                                <option value="2">Medium</option>
+                                <option value="3">High</option>
+                                <option value="4">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="font-weight-semibold">Start Date</label>
+                            <input type="datetime-local" class="form-control" id="start_date">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label class="font-weight-semibold">End Date</label>
+                            <input type="datetime-local" class="form-control" id="end_date">
+                            <small class="form-text text-muted">End date cannot be before the start date.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="text-muted text-uppercase mb-3">Cost & Notes</h6>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label class="font-weight-semibold">Labor Cost</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" class="form-control" id="labor_cost" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label class="font-weight-semibold">Parts Cost</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" class="form-control" id="parts_cost" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label class="font-weight-semibold">Odometer Reading</label>
+                            <input type="number" class="form-control" id="odometer" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="font-weight-semibold">Description</label>
                     <textarea class="form-control" id="description" rows="3" placeholder="Enter maintenance description"></textarea>
                 </div>
+
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="saveMaintenanceBtn">
                     <i class="fa fa-save mr-1"></i> Save Maintenance
                 </button>
             </div>
+
         </div>
     </div>
 </div>
@@ -202,6 +254,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 
         let tbl = $('#tblMaintenance').DataTable({
             responsive: true,
+            order: [[9, 'desc']],
             language: {
                 paginate: {
                     next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
@@ -246,6 +299,10 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         }
                         window.machineThumbFallback = machineThumbFallback;
 
+                        function escapeAttr(v) {
+                            return String(v ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
+                        }
+
                         let machineryImage = item.image ?
                             `<img src="<?= $baseURL ?>assets/images/machinery/${item.image}" alt="Machine" style="width:50px;height:50px;border-radius:10%;object-fit:cover;" onerror="this.outerHTML=machineThumbFallback();">` :
                             machineThumbFallback();
@@ -266,20 +323,24 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         let cost = parseFloat(item.total_cost ?? (parseFloat(item.labor_cost) + parseFloat(item.parts_cost)));
                         let costHtml = isNaN(cost) ? '₱0.00' : '₱' + cost.toFixed(2);
 
+                        let machineryCell = item.model ?
+                            `<div>${item.machinery_name ?? '-'}</div><small class="text-muted">${escapeAttr(item.model)}</small>` :
+                            `<div>${item.machinery_name ?? '-'}</div>`;
+
                         let actionBtn = `
                         <button class="btn btn-info mr-2 viewBtn"
                             data-id="${item.id}"
-                            data-machinery="${item.machinery_name || '-'}"
-                            data-facility="${item.facility_name || '-'}"
-                            data-type="${item.type_label || '-'}"
-                            data-priority="${item.priority_label || '-'}"
-                            data-status="${item.status_label || '-'}"
-                            data-cost="${costHtml}"
-                            data-start="${item.start_date || '-'}"
-                            data-end="${item.end_date || '-'}"
-                            data-odometer="${item.odometer_reading ?? '-'}"
-                            data-description="${item.description || '-'}"
-                            data-image="${item.image || ''}"
+                            data-machinery="${escapeAttr(item.machinery_name)}"
+                            data-facility="${escapeAttr(item.facility_name)}"
+                            data-type="${escapeAttr(item.type_label)}"
+                            data-priority="${escapeAttr(item.priority_label)}"
+                            data-status="${escapeAttr(item.status_label)}"
+                            data-cost="${escapeAttr(costHtml)}"
+                            data-start="${escapeAttr(item.start_date)}"
+                            data-end="${escapeAttr(item.end_date)}"
+                            data-odometer="${escapeAttr(item.odometer_reading)}"
+                            data-description="${escapeAttr(item.description)}"
+                            data-image="${escapeAttr(item.image)}"
                             data-toggle="tooltip" title="View Details">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -304,7 +365,8 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         tbl.row.add([
                             i + 1,
                             machineryImage,
-                            item.machinery_name ?? '-',
+                            machineryCell,
+                            item.branch_name ?? '-',
                             item.facility_name ?? '-',
                             typeBadge,
                             priorityBadge,
@@ -422,10 +484,11 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 
         $("#machinery_id").on("change", function() {
             let branch = $(this).find(":selected").data("branch");
-            if (!branch) return;
-            let fac = (window.facilities || []).find(f => String(f.branch_id) === String(branch));
-            if (fac) {
-                $("#facility_id").val(fac.id).trigger('change');
+            if (branch) {
+                let fac = (window.facilities || []).find(f => String(f.branch_id) === String(branch));
+                if (fac) {
+                    $("#facility_id").val(fac.id).trigger('change');
+                }
             }
         });
 
@@ -433,6 +496,82 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
            ADD MAINTENANCE
         ========================== */
         $("#btnAddMaintenance").on("click", function() {
+            $("#machinery_type_id").val('').trigger('change');
+            $("#machinery_id").val('').trigger('change');
+            $("#facility_id").val('').trigger('change');
+            $("#type").val('').trigger('change');
+            $("#priority").val('').trigger('change');
+            $("#start_date").val('');
+            $("#end_date").val('');
+            $("#labor_cost").val(0);
+            $("#parts_cost").val(0);
+            $("#odometer").val(0);
+            $("#description").val('');
+
+            loadDropdowns(function() {
+                $("#addMaintenanceModal").modal("show");
+            });
+        });
+
+        $("#saveMaintenanceBtn").click(function() {
+
+            if (
+                !$("#machinery_type_id").val() ||
+                !$("#machinery_id").val() ||
+                !$("#facility_id").val() ||
+                !$("#type").val() ||
+                !$("#priority").val()
+            ) {
+                Swal.fire("Error", "Please complete required fields", "error");
+                return;
+            }
+
+            showLoader("Saving...");
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-machinery-maintenance.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "ADD_MAINTENANCE",
+                    machinery_id: $("#machinery_id").val(),
+                    facility_id: $("#facility_id").val(),
+                    type: $("#type").val(),
+                    priority: $("#priority").val(),
+                    start_date: $("#start_date").val(),
+                    end_date: $("#end_date").val(),
+                    labor_cost: $("#labor_cost").val(),
+                    parts_cost: $("#parts_cost").val(),
+                    odometer_reading: $("#odometer").val(),
+                    description: $("#description").val()
+                }),
+
+                success: function(res) {
+                    closeLoader();
+                    Swal.fire({
+                        icon: res.code == 0 ? "success" : "error",
+                        title: res.code == 0 ? "Success" : "Error",
+                        text: res.message
+                    });
+
+                    if (res.code == 0) {
+                        $("#addMaintenanceModal").modal("hide");
+                        loadMaintenance();
+                    }
+                },
+                error: function(xhr) {
+                    closeLoader();
+                    console.error("ADD_MAINTENANCE failed:", xhr.responseText);
+                    Swal.fire("Error", "Failed to add maintenance.", "error");
+                }
+            });
+        });
+
+        /* =========================
+           ADD MAINTENANCE
+        ========================== */
+        $("#btnAddMaintenance").on("click", function() {
+            window.machineriesMap = {};
             $("#machinery_type_id").val('').trigger('change');
             $("#machinery_id").val('').trigger('change');
             $("#facility_id").val('').trigger('change');
