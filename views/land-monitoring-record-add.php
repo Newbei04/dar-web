@@ -56,6 +56,7 @@
                                     <select id="certificate_status" class="form-control select2" required>
                                         <option value="">Select status</option>
                                         <option value="pending">Pending</option>
+                                        <option value="active">Active</option>
                                         <option value="approved">Approved</option>
                                         <option value="released">Released</option>
                                         <option value="expired">Expired</option>

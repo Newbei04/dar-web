@@ -113,6 +113,15 @@ if ($trans == "LIST_MACHINERY_TYPE") {
     $description = $data['description'] ?? '';
     $status      = $data['status']      ?? 1;
 
+    if (!in_array((int)$status, [0, 1], true)) {
+        echo json_encode([
+            "code"    => 1,
+            "message" => "Status must be 0 or 1",
+            "data"    => null
+        ]);
+        exit;
+    }
+
     if (!$branch_id || !$type_id || !$name) {
         echo json_encode([
             "code"    => 1,
@@ -183,7 +192,17 @@ if ($trans == "LIST_MACHINERY_TYPE") {
     if (isset($data['model']))        $fields[] = "model='{$data['model']}'";
     if (isset($data['description']))  $fields[] = "description='{$data['description']}'";
     if (isset($data['daily_rate']))   $fields[] = "daily_rate='{$data['daily_rate']}'";
-    if (isset($data['status']))       $fields[] = "status='{$data['status']}'";
+    if (isset($data['status'])) {
+        if (!in_array((int)$data['status'], [0, 1], true)) {
+            echo json_encode([
+                "code" => 1,
+                "message" => "Status must be 0 or 1",
+                "data" => null
+            ]);
+            exit;
+        }
+        $fields[] = "status='{$data['status']}'";
+    }
 
     $fields[] = "updated_at = NOW()";
 

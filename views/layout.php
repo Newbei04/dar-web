@@ -11,27 +11,27 @@ require_once "navbar_1.php";
 
 <head>
 	<!--Title-->
-	<title>DAR Web</title>
+	<title>DAR — Resource Management System</title>
 
 	<!-- Meta -->
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="author" content="DexignZone">
+	<meta name="author" content="Department of Agrarian Reform">
 	<meta name="robots" content="index, follow">
 
-	<meta name="keywords" content="Mophy, Payment Admin Dashboard, Bootstrap Template, FrontEnd, Web Application, Payment Management, Responsive Design, User Experience, Customizable, Modern UI, Dashboard Template, Admin Panel, Bootstrap 4, HTML5, CSS3, JavaScript, Finance, Payment Gateway, Admin Template, UI Kit, SASS, SCSS, CRM, Analytics, Responsive Dashboard">
+	<meta name="keywords" content="DAR, Department of Agrarian Reform, Resource Management System, Agrarian Reform Beneficiaries, Land Monitoring, Facility, Machinery, Program, Training, Beneficiary Management, Agricultural Resources, Philippines Government, Web Application, Responsive Design">
 
-	<meta name="description" content="Explore the power of Mophy – a sleek and feature-rich Payment Admin Dashboard Bootstrap Template with a seamlessly integrated FrontEnd.">
+	<meta name="description" content="Department of Agrarian Reform — Resource Management System. Manage beneficiaries, land parcels, facilities, machinery, programs, trainings, and agricultural resources in one unified platform.">
 
-	<meta property="og:title" content="Mophy - Payment Admin Dashboard Bootstrap Template + FrontEnd | DexignZone">
-	<meta property="og:description" content="Explore the power of Mophy – a sleek and feature-rich Payment Admin Dashboard Bootstrap Template with a seamlessly integrated FrontEnd.">
-	<meta property="og:image" content="https://mophy.dexignzone.com/xhtml/social-image.png">
+	<meta property="og:title" content="DAR — Resource Management System">
+	<meta property="og:description" content="Department of Agrarian Reform — Resource Management System. Manage beneficiaries, land, facilities, machinery, programs, and trainings.">
+	<meta property="og:image" content="<?= $baseURL ?>assets/images/dar.png">
 
 	<meta name="format-detection" content="telephone=no">
 
-	<meta name="twitter:title" content="Mophy - Payment Admin Dashboard Bootstrap Template + FrontEnd | DexignZone">
-	<meta name="twitter:description" content="Explore the power of Mophy – a sleek and feature-rich Payment Admin Dashboard Bootstrap Template with a seamlessly integrated FrontEnd.">
-	<meta name="twitter:image" content="https://mophy.dexignzone.com/xhtml/social-image.png">
+	<meta name="twitter:title" content="DAR — Resource Management System">
+	<meta name="twitter:description" content="Department of Agrarian Reform — Resource Management System.">
+	<meta name="twitter:image" content="<?= $baseURL ?>assets/images/dar.png">
 	<meta name="twitter:card" content="summary_large_image">
 
 	<!-- MOBILE SPECIFIC -->
@@ -91,7 +91,7 @@ require_once "navbar_1.php";
         ***********************************-->
 		<div class="footer">
 			<div class="copyright">
-				<p>Copyright © Designed &amp; Developed by <a href="http://dexignzone.com/" target="_blank">DexignZone</a> <span class="current-year">2024</span></p>
+				<p>Copyright © <span class="current-year"><?= date('Y') ?></span> Department of Agrarian Reform — Resource Management System</p>
 			</div>
 		</div>
 		<!--**********************************

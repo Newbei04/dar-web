@@ -251,13 +251,13 @@
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="ciProgramWrap">
                         <label class="form-label fw-bold">Program</label>
                         <select class="single-select" id="ciProgram">
                             <option value="0">Cash In</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="ciBalanceTypeWrap">
                         <label class="form-label fw-bold">Balance Type</label>
                         <select class="single-select" id="ciBalanceType">
                             <option value="1">Personal Savings</option>
@@ -507,9 +507,26 @@ $(document).ready(function() {
         $('#ciAmount').val('');
         $('#ciProgram').val('');
         $('#ciBalanceType').val('1');
+        toggleProgramField();
         $('#cashInModal').modal('show');
         reinitSelect2('#ciProgram');
         reinitSelect2('#ciBalanceType');
+    });
+
+    function toggleProgramField() {
+        var balanceType = parseInt($('#ciBalanceType').val());
+        var isPersonal = balanceType == 1;
+        $('#ciProgram').prop('required', !isPersonal);
+        $('#ciProgram').prop('disabled', isPersonal);
+        if (isPersonal) {
+            $('#ciProgram').val('');
+        }
+        $('#ciProgramWrap').toggleClass('d-none', isPersonal);
+        $('#ciBalanceTypeWrap').toggleClass('col-md-12', isPersonal).toggleClass('col-md-6', !isPersonal);
+    }
+
+    $(document).on('change', '#ciBalanceType', function() {
+        toggleProgramField();
     });
 
     $(document).on('click', '#btnConfirmCashIn', function() {
@@ -522,7 +539,7 @@ $(document).ready(function() {
             Swal.fire("Validation", "Please enter a valid amount.", "warning");
             return;
         }
-        if (!programId) {
+        if (balanceType != 1 && !programId) {
             Swal.fire("Validation", "Please select a program.", "warning");
             return;
         }

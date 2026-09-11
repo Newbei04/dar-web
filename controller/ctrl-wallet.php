@@ -232,7 +232,7 @@ if ($trans == "LIST_WALLET") {
         exit;
     }
 
-    if (!$programId) {
+    if ($balanceType != 1 && !$programId) {
         echo json_encode(["code" => 1, "message" => "Please select a program."]);
         exit;
     }

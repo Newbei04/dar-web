@@ -223,12 +223,13 @@ if ($trans == "ADD_USER") {
     }
     exit;
 } else if ($trans == "LIST_USER") {
-    $query = "  SELECT 
-					u.id, u.username, u.type, u.status,
-					(SELECT t.title FROM users_role t WHERE t.id = u.role_id LIMIT 1) AS role
-				FROM users u
-				WHERE u.type = 0 
-                ORDER BY u.id ASC
+    $query = "  SELECT  u.id, u.username, u.type, u.status,
+        ( 
+        SELECT t.title  FROM users_role t  WHERE t.id = u.type  LIMIT 1
+        ) AS role
+        FROM users u
+        WHERE u.type = 0
+        ORDER BY u.id ASC
 			";
     $res = mysqli_query($conn, $query);
 

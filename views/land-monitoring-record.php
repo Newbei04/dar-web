@@ -19,7 +19,7 @@
                 <div class="card-header d-flex flex-wrap align-items-center">
                     <h4 class="card-title me-auto mb-2 mb-md-0">Land Records List</h4>
                     <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) { ?>
-                        <a href="<?= $basePath ?>/add-land-records" class="btn btn-primary btn-sm">
+                        <a href="<?= $baseURL ?>add-land-records" class="btn btn-primary btn-sm">
                             <i class="fas fa-plus me-1"></i> Add Land Record
                         </a>
                     <?php } ?>
@@ -55,10 +55,6 @@
 <script src="<?= $baseURL ?>assets/js/plugins-init/datatables.init.js"></script>
 <script>
     $(document).ready(function() {
-
-        if ("<?= $_SESSION["IS_LOGIN"] ?>" != "1") {
-            window.location.href = '<?= $basePath ?>/login';
-        }
 
         const API = '<?= $baseURL ?>controller/ctrl-land-records.php';
         const isAdmin = <?= isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1 ? 'true' : 'false' ?>;
@@ -143,13 +139,13 @@
         // ================= VIEW RECORD =================
         $(document).on('click', '.viewRecordBtn', function() {
             let id = $(this).data('id');
-            window.location.href = '<?= $basePath ?>/record-detail?id=' + id;
+            window.location.href = '<?= $baseURL ?>record-detail?id=' + id;
         });
 
         // ================= EDIT RECORD =================
         $(document).on('click', '.editRecordBtn', function() {
             let id = $(this).data('id');
-            window.location.href = '<?= $basePath ?>/edit-land-records?id=' + id;
+            window.location.href = '<?= $baseURL ?>edit-land-records?id=' + id;
         });
 
         // ================= DELETE =================

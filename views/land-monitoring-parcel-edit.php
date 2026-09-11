@@ -102,7 +102,7 @@
             </div>
 
             <div class="card-footer d-flex justify-content-end">
-                <a href="<?= $basePath ?>/list-land-parcel" class="btn btn-outline-secondary mr-2">Cancel</a>
+                <a href="<?= $baseURL ?>list-land-parcel" class="btn btn-outline-secondary mr-2">Cancel</a>
                 <button type="submit" form="editLandParcelForm" class="btn btn-primary px-4" id="saveBtn">
                     <i class="fe fe-save mr-1"></i> Update Land Parcel
                 </button>
@@ -126,7 +126,7 @@
 
         if (!parcelId) {
             Swal.fire("Error", "No parcel ID provided.", "error").then(() => {
-                window.location.href = '<?= $basePath ?>/list-land-parcel';
+                window.location.href = '<?= $baseURL ?>list-land-parcel';
             });
             return;
         }
@@ -180,7 +180,7 @@
                         $("#last_survey_date").val(p.last_survey_date || '');
                     } else {
                         Swal.fire("Error", res.message || "Parcel not found.", "error").then(() => {
-                            window.location.href = '<?= $basePath ?>/list-land-parcel';
+                            window.location.href = '<?= $baseURL ?>list-land-parcel';
                         });
                     }
                 },
@@ -215,7 +215,7 @@
                 success: function(res) {
                     if (res.code == 0) {
                         Swal.fire("Success", "Land parcel updated successfully!", "success").then(() => {
-                            window.location.href = '<?= $basePath ?>/list-land-parcel';
+                            window.location.href = '<?= $baseURL ?>list-land-parcel';
                         });
                     } else {
                         Swal.fire("Error", res.message, "error");

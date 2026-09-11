@@ -1,10 +1,10 @@
--- ============================================================================
+﻿-- ============================================================================
 --  SAMPLE DATA for `dar_dbv4`
 --  Import this file AFTER importing dar_dbv4.sql
 --
 --  NOTE:  reference tables (barangay, district, municipality, province,
---         region) already contain data inside dar_dbv4.sql and are NOT
---         repeated here.
+--         region) and `employee` already contain data inside dar_dbv4.sql
+--         and are NOT repeated here.
 --
 --  Reference codes used (PSGC codes from dar_dbv4.sql):
 --   * region code 010000000    = Region I (Ilocos)
@@ -36,14 +36,19 @@ INSERT INTO `users_role` (`id`, `title`, `description`, `access`, `status`, `cre
 
 -- ---------------------------------------------------------------
 -- users   (password = 12345678, bcrypt hash)
+--         (type: 0 = Employee, 1 = ARB / Beneficiary)
+--   admin   -> role 1 (Admin),       type 0 (Employee)
+--   coop    -> role 2 (Employee),    type 0 (Employee)
+--   staff   -> role 2 (Employee),    type 0 (Employee)
+--   ben1..3 -> role 3 (Beneficiary), type 1 (ARB)
 -- ---------------------------------------------------------------
 INSERT INTO `users` (`id`, `username`, `password`, `role_id`, `type`, `attempt`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'admin', '$2y$10$gRa5TRDFX1cp0UumTBlMHuJIz.IXuYIF6P4flficUMvApvmDJTG6O', 1, 1, NULL, 1, NOW(), NOW()),
-(2, 'coop',  '$2y$10$gRa5TRDFX1cp0UumTBlMHuJIz.IXuYIF6P4flficUMvApvmDJTG6O', 2, 2, NULL, 1, NOW(), NOW()),
-(3, 'staff', '$2y$10$gRa5TRDFX1cp0UumTBlMHuJIz.IXuYIF6P4flficUMvApvmDJTG6O', 2, 3, NULL, 1, NOW(), NOW()),
-(4, 'ben1',  '$2y$10$gRa5TRDFX1cp0UumTBlMHuJIz.IXuYIF6P4flficUMvApvmDJTG6O', 3, 4, NULL, 1, NOW(), NOW()),
-(5, 'ben2',  '$2y$10$gRa5TRDFX1cp0UumTBlMHuJIz.IXuYIF6P4flficUMvApvmDJTG6O', 3, 5, NULL, 1, NOW(), NOW()),
-(6, 'ben3',  '$2y$10$gRa5TRDFX1cp0UumTBlMHuJIz.IXuYIF6P4flficUMvApvmDJTG6O', 3, 6, NULL, 1, NOW(), NOW());
+(1, 'admin', '$2y$10$4PvC/UPi/fljnUh3D5bOh.je77hObtAkIYBpAj10waip.JiUmLKCu', 1, 0, NULL, 1, NOW(), NOW()),
+(2, 'coop',  '$2y$10$4PvC/UPi/fljnUh3D5bOh.je77hObtAkIYBpAj10waip.JiUmLKCu', 2, 0, NULL, 1, NOW(), NOW()),
+(3, 'staff', '$2y$10$4PvC/UPi/fljnUh3D5bOh.je77hObtAkIYBpAj10waip.JiUmLKCu', 2, 0, NULL, 1, NOW(), NOW()),
+(4, 'ben1',  '$2y$10$4PvC/UPi/fljnUh3D5bOh.je77hObtAkIYBpAj10waip.JiUmLKCu', 3, 1, NULL, 1, NOW(), NOW()),
+(5, 'ben2',  '$2y$10$4PvC/UPi/fljnUh3D5bOh.je77hObtAkIYBpAj10waip.JiUmLKCu', 3, 1, NULL, 1, NOW(), NOW()),
+(6, 'ben3',  '$2y$10$4PvC/UPi/fljnUh3D5bOh.je77hObtAkIYBpAj10waip.JiUmLKCu', 3, 1, NULL, 1, NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- branch
@@ -78,14 +83,6 @@ INSERT INTO `facility` (`id`, `branch_id`, `type_ids`, `name`, `phone`, `email`,
 (3, 3, '3',    'Batac Extension Office',     '077-600-9012', 'extension.batac@dar.gov.ph', 'Washington St',       '012805001', NULL, '012805000', '012800000', '010000000', '2906', 'Aglipay (Pob.), City of Batac, Ilocos Norte', 18.0553, 120.5691, '8:00 AM - 5:00 PM', 1, NOW(), NOW());
 
 -- ---------------------------------------------------------------
--- employee
--- ---------------------------------------------------------------
-INSERT INTO `employee` (`id`, `users_id`, `branch_id`, `facility_id`, `reference_no`, `fname`, `mname`, `lname`, `gender`, `marital`, `birthday`, `street`, `barangay_id`, `district_id`, `city_id`, `province_id`, `region_id`, `zip_code`, `country`, `address`, `email`, `mobile`, `position_id`, `status`, `profile`, `created_at`, `updated_at`) VALUES
-(1, 2, 1, 1, 'EMP-2', 'Maria',   'L.', 'Santos',      'Female', 'Married', '1988-04-12', 'J.P. Rizal St', '012812002', NULL, '012812000', '012800000', '010000000', '2900', 'PH', 'Bgy. No. 36, Araniw, Laoag City, Ilocos Norte', 'maria.santos@dar.gov.ph',  '09171234567', NULL, 1, NULL, NOW(), NOW()),
-(2, 3, 2, 2, 'EMP-3', 'Jose',   'R.', 'Dela Cruz',   'Male',   'Single',  '1992-09-23', 'Gen. Luna St',  '012812005', NULL, '012812000', '012800000', '010000000', '2900', 'PH', 'Bgy. No. 41, Balacad, Laoag City, Ilocos Norte', 'jose.delacruz@dar.gov.ph', '09179876543', NULL, 1, NULL, NOW(), NOW()),
-(3, 1, 1, 1, 'EMP-1', 'Admin',  'A.', 'Administrator','Male',  'Married', '1985-01-01', 'S. Gomez St',   '012812001', NULL, '012812000', '012800000', '010000000', '2900', 'PH', 'Bgy. No. 42, Apaya, Laoag City, Ilocos Norte', 'admin@dar.gov.ph',      '09170000001', NULL, 1, NULL, NOW(), NOW());
-
--- ---------------------------------------------------------------
 -- beneficiary
 -- ---------------------------------------------------------------
 INSERT INTO `beneficiary` (`id`, `users_id`, `branch_id`, `facility_id`, `doc_num`, `card_num`, `national_id`, `lname`, `fname`, `mname`, `sname`, `nationality`, `gender`, `marital`, `birthday`, `email`, `mobile`, `street`, `barangay_id`, `district_id`, `city_id`, `province_id`, `region_id`, `zip_code`, `country`, `address`, `land_tenure_status`, `profile`, `report_card_score`, `verified_dt`, `status`, `created_at`, `updated_at`) VALUES
@@ -106,12 +103,13 @@ INSERT INTO `machinery_type` (`id`, `name`, `details`, `created_at`, `updated_at
 -- ---------------------------------------------------------------
 -- machinery
 -- ---------------------------------------------------------------
+-- machinery  (status: 0 = Under Maintenance, 1 = Available)
 INSERT INTO `machinery` (`id`, `branch_id`, `type_id`, `name`, `model`, `description`, `daily_rate`, `ratings`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Kubota Hand Tractor',      'KUB-MD-100', 'Two-wheel hand tractor for small farms',          1500, 4.5, 1, NOW(), NOW()),
-(2, 1, 2, 'Mahindra 4WD Tractor',     'MAH-4WD-S650','Four-wheel tractor for land prep',                5000, 4.8, 1, NOW(), NOW()),
-(3, 2, 3, 'Yanmar Combine Harvester', 'YAN-CB-880',  'Combine harvester for rice harvesting',           8000, 4.7, 1, NOW(), NOW()),
-(4, 2, 4, 'Kubota Thresher',          'KUB-THR-200', 'Mechanical thresher',                              2500, 4.2, 1, NOW(), NOW()),
-(5, 3, 5, 'Kubota Transplanter',      'KUB-TRP-300', 'Rice transplanter',                                3000, 4.4, 2, NOW(), NOW());
+(1, 1, 1, 'Kubota Hand Tractor',      'KUB-MD-100', 'Two-wheel hand tractor for small farms',          1500, 5.0, 1, NOW(), NOW()),
+(2, 1, 2, 'Mahindra 4WD Tractor',     'MAH-4WD-S650','Four-wheel tractor for land prep',                5000, 4.0, 1, NOW(), NOW()),
+(3, 2, 3, 'Yanmar Combine Harvester', 'YAN-CB-880',  'Combine harvester for rice harvesting',           8000, 5.0, 1, NOW(), NOW()),
+(4, 2, 4, 'Kubota Thresher',          'KUB-THR-200', 'Mechanical thresher',                              2500, 4.0, 1, NOW(), NOW()),
+(5, 3, 5, 'Kubota Transplanter',      'KUB-TRP-300', 'Rice transplanter',                                3000, 4.0, 0, NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- machinery_images
@@ -125,18 +123,25 @@ INSERT INTO `machinery_images` (`id`, `machinery_id`, `name`, `is_primary`, `sta
 
 -- ---------------------------------------------------------------
 -- machinery_maintenance
+--   (type: 1-Preventive, 2/3-Corrective, 4-Emergency, 5-Inspection)
+--   (priority: 1-Low, 2-Medium, 3-High, 4-Critical)
+--   (status: 1-Scheduled, 2-In Progress, 3-Completed, 4-Awaiting Parts)
 -- ---------------------------------------------------------------
 INSERT INTO `machinery_maintenance` (`id`, `machinery_id`, `emp_id`, `facility_id`, `type`, `priority`, `start_date`, `end_date`, `labor_cost`, `parts_cost`, `odometer_reading`, `description`, `resolution_notes`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, 2, 2, 1, 2, '2026-01-05 09:00:00', '2026-01-05 17:00:00', 1500, 4500, 12500, 'Routine preventive maintenance', NULL, 3, NOW(), NOW()),
+(1, 2, 2, 2, 1, 2, '2026-01-05 09:00:00', '2026-01-05 17:00:00', 1500, 4500, 12500, 'Routine preventive maintenance', 'Maintenance completed, no issues found', 3, NOW(), NOW()),
 (2, 3, 2, 2, 4, 4, '2026-03-12 09:00:00', '2026-03-13 17:00:00', 2500, 12000, 89000, 'Engine replacement needed', 'Engine replaced', 3, NOW(), NOW()),
-(3, 1, 1, 1, 1, 1, '2026-06-01 09:00:00', '2026-06-01 16:00:00', 800, 1200, 54000, 'Inspection checkup', NULL, 1, NOW(), NOW());
+(3, 1, 1, 1, 5, 1, '2026-06-01 09:00:00', '2026-06-01 16:00:00', 800, 1200, 54000, 'Inspection checkup', 'Inspection passed, no repairs needed', 3, NOW(), NOW()),
+(4, 5, 2, 2, 3, 4, '2026-06-15 09:00:00', NULL, 1800, 22000, 24500, 'Transplanter planting roller and engine repair', 'Awaiting replacement parts', 4, NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- machinery_reviews
 -- ---------------------------------------------------------------
 INSERT INTO `machinery_reviews` (`id`, `machinery_id`, `beneficiary_id`, `rating`, `comment`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 5, 'Very reliable machine for my farm.',  1, NOW(), NOW()),
-(2, 2, 2, 4, 'Works well, slightly noisy.',         1, NOW(), NOW());
+(2, 2, 2, 4, 'Works well, slightly noisy.',         1, NOW(), NOW()),
+(3, 3, 3, 5, 'Powerful harvester, saved us a lot of time.', 1, NOW(), NOW()),
+(4, 4, 1, 4, 'Good thresher, easy to operate.',     1, NOW(), NOW()),
+(5, 5, 2, 4, 'Transplants evenly, keep spare rollers.', 1, NOW(), NOW());
 
 -- ---------------------------------------------------------------
 -- product_category
@@ -196,8 +201,8 @@ INSERT INTO `product_inventory_logs` (`id`, `inventory_id`, `action_type`, `quan
 (2, 2, 1, 200, 200, NULL, 1, 'Initial restock of urea',               NOW()),
 (3, 1, 2,  30,  70, NULL, 4, 'Sold 30 bags to beneficiary',          NOW()),
 (4, 4, 4,  -10,  15, NULL, 1, 'Low stock adjustment',                 NOW()),
-(5, 3, 5,  -40,  80, NULL, 1, 'Batch partially expired, written off', NOW()),
-(6, 2, 6,  -15, 135, NULL, 3, 'Damaged bags during handling',         NOW());
+(5, 3, 5,  -40, 120, NULL, 1, 'Batch partially expired, written off', NOW()),
+(6, 2, 6,  -50, 150, NULL, 3, 'Damaged bags during handling',         NOW());
 
 -- ---------------------------------------------------------------
 -- product_price_history
@@ -274,7 +279,7 @@ INSERT INTO `service_reviews` (`id`, `booking_id`, `rating`, `quality_score`, `t
 -- wallet
 -- ---------------------------------------------------------------
 INSERT INTO `wallet` (`id`, `account_num`, `beneficiary_id`, `total_balance`, `credit_limit`, `is_frozen`, `created_at`) VALUES
-(1, 'WAL0000000000001', 1, 15000.00, 100000.00, 0, NOW()),
+(1, 'WAL0000000000001', 1, 14000.00, 100000.00, 0, NOW()),
 (2, 'WAL0000000000002', 2, 12000.00,  80000.00, 0, NOW()),
 (3, 'WAL0000000000003', 3,  5000.00,  60000.00, 0, NOW());
 
@@ -282,7 +287,7 @@ INSERT INTO `wallet` (`id`, `account_num`, `beneficiary_id`, `total_balance`, `c
 -- wallet_balances
 -- ---------------------------------------------------------------
 INSERT INTO `wallet_balances` (`id`, `wallet_id`, `program_id`, `balance_type`, `amount`, `created_at`) VALUES
-(1, 1, 1, 4, 15000.00, NOW()),
+(1, 1, 1, 4, 14000.00, NOW()),
 (2, 2, 1, 4, 12000.00, NOW()),
 (3, 3, 2, 2,  5000.00, NOW());
 
@@ -323,6 +328,7 @@ INSERT INTO `cocrom_land_parcels` (`id`, `beneficiary_id`, `title_number`, `tota
 
 -- ---------------------------------------------------------------
 -- cocrom_records
+--   (certificate_status: pending, active, approved, released, expired)
 -- ---------------------------------------------------------------
 INSERT INTO `cocrom_records` (`id`, `beneficiary_id`, `land_parcel_id`, `credit_limit`, `certificate_status`, `issued_date`, `expiry_date`, `encrypted_signature`) VALUES
 (1, 1, 1, 100000.00, 'Active', '2026-01-01', '2031-01-01', 'enc-sig-1'),
@@ -330,6 +336,8 @@ INSERT INTO `cocrom_records` (`id`, `beneficiary_id`, `land_parcel_id`, `credit_
 
 -- ---------------------------------------------------------------
 -- cocrom_land_monitoring
+--   (log_type: 0-Site Visit, 1-Photo Report, 2-Soil Test,
+--              3-Pest Control, 4-Others)
 -- ---------------------------------------------------------------
 INSERT INTO `cocrom_land_monitoring` (`id`, `employee_id`, `land_parcels_id`, `log_type`, `title`, `notes`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 0, 'Site Visit',      'Checked crop health and water levels.', NOW(), NOW()),
@@ -451,7 +459,7 @@ INSERT INTO `user_modules` (`id`, `parent_id`, `title`, `icon`, `page`, `filenam
 (63, 0,  'Settings',            'fas fa-gear',              NULL,                     NULL,                              14, 1, 1, NOW(), NOW()),
 (64, 63, 'List Module',         'fas fa-list',              'module-list',            'module-list.php',                 1,  1, 1, NOW(), NOW()),
 (65, 63, 'User Roles',          'fas fa-user-gear',         'user-roles',             'user-role.php',                   2,  1, 1, NOW(), NOW()),
-(72, 0,  'Wallet',              'fas fa-wallet',            NULL,                     '',                                15, 1, 1, NOW(), NOW()),
+(72, 0,  'Wallet',              'fas fa-wallet',            NULL,                     NULL,                                15, 1, 1, NOW(), NOW()),
 (73, 72, 'Wallet List',         'fas fa-list',              'wallet-list',            'wallet-list.php',                 1,  1, 1, NOW(), NOW()),
 (74, 63, 'All Logs',            'fas fa-clipboard-list',    'logs',                   'logs.php',                        3,  1, 1, NOW(), NOW());
 

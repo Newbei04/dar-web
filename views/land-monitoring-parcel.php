@@ -19,7 +19,7 @@
                 <div class="card-header d-flex flex-wrap align-items-center">
                     <h4 class="card-title me-auto mb-2 mb-md-0">Land Parcels List</h4>
                     <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) { ?>
-                        <a href="<?= $basePath ?>/add-land-parcel" class="btn btn-primary btn-sm">
+                        <a href="<?= $baseURL ?>add-land-parcel" class="btn btn-primary btn-sm">
                             <i class="fas fa-plus me-1"></i> Add Land Parcel
                         </a>
                     <?php } ?>
@@ -54,10 +54,6 @@
 <script src="<?= $baseURL ?>assets/js/plugins-init/datatables.init.js"></script>
 <script>
     $(document).ready(function() {
-
-        if ("<?= $_SESSION["IS_LOGIN"] ?>" != "1") {
-            window.location.href = '<?= $basePath ?>/login';
-        }
 
         // Initialize DataTable once
         let tbl = $('#tblData').DataTable({
@@ -96,7 +92,7 @@
                                     <i class="fas fa-eye"></i>
                                 </button>`;
 
-                            if ("<?= $_SESSION['role_id'] ?? '' ?>" == '1') {
+                            if ("<?= $_SESSION['role_id'] ?? '' ?>" == 1) {
                                 actions += ` <button class="btn btn-primary shadow editParcelBtn" data-id="${item.id}" data-toggle="tooltip" title="Update Details">
                                     <span class="fas fa-pencil-alt"></span>
                                 </button>`;
@@ -130,13 +126,13 @@
         // ================= VIEW DETAIL =================
         $(document).on('click', '.viewDetailBtn', function() {
             let id = $(this).data('id');
-            window.location.href = '<?= $basePath ?>/parcel-detail?id=' + id;
+            window.location.href = '<?= $baseURL ?>parcel-detail?id=' + id;
         });
 
         // ================= EDIT PARCEL =================
         $(document).on('click', '.editParcelBtn', function() {
             let id = $(this).data('id');
-            window.location.href = '<?= $basePath ?>/edit-land-parcel?id=' + id;
+            window.location.href = '<?= $baseURL ?>edit-land-parcel?id=' + id;
         });
 
     });

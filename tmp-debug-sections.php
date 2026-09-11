@@ -1,8 +1,8 @@
 <?php
 require 'sections.php';
 $ENV = parse_ini_file(__DIR__ . '/.env');
-$baseURL = $ENV['APP_URL'] . '/';
-$basePath = $ENV['APP_URL'] . '/index.php';
+$baseURL = base_url() . '/';
+$basePath = base_url() . '/index.php';
 ob_start();
 require 'views/users-list.php';
 ob_end_clean();

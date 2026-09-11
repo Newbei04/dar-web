@@ -116,8 +116,8 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
         $stmt->execute($params);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        include_once __DIR__ . '/../config/dbconn.php';
-        $baseUrl = $ENV['APP_URL'] ?? '';
+        include_once __DIR__ . '/../sections.php';
+        $baseUrl = base_url();
 
         $list = [];
         foreach ($rows as $row) {

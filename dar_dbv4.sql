@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 04, 2026 at 07:42 AM
+-- Generation Time: Sep 11, 2026 at 05:17 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -42338,7 +42338,7 @@ CREATE TABLE `booking_schedules` (
   `end_at` datetime DEFAULT NULL,
   `status` int DEFAULT '0' COMMENT '0-Pending\r\n1-Active\r\n2-Done',
   `created_at` datetime DEFAULT NULL,
-  `updated_at` int DEFAULT NULL
+  `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -42382,7 +42382,7 @@ CREATE TABLE `cocrom_land_monitoring` (
   `id` int NOT NULL,
   `employee_id` int DEFAULT NULL,
   `land_parcels_id` int DEFAULT NULL,
-  `log_type` int DEFAULT NULL COMMENT '0-Site Visit\r\n1-Photo Report\r\n2-Soil Test\r\n3-Pest Control\r\n',
+  `log_type` int DEFAULT NULL COMMENT '0-Site Visit\r\n1-Photo Report\r\n2-Soil Test\r\n3-Pest Control\r\n4-Others',
   `title` varchar(255) DEFAULT NULL,
   `notes` text,
   `created_at` datetime NOT NULL,
@@ -42517,6 +42517,15 @@ CREATE TABLE `employee` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `employee`
+--
+
+INSERT INTO `employee` (`id`, `users_id`, `branch_id`, `facility_id`, `reference_no`, `fname`, `mname`, `lname`, `gender`, `marital`, `birthday`, `street`, `barangay_id`, `district_id`, `city_id`, `province_id`, `region_id`, `zip_code`, `country`, `address`, `email`, `mobile`, `position_id`, `status`, `profile`, `created_at`, `updated_at`) VALUES
+(1, 2, 1, 1, 'EMP-2', 'Maria', 'L.', 'Santos', 'Female', 'Married', '1988-04-12', 'J.P. Rizal St', '012812002', NULL, '012812000', '012800000', '010000000', '2900', 'PH', 'Bgy. No. 36, Araniw, Laoag City, Ilocos Norte', 'maria.santos@dar.gov.ph', '09171234567', NULL, 1, NULL, '2026-08-18 23:40:15', '2026-08-18 23:40:15'),
+(2, 3, 2, 2, 'EMP-3', 'Jose', 'R.', 'Dela Cruz', 'Male', 'Single', '1992-09-23', 'Gen. Luna St', '012812005', NULL, '012812000', '012800000', '010000000', '2900', 'PH', 'Bgy. No. 41, Balacad, Laoag City, Ilocos Norte', 'jose.delacruz@dar.gov.ph', '09179876543', NULL, 1, NULL, '2026-08-18 23:40:15', '2026-08-18 23:40:15'),
+(3, 1, 1, 1, 'EMP-1', 'Admin', 'A.', 'Administrator', 'Male', 'Married', '1985-01-01', 'S. Gomez St', '012812001', NULL, '012812000', '012800000', '010000000', '2900', 'PH', 'Bgy. No. 42, Apaya, Laoag City, Ilocos Norte', 'admin@dar.gov.ph', '09170000001', NULL, 1, NULL, '2026-08-18 23:40:15', '2026-08-18 23:40:15');
+
 -- --------------------------------------------------------
 
 --
@@ -42589,7 +42598,7 @@ CREATE TABLE `machinery` (
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `daily_rate` double DEFAULT '0' COMMENT 'Daily amount of rent',
   `ratings` double DEFAULT '0' COMMENT 'Average ratings from reviews',
-  `status` int DEFAULT NULL COMMENT '0 - Under Maintenance\r\n1 = Available',
+  `status` int DEFAULT NULL COMMENT '0 = Under Maintenance, 1 = Available',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -44850,7 +44859,7 @@ CREATE TABLE `users` (
   `remember_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `attempt` int DEFAULT NULL,
   `role_id` int DEFAULT NULL,
-  `type` int DEFAULT NULL COMMENT '0-EMPLOYEE, 1-ARBs ',
+  `type` int DEFAULT NULL COMMENT '0 = Employee, 1 = ARB (Beneficiary)',
   `last_login` timestamp NULL DEFAULT NULL,
   `status` int DEFAULT NULL COMMENT '0-Inactive, 1-Active, 2-Deleted',
   `created_at` timestamp NULL DEFAULT NULL,
@@ -44899,7 +44908,7 @@ CREATE TABLE `user_modules` (
   `title` varchar(100) DEFAULT NULL,
   `icon` varchar(100) DEFAULT NULL,
   `page` varchar(255) DEFAULT NULL,
-  `filename` varchar(255) NOT NULL,
+  `filename` varchar(255) DEFAULT NULL,
   `sort_order` int DEFAULT '0',
   `is_menu` int DEFAULT '1',
   `status` int DEFAULT '1',
@@ -44932,7 +44941,7 @@ CREATE TABLE `wallet` (
 CREATE TABLE `wallet_balances` (
   `id` int NOT NULL,
   `wallet_id` int NOT NULL,
-  `program_id` int NOT NULL COMMENT 'Link to the specific DAR/DA program',
+  `program_id` int NOT NULL COMMENT 'Link to the specific DAR/DA program\r\nIf 0 - cash in',
   `balance_type` int NOT NULL COMMENT '1-Personal_Savings\r\n2-Fuel_Subsidy\r\n3-Planting_Loan\r\n4-RFFA Assistance',
   `amount` double DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Date log'
@@ -45279,7 +45288,7 @@ ALTER TABLE `wallet_logs`
 -- AUTO_INCREMENT for table `agency`
 --
 ALTER TABLE `agency`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `barangay`
@@ -45291,61 +45300,61 @@ ALTER TABLE `barangay`
 -- AUTO_INCREMENT for table `beneficiary`
 --
 ALTER TABLE `beneficiary`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `booking_logs`
 --
 ALTER TABLE `booking_logs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `booking_schedules`
 --
 ALTER TABLE `booking_schedules`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `branch`
 --
 ALTER TABLE `branch`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cocrom_land_images`
 --
 ALTER TABLE `cocrom_land_images`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cocrom_land_monitoring`
 --
 ALTER TABLE `cocrom_land_monitoring`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cocrom_land_parcels`
 --
 ALTER TABLE `cocrom_land_parcels`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cocrom_records`
 --
 ALTER TABLE `cocrom_records`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cocrom_records_images`
 --
 ALTER TABLE `cocrom_records_images`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `district`
@@ -45357,55 +45366,55 @@ ALTER TABLE `district`
 -- AUTO_INCREMENT for table `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `facility`
 --
 ALTER TABLE `facility`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `facility_terminal`
 --
 ALTER TABLE `facility_terminal`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `facility_type`
 --
 ALTER TABLE `facility_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `machinery`
 --
 ALTER TABLE `machinery`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `machinery_images`
 --
 ALTER TABLE `machinery_images`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `machinery_maintenance`
 --
 ALTER TABLE `machinery_maintenance`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `machinery_reviews`
 --
 ALTER TABLE `machinery_reviews`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `machinery_type`
 --
 ALTER TABLE `machinery_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `municipality`
@@ -45417,61 +45426,61 @@ ALTER TABLE `municipality`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_category`
 --
 ALTER TABLE `product_category`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_facility_price`
 --
 ALTER TABLE `product_facility_price`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_inventory`
 --
 ALTER TABLE `product_inventory`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_inventory_logs`
 --
 ALTER TABLE `product_inventory_logs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_price_history`
 --
 ALTER TABLE `product_price_history`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `program`
 --
 ALTER TABLE `program`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `program_allocation`
 --
 ALTER TABLE `program_allocation`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `program_beneficiary`
 --
 ALTER TABLE `program_beneficiary`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `province`
@@ -45489,61 +45498,61 @@ ALTER TABLE `region`
 -- AUTO_INCREMENT for table `service_reviews`
 --
 ALTER TABLE `service_reviews`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `store_transactions`
 --
 ALTER TABLE `store_transactions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `system_treasury`
 --
 ALTER TABLE `system_treasury`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `terminal`
 --
 ALTER TABLE `terminal`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `training`
 --
 ALTER TABLE `training`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `training_admission`
 --
 ALTER TABLE `training_admission`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `training_approval`
 --
 ALTER TABLE `training_approval`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `training_program`
 --
 ALTER TABLE `training_program`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users_role`
 --
 ALTER TABLE `users_role`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users_token`
@@ -45561,19 +45570,19 @@ ALTER TABLE `user_modules`
 -- AUTO_INCREMENT for table `wallet`
 --
 ALTER TABLE `wallet`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `wallet_balances`
 --
 ALTER TABLE `wallet_balances`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `wallet_logs`
 --
 ALTER TABLE `wallet_logs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

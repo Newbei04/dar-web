@@ -651,12 +651,31 @@
 
             _renderMain() {
                 const url = this.images[this.current] || '';
-                $('#viewGalleryMainImg').attr('src', url);
                 const total = this.images.length || 0;
                 const cur = total ? this.current + 1 : 0;
                 $('#viewGalleryCounter').text(`${cur} / ${total}`);
                 $('#viewGalleryPrev').prop('disabled', this.current === 0);
                 $('#viewGalleryNext').prop('disabled', this.current === this.images.length - 1);
+
+                const $img = $('#viewGalleryMainImg');
+                const $ph = $('#viewGalleryPlaceholder');
+
+                $img.removeClass('d-block').addClass('d-none').removeAttr('src');
+
+                if (!url) {
+                    $ph.removeClass('d-none').addClass('d-flex');
+                } else {
+                    const preload = new Image();
+                    preload.onload = function() {
+                        $ph.removeClass('d-flex').addClass('d-none');
+                        $img.attr('src', url).removeClass('d-none').addClass('d-block');
+                    };
+                    preload.onerror = function() {
+                        $ph.removeClass('d-none').addClass('d-flex');
+                    };
+                    preload.src = url;
+                }
+
                 if ($('#viewImgOverlay').hasClass('active')) {
                     ViewOverlay.go(this.current);
                 }
@@ -669,9 +688,17 @@
                     return;
                 }
                 this.images.forEach((url, i) => {
-                    $(`<div class="g-thumb ${i === this.current ? 'active' : ''}">
-                        <img src="${url}" alt="thumb ${i+1}" onerror="productImgFallback(this)">
-                    </div>`)
+                    const $thumb = $(`<div class="g-thumb ${i === this.current ? 'active' : ''}"></div>`);
+                    const $img = $(`<img src="${url}" alt="thumb ${i + 1}" style="width:100%;height:100%;object-fit:cover;">`);
+                    const preload = new Image();
+                    preload.onload = function() {
+                        $img.appendTo($thumb);
+                    };
+                    preload.onerror = function() {
+                        $thumb.html('<i class="fas fa-image text-muted"></i>');
+                    };
+                    preload.src = url;
+                    $thumb
                         .on('click', () => this.go(i))
                         .appendTo($strip);
                 });
@@ -698,7 +725,8 @@
                 $('#viewOvImg').attr('src', ViewGallery.images[index]);
                 $('#viewOvCounter').text(`${index + 1} / ${ViewGallery.images.length}`);
                 ViewGallery._syncThumbs();
-                $('#viewGalleryMainImg').attr('src', ViewGallery.images[index]);
+                $('#viewGalleryMainImg').attr('src', ViewGallery.images[index]).removeClass('d-none').addClass('d-block');
+                $('#viewGalleryPlaceholder').removeClass('d-flex').addClass('d-none');
                 const total = ViewGallery.images.length || 0;
                 const cur = total ? index + 1 : 0;
                 $('#viewGalleryCounter').text(`${cur} / ${total}`);
@@ -880,7 +908,11 @@
                         <div class="row">
                             <div class="col-md-5 mb-3 mb-md-0">
                                 <div class="gallery-main" id="viewGalleryMain">
-                                    <img id="viewGalleryMainImg" src="" alt="Product Image" onerror="productImgFallback(this)">
+                                    <div class="gallery-no-image d-flex" id="viewGalleryPlaceholder">
+                                        <i class="fas fa-image fa-3x"></i>
+                                        <span>No image</span>
+                                    </div>
+                                    <img id="viewGalleryMainImg" src="" alt="Product Image" class="d-none">
                                     <button class="gallery-nav-btn prev" id="viewGalleryPrev">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
@@ -1036,9 +1068,9 @@
                                             ${urls.map(function(url, i) {
                                                 const isPrimary = images[i] && images[i].is_primary == 1;
                                                 return `
-                                                    <div style="width:84px;height:84px;border-radius:6px;overflow:hidden;position:relative;border:2px solid ${isPrimary ? '#0f766e' : 'var(--border,#e9ecef)'};" class="detail-thumb" data-url="${url}" data-image-id="${escapeHtml(images[i].id)}" data-index="${i}">
-                                                        <img src="${url}" alt="img ${i+1}" style="width:100%;height:100%;object-fit:cover;" onerror="productImgFallback(this)">
-                                                        ${isPrimary ? '<span style="position:absolute;top:2px;left:2px;background:#0f766e;color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;">Primary</span>' : ''}
+                                                    <div style="width:84px;height:84px;border-radius:6px;overflow:hidden;position:relative;border:2px solid ${isPrimary ? '#0f766e' : 'var(--border,#e9ecef)'};display:flex;align-items:center;justify-content:center;background:var(--body-bg,#f1f5f9);" class="detail-thumb" data-url="${url}" data-image-id="${escapeHtml(images[i].id)}" data-index="${i}">
+                                                        <img src="${url}" alt="img ${i+1}" style="width:100%;height:100%;object-fit:cover;" onerror="this.remove(); this.parentElement.innerHTML='<i class=&quot;fas fa-image text-muted&quot;></i>';">
+                                                        ${isPrimary ? '<span style="position:absolute;top:2px;left:2px;background:#0f766e;color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;z-index:2;">Primary</span>' : ''}
                                                     </div>
                                                 `;
                                             }).join('') || '<small class="text-muted">No images.</small>'}

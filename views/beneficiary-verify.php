@@ -369,7 +369,7 @@
         connectReader();
 
         function connectReader() {
-            cardReader = new WebSocket('ws://localhost:8347');
+            cardReader = new WebSocket('ws://' + location.hostname + ':8347');
             cardReader.onopen = () => {
                 isConnected = true;
             };

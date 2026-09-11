@@ -144,60 +144,37 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 
 <!-- ================= VIEW MAINTENANCE MODAL ================= -->
 <div class="modal fade" id="viewMaintenanceModal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
+
             <div class="modal-header">
-                <h5 class="modal-title">Maintenance Details</h5>
+                <h5 class="modal-title" id="viewModalTitle">Maintenance Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal">
                 </button>
             </div>
+
             <div class="modal-body">
-                <table class="table table-borderless mb-0">
-                    <tr>
-                        <th width="35%" class="text-muted">Machinery</th>
-                        <td id="view_machinery">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Facility</th>
-                        <td id="view_facility">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Type</th>
-                        <td id="view_type">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Priority</th>
-                        <td id="view_priority">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Status</th>
-                        <td id="view_status">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Cost</th>
-                        <td id="view_cost">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Start Date</th>
-                        <td id="view_start">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">End Date</th>
-                        <td id="view_end">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Odometer</th>
-                        <td id="view_odometer">-</td>
-                    </tr>
-                    <tr>
-                        <th class="text-muted">Description</th>
-                        <td id="view_description">-</td>
-                    </tr>
-                </table>
+                <div class="row">
+
+                    <div class="col-md-5 mb-3 mb-md-0">
+                        <div class="position-relative rounded-3 overflow-hidden bg-light" style="height:260px;display:flex;align-items:center;justify-content:center;">
+                            <div id="viewMaintenancePlaceholder" class="d-flex align-items-center justify-content-center text-muted" style="height:100%;width:100%;">
+                                <i class="fas fa-image me-2"></i> No image
+                            </div>
+                            <img id="viewMaintenanceImg" src="" alt="Machine Image" class="d-none w-100 h-100 object-fit-cover" style="position:relative;z-index:1;">
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <h5 class="fw-semibold mb-1" id="viewDetailName">—</h5>
+                        <small class="text-muted d-block" id="viewDetailFacility"></small>
+
+                        <div id="viewDetailRows" class="mt-3"></div>
+                    </div>
+
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
-            </div>
+
         </div>
     </div>
 </div>
@@ -258,9 +235,14 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 
                     data.forEach(function(item, i) {
 
+                        function machineThumbFallback() {
+                            return '<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>';
+                        }
+                        window.machineThumbFallback = machineThumbFallback;
+
                         let machineryImage = item.image ?
-                            `<img src="<?= $baseURL ?>assets/images/machinery/${item.image}" alt="Machine" style="width:50px;height:50px;border-radius:10%;object-fit:cover;">` :
-                            `<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>`;
+                            `<img src="<?= $baseURL ?>assets/images/machinery/${item.image}" alt="Machine" style="width:50px;height:50px;border-radius:10%;object-fit:cover;" onerror="this.outerHTML=machineThumbFallback();">` :
+                            machineThumbFallback();
 
                         let statusBadge =
                             item.status_label == 'Completed' ? '<span class="badge light badge-success badge-sm">Completed</span>' :
@@ -280,6 +262,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
 
                         let actionBtn = `
                         <button class="btn btn-info mr-2 viewBtn"
+                            data-id="${item.id}"
                             data-machinery="${item.machinery_name || '-'}"
                             data-facility="${item.facility_name || '-'}"
                             data-type="${item.type_label || '-'}"
@@ -290,6 +273,7 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                             data-end="${item.end_date || '-'}"
                             data-odometer="${item.odometer_reading ?? '-'}"
                             data-description="${item.description || '-'}"
+                            data-image="${item.image || ''}"
                             data-toggle="tooltip" title="View Details">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -461,16 +445,91 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
            VIEW
         ========================== */
         $(document).on("click", ".viewBtn", function() {
-            $("#view_machinery").text($(this).data("machinery") || '-');
-            $("#view_facility").text($(this).data("facility") || '-');
-            $("#view_type").text($(this).data("type") || '-');
-            $("#view_priority").text($(this).data("priority") || '-');
-            $("#view_status").text($(this).data("status") || '-');
-            $("#view_cost").text($(this).data("cost") || '-');
-            $("#view_start").text($(this).data("start") || '-');
-            $("#view_end").text($(this).data("end") || '-');
-            $("#view_odometer").text($(this).data("odometer") || '-');
-            $("#view_description").text($(this).data("description") || '-');
+            let machinery = $(this).data("machinery") || '—';
+            let facility = $(this).data("facility") || '—';
+            let type = $(this).data("type") || '—';
+            let priority = $(this).data("priority") || '—';
+            let statusHtml = $(this).data("status") || '—';
+            let cost = $(this).data("cost") || '—';
+            let start = $(this).data("start") || '—';
+            let end = $(this).data("end") || '—';
+            let odometer = $(this).data("odometer") || '—';
+            let description = $(this).data("description") || '—';
+            let image = $(this).data("image") || '';
+
+            let statusBadge =
+                statusHtml == 'Completed' ? '<span class="badge light badge-success">Completed</span>' :
+                statusHtml == 'In Progress' ? '<span class="badge light badge-info">In Progress</span>' :
+                '<span class="badge light badge-warning">Scheduled</span>';
+
+            let priorityBadge =
+                priority == 'Low' ? '<span class="badge light badge-secondary">Low</span>' :
+                priority == 'Medium' ? '<span class="badge light badge-info">Medium</span>' :
+                priority == 'High' ? '<span class="badge light badge-warning">High</span>' :
+                '<span class="badge light badge-danger">Critical</span>';
+
+            $('#viewModalTitle').text('Maintenance Details');
+            $('#viewDetailName').text(machinery);
+            $('#viewDetailFacility').text(facility);
+
+            $('#viewDetailRows').html(`
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Facility</span>
+                    <span class="fw-semibold text-end">${facility}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Type</span>
+                    <span class="fw-semibold text-end">${type}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Priority</span>
+                    <span class="fw-semibold text-end">${priorityBadge}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Status</span>
+                    <span class="fw-semibold text-end">${statusBadge}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Total Cost</span>
+                    <span class="fw-semibold text-end">${cost}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Start Date</span>
+                    <span class="fw-semibold text-end">${start}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">End Date</span>
+                    <span class="fw-semibold text-end">${end}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom small">
+                    <span class="text-muted">Odometer</span>
+                    <span class="fw-semibold text-end">${odometer}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 small">
+                    <span class="text-muted">Description</span>
+                    <span class="fw-semibold text-end">${description}</span>
+                </div>
+            `);
+
+            const $img = $('#viewMaintenanceImg');
+            const $ph = $('#viewMaintenancePlaceholder');
+            $img.removeClass('d-block').addClass('d-none').removeAttr('src');
+
+            if (image) {
+                const base = "<?= $baseURL ?>assets/images/machinery/";
+                const preload = new Image();
+                preload.onload = function() {
+                    $ph.removeClass('d-flex').addClass('d-none');
+                    $img.attr('src', base + image).removeClass('d-none').addClass('d-block');
+                };
+                preload.onerror = function() {
+                    $ph.removeClass('d-none').addClass('d-flex');
+                };
+                preload.src = base + image;
+            } else {
+                $ph.removeClass('d-none').addClass('d-flex');
+            }
+
             $("#viewMaintenanceModal").modal("show");
         });
 

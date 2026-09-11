@@ -224,10 +224,6 @@
 <script>
     $(document).ready(function() {
 
-        if ("<?= $_SESSION["IS_LOGIN"] ?>" != "1") {
-            window.location.href = '<?= $basePath ?>/login';
-        }
-
         const API = '<?= $baseURL ?>controller/ctrl-land-monitoring.php';
         const isAdmin = <?= isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1 ? 'true' : 'false' ?>;
         let tbl = $('#tblData').DataTable({

@@ -10,8 +10,8 @@ require 'sections.php';
 // Load env file
 $ENV = parse_ini_file(__DIR__ . '/.env');
 
-$baseURL = $ENV['APP_URL'] . "/";
-$basePath = $ENV['APP_URL'] . "/index.php";
+$baseURL = base_url() . "/";
+$basePath = base_url() . "/index.php";
 
 
 $defaultProvince = "";

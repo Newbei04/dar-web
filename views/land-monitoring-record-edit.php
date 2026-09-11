@@ -40,6 +40,7 @@
                             <select class="form-control select2" id="certificate_status">
                                 <option value="">Select status</option>
                                 <option value="pending">Pending</option>
+                                <option value="active">Active</option>
                                 <option value="approved">Approved</option>
                                 <option value="released">Released</option>
                                 <option value="expired">Expired</option>
@@ -93,7 +94,7 @@
 
         <hr>
         <div class="d-flex justify-content-end">
-            <a href="<?= $basePath ?>/list-land-records" class="btn btn-outline-secondary mr-2">Cancel</a>
+            <a href="<?= $baseURL ?>list-land-records" class="btn btn-outline-secondary mr-2">Cancel</a>
             <button type="submit" form="editRecordForm" class="btn btn-primary px-4" id="saveBtn">
                 <i class="fe fe-save mr-1"></i> Update Record
             </button>
@@ -120,7 +121,7 @@
 
         if (!recordId) {
             Swal.fire("Error", "No record ID provided.", "error").then(() => {
-                window.location.href = '<?= $basePath ?>/list-land-records';
+                window.location.href = '<?= $baseURL ?>list-land-records';
             });
             return;
         }
@@ -179,7 +180,7 @@
                         $("#encrypted_signature").val(r.encrypted_signature || '');
                     } else {
                         Swal.fire("Error", res.message || "Record not found.", "error").then(() => {
-                            window.location.href = '<?= $basePath ?>/list-land-records';
+                            window.location.href = '<?= $baseURL ?>list-land-records';
                         });
                     }
                 },
@@ -215,7 +216,7 @@
                 success: function(res) {
                     if (res.code == 0) {
                         Swal.fire("Success", "Record updated successfully!", "success").then(() => {
-                            window.location.href = '<?= $basePath ?>/list-land-records';
+                            window.location.href = '<?= $baseURL ?>list-land-records';
                         });
                     } else {
                         Swal.fire("Error", res.message, "error");
