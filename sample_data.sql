@@ -421,7 +421,6 @@ INSERT INTO `user_modules` (`id`, `parent_id`, `title`, `icon`, `page`, `filenam
 (68, 66, 'Receive Stock',       'fas fa-plus',              'add-inventory',          'product-inventory-add.php',       2,  1, 1, NOW(), NOW()),
 (69, 66, 'Stock Movements',     'fas fa-right-left',        'stock-movements',        'product-stock-movements.php',     3,  1, 1, NOW(), NOW()),
 (70, 66, 'Low Stock',           'fas fa-exclamation-triangle','low-stock',            'product-low-stock.php',           4,  1, 1, NOW(), NOW()),
-(71, 66, 'Buy / Sell Simulation','fas fa-flask',            'simulation',             'product-simulation.php',          5,  1, 1, NOW(), NOW()),
 (29, 0,  'Booking',             'fas fa-calendar-check',    NULL,                     NULL,                              9,  1, 1, NOW(), NOW()),
 (30, 29, 'Book a Machine',      'fas fa-tractor',           'booking-browse',         'booking-browse.php',              1,  1, 1, NOW(), NOW()),
 (31, 29, 'My Bookings',         'fas fa-credit-card',       'booking-beneficiary',    'booking-beneficiary.php',         2,  1, 1, NOW(), NOW()),

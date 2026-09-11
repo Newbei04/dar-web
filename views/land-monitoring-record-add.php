@@ -162,7 +162,7 @@
 
         loadBeneficiary();
 
-        function loadBeneficiary() {
+        function loadBeneficiary(cb) {
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-users.php",
                 type: "POST",
@@ -170,7 +170,7 @@
                 dataType: "json",
                 data: JSON.stringify({
                     trans: "LIST_USER_ROLE",
-                    role_id: 2
+                    role_id: 3
                 }),
                 success: function(res) {
 
@@ -178,15 +178,34 @@
 
                     if (res.code == 0) {
                         res.data.forEach(p => {
+                            if (!p.profile) return;
                             let name = `${p.profile?.fname || ''} ${p.profile?.mname || ''} ${p.profile?.lname || ''}`.trim();
-                            html += `<option value="${p.id}">${name}</option>`;
+                            html += `<option value="${p.profile.id}">${name}</option>`;
                         });
                     }
 
                     $("#beneficiary_id").html(html);
+                    cb && cb();
                 }
             });
         }
+
+        $("#land_parcel_id").on("change", function() {
+            let pid = $(this).val();
+            if (!pid) return;
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-land-parcel.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({ trans: "GET_PARCEL_DETAIL", id: pid }),
+                success: function(res) {
+                    if (res.code == 0 && res.data?.parcel) {
+                        $("#beneficiary_id").val(res.data.parcel.beneficiary_id || '').trigger('change');
+                    }
+                }
+            });
+        });
 
         // ======================
         // SUBMIT FORM (JSON.stringify ONLY)

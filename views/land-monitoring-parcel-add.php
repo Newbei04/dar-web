@@ -122,7 +122,7 @@
                 dataType: "json",
                 data: JSON.stringify({
                     trans: "LIST_USER_ROLE",
-                    role_id: 2
+                    role_id: 3
                 }),
                 success: function(res) {
 
@@ -130,8 +130,9 @@
 
                     if (res.code == 0) {
                         res.data.forEach(p => {
+                            if (!p.profile) return;
                             let name = `${p.profile?.fname || ''} ${p.profile?.mname || ''} ${p.profile?.lname || ''}`.trim();
-                            html += `<option value="${p.id}">${name}</option>`;
+                            html += `<option value="${p.profile.id}">${name}</option>`;
                         });
                     }
 

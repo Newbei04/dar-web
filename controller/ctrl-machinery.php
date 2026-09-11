@@ -54,6 +54,7 @@ if ($trans == "LIST_MACHINERY_TYPE") {
 } else if ($trans == "LIST_MACHINERY") {
 
     $employee_id = mysqli_real_escape_string($conn, $data['employee_id'] ?? '');
+    $type_id     = mysqli_real_escape_string($conn, $data['type_id'] ?? '');
 
     $where = "WHERE 1=1";
 
@@ -64,6 +65,10 @@ if ($trans == "LIST_MACHINERY_TYPE") {
         WHERE users_id = '$employee_id'
         LIMIT 1
     )";
+    }
+
+    if (!empty($type_id)) {
+        $where .= " AND m.type_id = '$type_id'";
     }
 
     $res = mysqli_query($conn, "

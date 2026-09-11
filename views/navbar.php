@@ -678,7 +678,6 @@
                     <li><a href="<?= $baseURL ?>add-inventory">Receive Stock</a></li>
                     <li><a href="<?= $baseURL ?>stock-movements">Stock Movements</a></li>
                     <li><a href="<?= $baseURL ?>low-stock">Low Stock</a></li>
-                    <li><a href="<?= $baseURL ?>simulation">Buy / Sell Simulation</a></li>
                 </ul>
             </li>
             <!-- BOOKING -->

@@ -43,6 +43,20 @@
         padding: 1px 6px;
         border-radius: 8px;
     }
+
+    #currentImages .position-relative { border-radius: 8px; overflow: hidden; }
+    #currentImages img { width: 100%; height: 120px; object-fit: cover; display: block; }
+
+    .upload-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.45);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+    }
 </style>
 <?= endSection() ?>
 
@@ -149,13 +163,16 @@
                         <!-- PRODUCT IMAGES -->
                         <h6 class="text-uppercase text-muted mb-4 fw-bold"><small>Product Images</small></h6>
 
-                        <div class="row" id="currentImages"></div>
+                        <label class="font-weight-semibold">Current Images <span id="imageCount" class="badge badge-secondary ms-1" style="font-size:11px;">0</span></label>
+                        <div id="currentImages" class="row mb-2 mt-1"></div>
 
-                        <div class="mb-3 mt-3">
+                        <hr class="my-3">
+                        <label class="font-weight-semibold">Add New Images</label>
+                        <div class="mb-2 mt-1">
                             <input type="file" class="form-control" id="images" accept="image/*" multiple>
-                            <small class="text-muted">Upload new images to add to this product.</small>
+                            <small class="text-muted">You can select multiple images. They will be appended to this product.</small>
                         </div>
-                        <div class="d-flex flex-wrap gap-2" id="imagePreview" style="gap:.5rem;"></div>
+                        <div class="row" id="imagePreview"></div>
 
                         <hr>
 
@@ -255,22 +272,7 @@
                     loadCategories(p.category_id);
 
                     // Current images
-                    const images = res.data.images || [];
-                    const $box = $("#currentImages").empty();
-                    if (!images.length) {
-                        $box.html('<div class="col-12"><small class="text-muted">No images yet.</small></div>');
-                    }
-                    images.forEach(function(img) {
-                        const primary = img.is_primary == 1 ? '<span class="img-primary">Primary</span>' : '';
-                        $box.append(`
-                            <div class="col-md-3 mb-3">
-                                <div class="img-thumb-wrap">
-                                    <img src="<?= $baseURL ?>assets/images/product/${img.name}" alt="product image" onerror="productEditImgFallback(this)">
-                                    ${primary}
-                                </div>
-                            </div>
-                        `);
-                    });
+                    renderEditImages(res.data.images || [], productId);
                 },
                 error: function(xhr) {
                     console.error("GET_PRODUCT_DETAILS failed:", xhr.responseText);
@@ -279,22 +281,132 @@
             });
         }
 
-        // ================= IMAGE PREVIEW =================
-        function renderImagePreview() {
-            const $box = $("#imagePreview").empty();
-            imageFiles.forEach(function(file, i) {
-                const url = URL.createObjectURL(file);
-                $box.append(`
-                    <div class="img-thumb-wrap" data-index="${i}">
-                        <img src="${url}" alt="preview ${i+1}">
-                        <button type="button" class="img-remove" data-index="${i}">
-                            <i class="fas fa-times"></i>
-                        </button>
+        // ================= LOAD EDIT IMAGES =================
+        function renderEditImages(images, pid) {
+            const $container = $("#currentImages").empty();
+            $("#imageCount").text(images.length);
+
+            if (!images.length) {
+                $container.html(`
+                    <div class="col-12 border rounded-3 bg-light text-center text-muted py-4">
+                        <i class="fas fa-image" style="font-size:1.5rem;"></i>
+                        <p class="mb-0 mt-1 small">No images uploaded</p>
+                    </div>
+                `);
+                return;
+            }
+
+            images.forEach(function(img) {
+                const primaryBadge = img.is_primary == 1
+                    ? '<span class="badge badge-success position-absolute top-0 start-0 m-1" style="font-size:10px;">Primary</span>'
+                    : '';
+                $container.append(`
+                    <div class="col-md-3 col-6 mb-2">
+                        <div class="position-relative rounded-3 overflow-hidden border" data-img-id="${img.id}" data-img-name="${img.name}">
+                            <img src="<?= $baseURL ?>assets/images/product/${img.name}" alt="${img.name}" class="w-100 object-fit-cover d-block" style="height:120px;" onerror="productEditImgFallback(this)">
+                            ${primaryBadge}
+                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle d-flex align-items-center justify-content-center prod-img-delete" style="width:24px;height:24px;padding:0;" title="Remove image">
+                                <i class="fas fa-times" style="font-size:10px;"></i>
+                            </button>
+                        </div>
                     </div>
                 `);
             });
         }
 
+        // ================= DELETE SINGLE IMAGE =================
+        $(document).on("click", ".prod-img-delete", function(e) {
+            e.stopPropagation();
+            const $wrap = $(this).closest(".position-relative");
+            const imgId = $wrap.data("img-id");
+            const imgName = $wrap.data("img-name");
+
+            Swal.fire({
+                title: "Remove image?",
+                text: "This image will be permanently deleted.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Yes, remove it"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoader();
+                    $.ajax({
+                        url: "<?= $baseURL ?>controller/ctrl-products.php",
+                        type: "POST",
+                        contentType: "application/json",
+                        dataType: "json",
+                        data: JSON.stringify({
+                            trans: "DELETE_PRODUCT_IMAGE",
+                            id: imgId,
+                            name: imgName,
+                            product_id: productId
+                        }),
+                        success: function(res) {
+                            closeLoader();
+                            if (res.code == 0) {
+                                renderEditImages([], productId);
+                                loadProduct();
+                            } else {
+                                Swal.fire("Error", res.message, "error");
+                            }
+                        },
+                        error: function() {
+                            closeLoader();
+                            Swal.fire("Error", "Failed to delete image.", "error");
+                        }
+                    });
+                }
+            });
+        });
+
+        // ================= FILE -> BASE64 =================
+        function filesToBase64(files) {
+            const promises = files.map(function(file) {
+                return new Promise(function(resolve, reject) {
+                    const reader = new FileReader();
+                    reader.onload = function() { resolve(reader.result); };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            });
+            return Promise.all(promises);
+        }
+
+        // ================= UPLOAD PREVIEW =================
+        function renderUploadPreviews(containerId, files) {
+            $("#" + containerId).empty();
+            files.forEach(function(file, idx) {
+                const url = URL.createObjectURL(file);
+                const $item = $(
+                    '<div class="col-6 col-md-3 mt-2" data-preview-idx="' + idx + '">' +
+                    '<div class="position-relative rounded-3 overflow-hidden border" style="height:90px;">' +
+                    '<img src="' + url + '" alt="' + (file.name||'').replace(/"/g,'') + '"' +
+                    ' class="w-100 h-100 d-block" style="object-fit:cover;">' +
+                    '<div class="upload-overlay">' +
+                    '<span class="spinner-border spinner-border-sm mb-1"></span>' +
+                    '<small class="font-weight-semibold">Uploading...</small>' +
+                    '</div></div></div>'
+                );
+                $item.find("img").on("load", function() { URL.revokeObjectURL(url); });
+                $("#" + containerId).append($item);
+            });
+        }
+
+        function setUploadPreviewState(containerId, state) {
+            $("#" + containerId + " .upload-overlay").each(function() {
+                const $s = $(this);
+                if (state === "uploading") {
+                    $s.html('<span class="spinner-border spinner-border-sm mb-1"></span><small class="font-weight-semibold">Uploading...</small>');
+                } else if (state === "done") {
+                    $s.html('<i class="fas fa-check-circle" style="font-size:1.15rem;color:#7CFC00;"></i><small class="font-weight-semibold">Uploaded</small>');
+                } else if (state === "failed") {
+                    $s.html('<i class="fas fa-times-circle" style="font-size:1.15rem;color:#ff6b6b;"></i><small class="font-weight-semibold">Failed</small>');
+                }
+            });
+        }
+
+        // ================= PREVIEW NEW FILES =================
         $("#images").on("change", function() {
             const newFiles = Array.from(this.files || []);
             if (newFiles.length + imageFiles.length > 10) {
@@ -303,24 +415,15 @@
                 return;
             }
             imageFiles = imageFiles.concat(newFiles);
-            renderImagePreview();
+            renderUploadPreviews("imagePreview", newFiles);
         });
 
         $(document).on("click", ".img-remove", function() {
             const idx = parseInt($(this).data("index"));
             imageFiles.splice(idx, 1);
             $("#images").val("");
-            renderImagePreview();
+            renderUploadPreviews("imagePreview", imageFiles);
         });
-
-        function fileToBase64(file) {
-            return new Promise(function(resolve, reject) {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
 
         // ================= SUBMIT =================
         $("#editProductForm").on("submit", async function(e) {
@@ -338,12 +441,10 @@
             const $btn = $("#editProductForm button[type='submit']");
             $btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Updating...');
 
-            const base64Array = [];
-            for (const file of imageFiles) {
-                base64Array.push(await fileToBase64(file));
-            }
+            showLoader("Uploading images...");
+            const base64Array = await filesToBase64(imageFiles);
+            setUploadPreviewState("imagePreview", "uploading");
 
-            showLoader();
             $.ajax({
                 url: "<?= $baseURL ?>controller/ctrl-products.php",
                 type: "POST",
@@ -364,6 +465,7 @@
                 success: function(res) {
                     closeLoader();
                     if (res.code == 0) {
+                        setUploadPreviewState("imagePreview", "done");
                         Swal.fire({
                             icon: "success",
                             title: "Updated!",
@@ -372,11 +474,13 @@
                             window.location.href = "<?= $baseURL ?>list-products";
                         });
                     } else {
+                        setUploadPreviewState("imagePreview", "failed");
                         Swal.fire("Error", res.message, "error");
                     }
                 },
                 error: function(xhr) {
                     closeLoader();
+                    setUploadPreviewState("imagePreview", "failed");
                     console.error("UPDATE_PRODUCT failed:", xhr.responseText);
                     Swal.fire("Error", "Server error. Please try again.", "error");
                 },

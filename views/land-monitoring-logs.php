@@ -259,7 +259,8 @@
                     }
                     $("#edit_employee_id").html(html);
                     $("#add_employee_id").html(html);
-                    $('#edit_employee_id, #add_employee_id').selectpicker('refresh');
+                    reinitSelect2('#edit_employee_id');
+                    reinitSelect2('#add_employee_id');
                 }
             });
         }
@@ -282,6 +283,8 @@
                     }
                     $("#edit_land_parcels_id").html(html);
                     $("#add_land_parcels_id").html(html);
+                    reinitSelect2('#edit_land_parcels_id');
+                    reinitSelect2('#add_land_parcels_id');
                 }
             });
         }
@@ -402,9 +405,9 @@
                     if (res.code == 0 && res.data) {
                         let d = res.data;
                         $('#edit_id').val(d.id);
-                        $('#edit_land_parcels_id').val(d.land_parcels_id).selectpicker('refresh');
-                        $('#edit_employee_id').val(d.employee_id).selectpicker('refresh');
-                        $('#edit_log_type').val(d.log_type).selectpicker('refresh');
+                        $('#edit_land_parcels_id').val(String(d.land_parcels_id ?? '')).trigger('change');
+                        $('#edit_employee_id').val(String(d.employee_id ?? '')).trigger('change');
+                        $('#edit_log_type').val(String(d.log_type ?? '')).trigger('change');
                         $('#edit_title').val(d.title);
                         $('#edit_notes').val(d.notes);
 
@@ -493,9 +496,9 @@
         // ================= ADD =================
         $(document).on('click', '#btnAddMonitoring', function() {
             $('#addMonitoringForm')[0].reset();
-            $('#add_land_parcels_id').val('').selectpicker('refresh');
-            $('#add_employee_id').val('').selectpicker('refresh');
-            $('#add_log_type').val('').selectpicker('refresh');
+            $('#add_land_parcels_id').val('').trigger('change');
+            $('#add_employee_id').val('').trigger('change');
+            $('#add_log_type').val('').trigger('change');
             $('#add_images_preview').empty();
             $('#addModal').modal('show');
         });
@@ -546,9 +549,9 @@
                         Swal.fire("Success", res.message, "success");
                         $('#addModal').modal('hide');
                         $('#addMonitoringForm')[0].reset();
-                        $('#add_land_parcels_id').val('').selectpicker('refresh');
-                        $('#add_employee_id').val('').selectpicker('refresh');
-                        $('#add_log_type').val('').selectpicker('refresh');
+                        $('#add_land_parcels_id').val('').trigger('change');
+                        $('#add_employee_id').val('').trigger('change');
+                        $('#add_log_type').val('').trigger('change');
                         $('#add_images_preview').empty();
                         loadData();
                     } else {

@@ -72,11 +72,17 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
             </div>
             <div class="modal-body">
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
+                        <label>Machine Type <span class="text-danger">*</span></label>
+                        <select class="form-control single-select" id="machinery_type_id">
+                            <option value="">Select Machine Type</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
                         <label>Machinery <span class="text-danger">*</span></label>
                         <select class="form-control single-select" id="machinery_id"></select>
                     </div>
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
                         <label>Facility <span class="text-danger">*</span></label>
                         <select class="form-control single-select" id="facility_id"></select>
                     </div>
@@ -330,6 +336,16 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                     contentType: "application/json",
                     dataType: "json",
                     data: JSON.stringify({
+                        trans: "LIST_MACHINERY_TYPE",
+                        limit: 1000
+                    })
+                }),
+                $.ajax({
+                    url: "<?= $baseURL ?>controller/ctrl-machinery.php",
+                    type: "POST",
+                    contentType: "application/json",
+                    dataType: "json",
+                    data: JSON.stringify({
                         trans: "LIST_MACHINERY"
                     })
                 }),
@@ -343,23 +359,29 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
                         limit: 1000
                     })
                 })
-            ).done(function(machineryRes, facilityRes) {
+            ).done(function(typeRes, machineryRes, facilityRes) {
 
-                let machines = machineryRes[0]?.data || [];
-                let machineryHtml = `<option value="">Select Machinery</option>`;
-                machines.forEach(m => {
-                    machineryHtml += `<option value="${m.id}">${m.name}</option>`;
+                window.facilities = facilityRes[0]?.data?.items || [];
+
+                let types = typeRes[0]?.data?.result || [];
+                let typeHtml = `<option value="">Select Machine Type</option>`;
+                types.forEach(t => {
+                    typeHtml += `<option value="${t.id}">${t.name}</option>`;
                 });
-                $("#machinery_id").html(machineryHtml);
-                reinitSelect2("#machinery_id");
+                $("#machinery_type_id").html(typeHtml);
+                reinitSelect2("#machinery_type_id");
 
                 let facilities = facilityRes[0]?.data?.items || [];
+                window.facilities = facilities;
+
                 let facilityHtml = `<option value="">Select Facility</option>`;
                 facilities.forEach(f => {
                     facilityHtml += `<option value="${f.id}">${f.name}</option>`;
                 });
                 $("#facility_id").html(facilityHtml);
                 reinitSelect2("#facility_id");
+
+                loadMachineries();
 
                 if (callback) callback();
 
@@ -368,10 +390,50 @@ $isAdmin = (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) ||
             });
         }
 
+        function loadMachineries(id) {
+            $.ajax({
+                url: "<?= $baseURL ?>controller/ctrl-machinery.php",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    trans: "LIST_MACHINERY",
+                    type_id: id || ''
+                }),
+                success: function(res) {
+                    let machines = res.data || [];
+                    let html = `<option value="">Select Machinery</option>`;
+                    machines.forEach(m => {
+                        html += `<option value="${m.id}" data-branch="${m.branch_id || ''}">${m.name}</option>`;
+                    });
+                    $("#machinery_id").html(html);
+                    reinitSelect2("#machinery_id");
+                },
+                error: function(xhr) {
+                    console.error("LIST_MACHINERY failed:", xhr.responseText);
+                }
+            });
+        }
+
+        $("#machinery_type_id").on("change", function() {
+            $("#machinery_id").val('').trigger('change');
+            loadMachineries($(this).val());
+        });
+
+        $("#machinery_id").on("change", function() {
+            let branch = $(this).find(":selected").data("branch");
+            if (!branch) return;
+            let fac = (window.facilities || []).find(f => String(f.branch_id) === String(branch));
+            if (fac) {
+                $("#facility_id").val(fac.id).trigger('change');
+            }
+        });
+
         /* =========================
            ADD MAINTENANCE
         ========================== */
         $("#btnAddMaintenance").on("click", function() {
+            $("#machinery_type_id").val('').trigger('change');
             $("#machinery_id").val('').trigger('change');
             $("#facility_id").val('').trigger('change');
             $("#type").val('').trigger('change');

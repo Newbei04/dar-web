@@ -293,9 +293,6 @@ switch ($route) {
 	case 'low-stock':
 		require_once 'views/product-low-stock.php';
 		break;
-	case 'simulation':
-		require_once 'views/product-simulation.php';
-		break;
 	case 'facility-prices':
 		require_once 'views/facility-prices.php';
 		break;

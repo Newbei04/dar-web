@@ -414,6 +414,35 @@ if ($trans == "ADD_PRODUCT") {
     ]);
     exit;
 
+} else if ($trans == "DELETE_PRODUCT_IMAGE") {
+
+    $id   = $data['id'] ?? '';
+    $name = $data['name'] ?? '';
+
+    if (!$id) {
+        echo json_encode(["code" => 1, "message" => "Image ID is required"]);
+        exit;
+    }
+
+    $filePath = "../assets/images/product/" . $name;
+    if ($name && file_exists($filePath)) {
+        unlink($filePath);
+    }
+
+    mysqli_query($conn, "DELETE FROM product_images WHERE id='$id'");
+
+    // If the deleted image was primary, promote the next oldest image
+    $product_id = (int)($data['product_id'] ?? 0);
+    if ($product_id) {
+        $hasPrimary = mysqli_query($conn, "SELECT 1 FROM product_images WHERE product_id='$product_id' AND is_primary=1 AND status=1 LIMIT 1");
+        if ($hasPrimary && mysqli_num_rows($hasPrimary) === 0) {
+            mysqli_query($conn, "UPDATE product_images SET is_primary=1 WHERE product_id='$product_id' AND status=1 ORDER BY id ASC LIMIT 1");
+        }
+    }
+
+    echo json_encode(["code" => 0, "message" => "Image deleted"]);
+    exit;
+
 } else {
     echo json_encode([
         "code" => 1,

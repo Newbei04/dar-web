@@ -40,9 +40,6 @@
                         <a href="<?= $baseURL ?>low-stock" class="btn btn-outline-warning btn-sm">
                             <i class="fas fa-exclamation-triangle mr-1"></i> Low Stock
                         </a>
-                        <a href="<?= $baseURL ?>simulation" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-flask mr-1"></i> Simulation
-                        </a>
                         <a href="<?= $baseURL ?>add-inventory" class="btn btn-primary btn-sm">
                             <i class="fa fa-plus mr-1"></i> Receive Stock
                         </a>

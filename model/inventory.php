@@ -3,9 +3,9 @@
 /**
  * Shared inventory / FEFO / pricing engine.
  *
- * Single source of truth used by ctrl-inventory.php, ctrl-checkout.php,
- * ctrl-product-price.php and ctrl-simulation.php so that stock validation,
- * FEFO ordering and price resolution behave identically everywhere.
+ * Single source of truth used by ctrl-inventory.php, ctrl-checkout.php and
+ * ctrl-product-price.php so that stock validation, FEFO ordering and price
+ * resolution behave identically everywhere.
  */
 
 header("Content-Type: application/json");

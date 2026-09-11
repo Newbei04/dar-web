@@ -159,6 +159,7 @@
                             <thead>
                                 <tr>
                                     <th>No.</th>
+                                    <th>Image</th>
                                     <th>Machinery</th>
                                     <th>Type</th>
                                     <th>Facility</th>
@@ -499,6 +500,16 @@
                         return;
                     }
                     (res.data || []).forEach(function(item, i) {
+
+                        function machineThumbFallback() {
+                            return '<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>';
+                        }
+                        window.machineThumbFallback = machineThumbFallback;
+
+                        let machineryImage = item.image ?
+                            `<img src="<?= $baseURL ?>assets/images/machinery/${item.image}" alt="Machine" style="width:50px;height:50px;border-radius:10%;object-fit:cover;" onerror="this.outerHTML=machineThumbFallback();">` :
+                            machineThumbFallback();
+
                         let statusText = item.status == 1 ?
                             `<span class="badge light badge-success">Available</span>` :
                             item.status == 0 ?
@@ -506,6 +517,7 @@
                             `<span class="badge light badge-secondary">Unavailable</span>`;
                         tbl.row.add([
                             i + 1,
+                            machineryImage,
                             item.name ?? '-',
                             item.machinery_type ?? '-',
                             item.facility_name ?? '-',

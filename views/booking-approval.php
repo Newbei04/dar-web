@@ -24,6 +24,7 @@
                             <thead>
                                 <tr>
                                     <th>No.</th>
+                                    <th>Image</th>
                                     <th>Machinery</th>
                                     <th>Beneficiary</th>
                                     <th>Status</th>
@@ -49,10 +50,25 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <!-- Machinery image -->
+                <div class="text-center mb-3">
+                    <img id="viewMachineryImage" src="" alt="Machinery Preview"
+                         class="w-100 bg-light"
+                         style="max-height:220px; object-fit:cover; border-radius:8px; display:none;">
+                    <div id="viewMachineryImageFallback" class="bg-light d-flex flex-column align-items-center justify-content-center text-muted"
+                         style="height:180px; border-radius:8px;">
+                        <i class="fas fa-image fa-3x mb-2"></i>
+                        <small>No image available</small>
+                    </div>
+                </div>
                 <table class="table table-bordered mb-0">
                     <tr>
                         <th style="width:30%">Booking No</th>
                         <td id="view_booking_num"></td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td id="view_status"></td>
                     </tr>
                     <tr>
                         <th>Machinery</th>
@@ -162,8 +178,19 @@
                         return;
                     }
                     (res.data || []).forEach(function(item, i) {
+
+                        function machineThumbFallback() {
+                            return '<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>';
+                        }
+                        window.machineThumbFallback = machineThumbFallback;
+
+                        let machineryImage = item.machinery_image ?
+                            `<img src="<?= $baseURL ?>assets/images/machinery/${item.machinery_image}" alt="Machine" style="width:50px;height:50px;border-radius:10%;object-fit:cover;" onerror="this.outerHTML=machineThumbFallback();">` :
+                            machineThumbFallback();
+
                         tbl.row.add([
                             i + 1,
+                            machineryImage,
                             item.machinery_name ?? '-',
                             item.beneficiary_name ?? '-',
                             `<span class="badge light badge-warning">For Approval</span>`,
@@ -214,6 +241,15 @@
                             currency: 'PHP'
                         });
                         $("#view_booking_num").text(d.booking_num ?? '-');
+                        const STATUS = {
+                            0: { label: 'For Approval', cls: 'badge-warning' },
+                            1: { label: 'Approved', cls: 'badge-success' },
+                            2: { label: 'Completed', cls: 'badge-info' },
+                            3: { label: 'Released', cls: 'badge-primary' },
+                            4: { label: 'Declined', cls: 'badge-danger' }
+                        };
+                        let st = STATUS[d.status] || { label: 'Unknown', cls: 'badge-secondary' };
+                        $("#view_status").html(`<span class="badge light ${st.cls}">${st.label}</span>`);
                         $("#view_machinery").text(
                             (d.machinery_name ?? '-') + ' ' + (d.machinery_model ?? '')
                         );
@@ -230,6 +266,25 @@
                         $("#view_unit_price").text(peso(d.unit_price));
                         $("#view_total_cost").text(peso(d.total_cost));
                         $("#view_created_at").text(d.created_at ?? '-');
+
+                        const $img = $('#viewMachineryImage');
+                        const $ph = $('#viewMachineryImageFallback');
+                        $img.removeClass('d-block').addClass('d-none').removeAttr('src');
+                        if (d.machinery_image) {
+                            const base = "<?= $baseURL ?>assets/images/machinery/";
+                            const preload = new Image();
+                            preload.onload = function() {
+                                $ph.removeClass('d-flex').addClass('d-none');
+                                $img.attr('src', base + d.machinery_image).removeClass('d-none').addClass('d-block');
+                            };
+                            preload.onerror = function() {
+                                $ph.removeClass('d-none').addClass('d-flex');
+                            };
+                            preload.src = base + d.machinery_image;
+                        } else {
+                            $ph.removeClass('d-none').addClass('d-flex');
+                        }
+
                         $("#modalApproveBtn").data("id", d.id);
                         $("#modalDeclineBtn").data("id", d.id);
                         $("#viewModal").modal("show");

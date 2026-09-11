@@ -60,12 +60,12 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                 FROM machinery m
                 LEFT JOIN machinery_type mt ON mt.id = m.type_id
                 LEFT JOIN branch b ON b.id = m.branch_id
-                WHERE m.status IN ('0','1')
-                  AND NOT EXISTS (
-                      SELECT 1 FROM booking bb
-                      WHERE bb.machinery_id = m.id
-                        AND bb.status IN ('0','1','2')
-                  )
+                -- WHERE m.status = '1'
+                --   AND NOT EXISTS (
+                --       SELECT 1 FROM booking bb
+                --       WHERE bb.machinery_id = m.id
+                --         AND bb.status IN ('0','1','2')
+                --   )
                 ORDER BY ratings DESC";
 
         $stmt = $db->query($sql);
@@ -228,7 +228,8 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
 
     try {
         $sql = "SELECT b.*, m.name AS machinery_name, m.model,
-                       CONCAT(ben.fname, ' ', ben.lname) AS beneficiary_name
+                       TRIM(CONCAT_WS(' ', ben.fname, ben.mname, ben.lname)) AS beneficiary_name,
+                       (SELECT name FROM machinery_images WHERE machinery_id = m.id AND is_primary = 1 LIMIT 1) AS machinery_image
                 FROM booking b
                 LEFT JOIN machinery m ON m.id = b.machinery_id
                 LEFT JOIN beneficiary ben ON ben.id = b.beneficiary_id
@@ -264,18 +265,18 @@ if ($trans == "LIST_AVAILABLE_BOOKINGS") {
                     m.description AS machinery_description,
                     mt.name AS machinery_type,
                     br.name AS branch_name,
-                    CONCAT(ben.fname, ' ', ben.lname) AS beneficiary_name,
+                    TRIM(CONCAT_WS(' ', ben.fname, ben.mname, ben.lname)) AS beneficiary_name,
                     ben.mobile AS beneficiary_mobile,
                     ben.email AS beneficiary_email,
                     ben.address AS beneficiary_address,
-                    bs.start_at,
-                    bs.end_at
+                    (SELECT name FROM machinery_images WHERE machinery_id = m.id AND is_primary = 1 LIMIT 1) AS machinery_image,
+                    (SELECT start_at FROM booking_schedules WHERE booking_id = b.id ORDER BY start_at ASC LIMIT 1) AS start_at,
+                    (SELECT end_at FROM booking_schedules WHERE booking_id = b.id ORDER BY start_at ASC LIMIT 1) AS end_at
                 FROM booking b
                 LEFT JOIN machinery m ON m.id = b.machinery_id
                 LEFT JOIN machinery_type mt ON mt.id = m.type_id
                 LEFT JOIN branch br ON br.id = b.branch_id
                 LEFT JOIN beneficiary ben ON ben.id = b.beneficiary_id
-                LEFT JOIN booking_schedules bs ON bs.booking_id = b.id
                 WHERE b.id = ?
                 LIMIT 1";
 
