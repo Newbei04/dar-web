@@ -1,6 +1,22 @@
 <?= startSection('css') ?>
 <link rel="stylesheet" href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css">
+<style>
+    .beneficiary-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #667eea;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-right: 10px;
+    }
+</style>
 <?= endSection() ?>
 
 <?= startSection('content') ?>
@@ -72,11 +88,14 @@
             <div class="card">
                 <!-- CARD HEADER -->
                 <div class="card-header d-flex flex-wrap align-items-center">
-                    <h5 class="card-title me-auto mb-2 mb-md-0">Program Beneficiaries</h5>
-                    <button class="btn btn-primary btn-sm" id="addNewBtn">
-                        <i class="fas fa-plus me-1"></i> Add beneficiary
-                    </button>
-                </div>
+<h5 class="card-title me-auto mb-2 mb-md-0">Program Beneficiaries</h5>
+                        <div>
+                            <span class="badge light badge-secondary me-2" id="beneficiaryCount">0</span>
+                            <button class="btn btn-primary btn-sm" id="addNewBtn">
+                                <i class="fas fa-plus me-1"></i> Add beneficiary
+                            </button>
+                        </div>
+                    </div>
 
                 <!-- CARD BODY -->
                 <div class="card-body d-flex flex-column">
@@ -165,48 +184,84 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Beneficiary Details</h5>
+            <div class="modal-header modal-header-muted">
+                <div>
+                    <h5 class="modal-title">Beneficiary Details</h5>
+                    <small id="view_subtitle" class="text-muted">View beneficiary information</small>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body modal-body-sub">
+                <h6 class="text-muted text-uppercase mb-2" style="font-size:0.8rem; letter-spacing:1px;">Personal Information</h6>
+
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Full Name</p>
-                        <p id="view_name" class="mb-3">-</p>
+                        <div class="view-info-item">
+                            <p class="view-info-label">Full Name</p>
+                            <p class="view-info-value" id="view_name">-</p>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Document Number</p>
-                        <p id="view_doc_num" class="mb-3">-</p>
+                        <div class="view-info-item">
+                            <p class="view-info-label">Document Number</p>
+                            <p class="view-info-value" id="view_doc_num">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="view-info-item">
+                            <p class="view-info-label">Card Number</p>
+                            <p class="view-info-value" id="view_card_num">-</p>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Card Number</p>
-                        <p id="view_card_num" class="mb-3">-</p>
+                        <div class="view-info-item">
+                            <p class="view-info-label">Email</p>
+                            <p class="view-info-value" id="view_email">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="view-info-item">
+                            <p class="view-info-label">Mobile</p>
+                            <p class="view-info-value" id="view_mobile">-</p>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Email</p>
-                        <p id="view_email" class="mb-3">-</p>
+                        <div class="view-info-item">
+                            <p class="view-info-label">Program</p>
+                            <p class="view-info-value" id="view_program">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <h6 class="text-muted text-uppercase mb-2" style="font-size:0.8rem; letter-spacing:1px;">Enrollment</h6>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="view-info-item">
+                            <p class="view-info-label">Status</p>
+                            <p class="view-info-value" id="view_status">-</p>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Mobile</p>
-                        <p id="view_mobile" class="mb-3">-</p>
+                        <div class="view-info-item">
+                            <p class="view-info-label">Date Enrolled</p>
+                            <p class="view-info-value" id="view_date_enrolled">-</p>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Program</p>
-                        <p id="view_program" class="mb-3">-</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Status</p>
-                        <p id="view_status" class="mb-3">-</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Date Enrolled</p>
-                        <p id="view_date_enrolled" class="mb-3">-</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="text-muted small text-uppercase mb-1">Date Received</p>
-                        <p id="view_date_received" class="mb-3">-</p>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="view-info-item">
+                            <p class="view-info-label">Date Received</p>
+                            <p class="view-info-value" id="view_date_received">-</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -323,6 +378,20 @@
                                 status = '<span class="badge light badge-secondary">UNKNOWN</span>';
                         }
 
+                        let bName = row.beneficiary_name || '-';
+                        let bDoc = formatDocNum(row.doc_num);
+                        let initials = bName.replace(/-/g, '').trim().split(/\s+/).filter(Boolean)
+                            .map(w => w.charAt(0).toUpperCase()).slice(0, 2).join('') || 'B';
+                        let beneficiary = `
+                            <div class="d-flex align-items-center">
+                                <span class="beneficiary-avatar">${initials}</span>
+                                <div>
+                                    <div class="fw-bold">${bName}</div>
+                                    <small class="text-muted">${bDoc}</small>
+                                </div>
+                            </div>
+                        `;
+
                         let actions = "";
 
                         if (row.status == 0) {
@@ -350,7 +419,7 @@
                         tblData.row.add([
                             i + 1,
                             row.program_name || '-',
-                            row.beneficiary_name || '-',
+                            beneficiary,
                             status,
                             row.date_enrolled || '-',
                             row.date_received || 'Not yet received',
@@ -359,6 +428,7 @@
                     });
 
                     tblData.draw(false);
+                    $('#beneficiaryCount').text(data.length + ' total');
                 },
                 error: function(xhr) {
                     closeLoader();
@@ -539,6 +609,7 @@
 
                     let d = res.data;
 
+                    $('#view_subtitle').text(d.beneficiary_name || 'Beneficiary details');
                     $('#view_name').text(d.beneficiary_name || '-');
                     $('#view_doc_num').text(formatDocNum(d.doc_num));
                     $('#view_card_num').text(d.card_num || '-');

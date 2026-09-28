@@ -6,20 +6,8 @@
         position: relative;
         overflow: hidden;
     }
-    .bg-gradient-primary { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
-    .bg-gradient-info { background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); }
-    .bg-gradient-success { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); }
-    .bg-gradient-warning { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
-    .bg-gradient-secondary { background: linear-gradient(135deg, #475569 0%, #64748b 100%); }
-    .bg-gradient-dark { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
-    .bg-gradient-danger { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
-    .shadow-primary { box-shadow: 0 8px 20px rgba(37, 99, 235, .18); }
-    .shadow-info { box-shadow: 0 8px 20px rgba(14, 165, 233, .18); }
-    .shadow-success { box-shadow: 0 8px 20px rgba(22, 163, 74, .18); }
-    .shadow-warning { box-shadow: 0 8px 20px rgba(245, 158, 11, .18); }
-    .shadow-secondary { box-shadow: 0 8px 20px rgba(71, 85, 105, .18); }
-    .shadow-dark { box-shadow: 0 8px 20px rgba(30, 41, 59, .18); }
-    .shadow-danger { box-shadow: 0 8px 20px rgba(220, 38, 38, .18); }
+    .bg-teal { color: #11998e; }
+    .bg-transparent { background: transparent; }
     .dash-hero::before {
         content: "";
         position: absolute;
@@ -41,46 +29,58 @@
         right: 160px;
     }
     .stat-card {
-        border: 0;
-        border-radius: 14px;
+        border: 1px solid #ebedf2;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         transition: transform .2s ease, box-shadow .2s ease;
         position: relative;
         overflow: hidden;
     }
     .stat-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-3px);
         box-shadow: 0 10px 24px rgba(2, 6, 23, 0.10) !important;
     }
     .stat-card .stat-icon {
-        width: 54px;
-        height: 54px;
-        border-radius: 14px;
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
+        font-size: 20px;
         flex-shrink: 0;
     }
+    .tile-teal { background: rgba(17, 153, 142, 0.12); color: #11998e; }
+    .tile-purple { background: rgba(102, 126, 234, 0.12); color: #667eea; }
+    .tile-green { background: rgba(22, 163, 74, 0.12); color: #16a34a; }
+    .tile-orange { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .tile-blue { background: rgba(77, 121, 246, 0.12); color: #4d79f6; }
+    .tile-slate { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+    .tile-red { background: rgba(245, 87, 108, 0.12); color: #f5576c; }
+    .tile-pink { background: rgba(236, 72, 153, 0.12); color: #ec4899; }
     .stat-card .stat-label {
         font-size: 12px;
         letter-spacing: .4px;
         text-transform: uppercase;
         font-weight: 600;
-        opacity: .75;
+        color: #6c757d;
     }
     .stat-card .stat-value {
         font-size: 28px;
         font-weight: 700;
         line-height: 1.15;
+        color: #2d3436;
     }
     .dash-card {
-        border: 0;
-        border-radius: 14px;
-        box-shadow: 0 2px 12px rgba(2, 6, 23, 0.06);
+        border: 1px solid #ebedf2;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     }
     .dash-card .card-header {
         background: transparent;
-        border-bottom: 1px solid rgba(2, 6, 23, .08);
+        border-bottom: 1px solid #eee;
+        padding: 1.25rem 1.5rem;
     }
     .booking-status-dot {
         width: 8px;
@@ -103,8 +103,19 @@
         color: var(--text-dark, #fff) !important;
     }
 
+    [data-theme-version="dark"] .stat-card,
+    [data-theme-version="dark"] .dash-card {
+        background: #1f2533;
+        border-color: rgba(255, 255, 255, 0.06);
+        box-shadow: none;
+    }
+
+    [data-theme-version="dark"] .stat-card .stat-value {
+        color: #fff;
+    }
+
     [data-theme-version="dark"] .dash-card .card-header {
-        border-bottom-color: var(--border, #333a54);
+        border-bottom-color: rgba(255, 255, 255, 0.06);
     }
 
     [data-theme-version="dark"] .recent-booking:hover {
@@ -130,7 +141,7 @@
     <div class="dash-hero p-4 mb-4 text-white">
         <div class="d-flex flex-wrap align-items-center justify-content-between position-relative" style="z-index:1;">
             <div>
-                <h3 class="text-white mb-1">Welcome back, <?= htmlspecialchars($_SESSION['name'] ?? $_SESSION['username'] ?? 'User') ?> 👋</h3>
+                <h3 class="text-white mb-1">Welcome back, <?= htmlspecialchars($_SESSION['name'] ?? $_SESSION['username'] ?? 'User') ?> </h3>
                 <p class="text-white-50 mb-0" id="todayDate"></p>
                 <p class="text-white mb-0 fs-20 fw-bold" id="clockTime"></p>
             </div>            <div class="text-end" id="branchBox" style="display:none;">
@@ -143,101 +154,101 @@
     <!-- STAT CARDS -->
     <div class="row g-4 mb-4" id="statsRow">
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-primary text-white shadow-primary">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Machines</p>
-                        <h3 class="text-white stat-value mb-0" id="statMachines">0</h3>
+                        <p class="stat-label mb-1">Machines</p>
+                        <h3 class="stat-value mb-0" id="statMachines">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-primary"><i class="fa-solid fa-tractor"></i></div>
+                    <div class="stat-icon tile-teal"><i class="fa-solid fa-tractor"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-info text-white shadow-info">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Bookings</p>
-                        <h3 class="text-white stat-value mb-0" id="statBookings">0</h3>
+                        <p class="stat-label mb-1">Bookings</p>
+                        <h3 class="stat-value mb-0" id="statBookings">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-info"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div class="stat-icon tile-purple"><i class="fa-solid fa-calendar-check"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-success text-white shadow-success">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Facilities</p>
-                        <h3 class="text-white stat-value mb-0" id="statFacility">0</h3>
+                        <p class="stat-label mb-1">Facilities</p>
+                        <h3 class="stat-value mb-0" id="statFacility">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-success"><i class="fa-solid fa-building-columns"></i></div>
+                    <div class="stat-icon tile-green"><i class="fa-solid fa-building-columns"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-warning text-white shadow-warning">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Programs</p>
-                        <h3 class="text-white stat-value mb-0" id="statPrograms">0</h3>
+                        <p class="stat-label mb-1">Programs</p>
+                        <h3 class="stat-value mb-0" id="statPrograms">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-warning"><i class="fa-solid fa-list-check"></i></div>
+                    <div class="stat-icon tile-orange"><i class="fa-solid fa-list-check"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-secondary text-white shadow-secondary">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Trainings</p>
-                        <h3 class="text-white stat-value mb-0" id="statTrainings">0</h3>
+                        <p class="stat-label mb-1">Trainings</p>
+                        <h3 class="stat-value mb-0" id="statTrainings">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-secondary"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <div class="stat-icon tile-blue"><i class="fa-solid fa-chalkboard-user"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-dark text-white shadow-dark">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Inventory</p>
-                        <h3 class="text-white stat-value mb-0" id="statInventory">0</h3>
+                        <p class="stat-label mb-1">Inventory</p>
+                        <h3 class="stat-value mb-0" id="statInventory">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-dark"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    <div class="stat-icon tile-slate"><i class="fa-solid fa-boxes-stacked"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-danger text-white shadow-danger">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Reserved Stock</p>
-                        <h3 class="text-white stat-value mb-0" id="statReserved">0</h3>
+                        <p class="stat-label mb-1">Reserved Stock</p>
+                        <h3 class="stat-value mb-0" id="statReserved">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-danger"><i class="fa-solid fa-lock"></i></div>
+                    <div class="stat-icon tile-red"><i class="fa-solid fa-lock"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-primary text-white shadow-primary">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Users</p>
-                        <h3 class="text-white stat-value mb-0" id="statUsers">0</h3>
+                        <p class="stat-label mb-1">Users</p>
+                        <h3 class="stat-value mb-0" id="statUsers">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-primary"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-icon tile-purple"><i class="fa-solid fa-users"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card stat-card bg-gradient-info text-white shadow-info">
+            <div class="card stat-card">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <div>
-                        <p class="stat-label text-white mb-1">Beneficiaries</p>
-                        <h3 class="text-white stat-value mb-0" id="statBeneficiaries">0</h3>
+                        <p class="stat-label mb-1">Beneficiaries</p>
+                        <h3 class="stat-value mb-0" id="statBeneficiaries">0</h3>
                     </div>
-                    <div class="stat-icon bg-white text-info"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <div class="stat-icon tile-pink"><i class="fa-solid fa-hand-holding-heart"></i></div>
                 </div>
             </div>
         </div>

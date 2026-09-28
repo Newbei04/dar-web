@@ -1,6 +1,46 @@
 <?= startSection('css') ?>
 <link rel="stylesheet" href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css">
+<style>
+    .allocation-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: rgba(102, 126, 234, 0.12);
+        color: #667eea;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-right: 10px;
+    }
+
+    .table-responsive table.display .statusBtn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        line-height: 1;
+        margin: 0 2px;
+        transition: all 0.2s ease;
+        background: rgba(108, 117, 125, 0.12);
+        color: #6c757d;
+        border: 1px solid transparent;
+    }
+
+    .table-responsive table.display .statusBtn:hover {
+        background: #6c757d;
+        color: #fff;
+        border-color: #6c757d;
+        transform: scale(1.1);
+    }
+</style>
 <?= endSection() ?>
 
 <?= startSection('content') ?>
@@ -116,22 +156,43 @@
 
                             let badgeClass = item.status == 0 ? 'warning' : item.status == 1 ? 'info' : item.status == 2 ? 'success' : 'secondary';
 
+                            let progName = item.program_name || '-';
+                            let pInitials = progName.replace(/-/g, '').trim().split(/\s+/)
+                                .map(w => w.charAt(0).toUpperCase()).slice(0, 2).join('') || 'P';
+                            let programCell = `
+                                <div class="d-flex align-items-center">
+                                    <span class="allocation-avatar">${pInitials}</span>
+                                    <div>
+                                        <div class="fw-bold">${progName}</div>
+                                        <small class="text-muted">Allocation #${item.id}</small>
+                                    </div>
+                                </div>
+                            `;
+
+                            let allocBadge = (item.allocation_type === 'PRODUCT')
+                                ? '<span class="badge light badge-info">Product</span>'
+                                : '<span class="badge light badge-success">Cash</span>';
+                            let productCell = `
+                                <div class="fw-semibold">${item.product_name || 'Cash'}</div>
+                                <small>${allocBadge}</small>
+                            `;
+
                             tbl.row.add([
                                 i + 1,
-                                item.program_name ?? '-',
-                                item.product_name || 'Cash',
+                                programCell,
+                                productCell,
                                 item.branch_name ?? '-',
                                 item.allocated_budget ?? 0,
                                 item.distributed_budget ?? 0,
                                 item.reserved_budget ?? 0,
                                 `<span class="badge light badge-${badgeClass}">${item.status_text}</span>`,
-                                `<a href="<?= $basePath ?>/list-program-beneficiary/${item.id}" class="btn btn-sm btn-info">
+                                `<a href="<?= $basePath ?>/list-program-beneficiary/${item.id}" class="viewBtn" title="View Beneficiaries">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="<?= $basePath ?>/edit-allocation/${item.id}" class="btn btn-sm btn-warning">
+                                <a href="<?= $basePath ?>/edit-allocation/${item.id}" class="editBtn" title="Edit Allocation">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button class="btn btn-sm btn-outline-primary editStatusBtn" data-id="${item.id}" data-status="${item.status}">
+                                <button class="statusBtn editStatusBtn" data-id="${item.id}" data-status="${item.status}" title="Edit Status">
                                     <i class="fas fa-cog"></i>
                                 </button>`
                             ]).draw(false);

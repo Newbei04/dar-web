@@ -1,0 +1,334 @@
+/* ================================================================
+   User / Beneficiary List-Table Styling
+   Loaded by: views/users-list.php, views/beneficiary-list.php,
+              views/beneficiary-verify-list.php
+   Mirrors the design used on the Facility list page (views/facility-list.php).
+
+   Usage: add class "user-card" to the wrapper .card, "user-table" to the
+   <table>, then use .user-avatar / .user-name-cell / .user-contact-cell /
+   .user-username-cell / .badge-status / .btn-action inside the rows.
+   ================================================================ */
+
+/* -----------------------------------------------
+   Card wrapper
+   ----------------------------------------------- */
+.user-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.user-card .card-header {
+    background: transparent;
+    border-bottom: 1px solid #eee;
+    padding: 1.25rem 1.5rem;
+}
+
+.user-card .card-body {
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+[data-theme-version="dark"] .user-card {
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+[data-theme-version="dark"] .user-card .card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* -----------------------------------------------
+   Table structure
+   ----------------------------------------------- */
+.table-responsive table.display.user-table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    padding: 12px 15px;
+    white-space: nowrap;
+}
+
+.table-responsive table.display.user-table tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    white-space: normal;
+}
+
+.table-responsive table.display.user-table tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+.table-responsive table.display.user-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* -----------------------------------------------
+   Avatar / photo cell
+   ----------------------------------------------- */
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* -----------------------------------------------
+   Name + contact cell
+   ----------------------------------------------- */
+.user-name-cell {
+    font-weight: 600;
+    color: #2d3436;
+    line-height: 1.35;
+}
+
+.user-contact-cell {
+    color: #636e72;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 340px;
+}
+
+.user-contact-cell i {
+    width: 14px;
+    text-align: center;
+    color: #a4a4a4;
+    flex-shrink: 0;
+}
+
+.user-contact-cell span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-username-cell {
+    display: block;
+    font-weight: 500;
+    color: #495057;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* -----------------------------------------------
+   Pill status badges
+   ----------------------------------------------- */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.badge-pending-status {
+    background: rgba(240, 165, 0, 0.14);
+    color: #d18f00;
+}
+
+.badge-active {
+    background: rgba(17, 153, 142, 0.12);
+    color: #11998e;
+}
+
+.badge-inactive {
+    background: rgba(245, 87, 108, 0.12);
+    color: #f5576c;
+}
+
+.badge-deactivated {
+    background: rgba(99, 110, 114, 0.12);
+    color: #636e72;
+}
+
+.badge-neutral {
+    background: rgba(102, 126, 234, 0.12);
+    color: #667eea;
+}
+
+.badge-info {
+    background: rgba(23, 162, 184, 0.14);
+    color: #17a2b8;
+}
+
+/* -----------------------------------------------
+   Compact icon action buttons
+   ----------------------------------------------- */
+.btn-action {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 2px;
+}
+
+.btn-action:hover {
+    transform: scale(1.1);
+    color: #fff;
+}
+
+.btn-view {
+    background: rgba(102, 126, 234, 0.12);
+    color: #667eea;
+}
+
+.btn-view:hover {
+    background: #667eea;
+}
+
+.btn-edit {
+    background: rgba(17, 153, 142, 0.12);
+    color: #11998e;
+}
+
+.btn-edit:hover {
+    background: #11998e;
+}
+
+.btn-verify {
+    background: rgba(40, 167, 69, 0.12);
+    color: #28a745;
+}
+
+.btn-verify:hover {
+    background: #28a745;
+}
+
+.btn-cashin {
+    background: rgba(40, 167, 69, 0.12);
+    color: #28a745;
+}
+
+.btn-cashin:hover {
+    background: #28a745;
+}
+
+.btn-password {
+    background: rgba(255, 193, 7, 0.16);
+    color: #e0a800;
+}
+
+.btn-password:hover {
+    background: #ffc107;
+}
+
+.btn-delete {
+    background: rgba(245, 87, 108, 0.12);
+    color: #f5576c;
+}
+
+.btn-delete:hover {
+    background: #f5576c;
+}
+
+/* -----------------------------------------------
+   Modal chrome (matches facility view modal)
+   ----------------------------------------------- */
+.modal-header-muted {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef0f4;
+    align-items: center;
+}
+
+.modal-header-muted .modal-title {
+    font-weight: 600;
+}
+
+.modal-header-muted small {
+    display: block;
+    color: #6c757d;
+}
+
+.modal-body-sub {
+    padding: 1.5rem;
+}
+
+/* -----------------------------------------------
+   Dark mode overrides
+   ----------------------------------------------- */
+[data-theme-version="dark"] .table-responsive table.display.user-table thead th {
+    background: #1f2533;
+    border-bottom-color: #2a3040;
+    color: #c8ccd4;
+}
+
+[data-theme-version="dark"] .table-responsive table.display.user-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme-version="dark"] .user-name-cell {
+    color: #e3e6ea;
+}
+
+[data-theme-version="dark"] .user-contact-cell,
+[data-theme-version="dark"] .user-username-cell {
+    color: #a4a4a4;
+}
+
+[data-theme-version="dark"] .badge-pending-status {
+    background: rgba(240, 165, 0, 0.18);
+    color: #ffc107;
+}
+
+[data-theme-version="dark"] .badge-active {
+    background: rgba(17, 153, 142, 0.18);
+    color: #2fd3c4;
+}
+
+[data-theme-version="dark"] .badge-inactive {
+    background: rgba(245, 87, 108, 0.18);
+    color: #ff8fa0;
+}
+
+[data-theme-version="dark"] .badge-deactivated {
+    background: rgba(255, 255, 255, 0.08);
+    color: #b6bcc6;
+}
+
+[data-theme-version="dark"] .badge-neutral {
+    background: rgba(102, 126, 234, 0.18);
+    color: #97a6f5;
+}
+
+[data-theme-version="dark"] .badge-info {
+    background: rgba(23, 162, 184, 0.2);
+    color: #4dd0e1;
+}
+
+[data-theme-version="dark"] .modal-header-muted {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}

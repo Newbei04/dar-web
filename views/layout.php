@@ -48,6 +48,7 @@ require_once "navbar_1.php";
 	<link rel="stylesheet" href="<?= $baseURL ?>assets/vendor/select2/css/select2.min.css">
 	<link rel="stylesheet" href="<?= $baseURL ?>assets/vendor/sweetalert2/dist/sweetalert2.min.css">
 	<link class="main-css" href="<?= $baseURL ?>assets/css/style.css" rel="stylesheet">
+	<link href="<?= $baseURL ?>assets/css/list-table.css" rel="stylesheet">
 
 	<!-- Custom styles -->
 	<?php yieldSection('css') ?>

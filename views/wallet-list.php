@@ -2,6 +2,7 @@
 <?= startSection('css') ?>
 <link href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css" rel="stylesheet">
+<link href="<?= $baseURL ?>assets/css/user-table.css" rel="stylesheet">
 <style>
     .wallet-card {
         border-left: 4px solid;
@@ -14,9 +15,15 @@
         width: 60px; height: 60px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
         font-size: 24px;
+        flex-shrink: 0;
     }
-    .badge-frozen { background: #dc3545; color: #fff; }
-    .badge-active { background: #198754; color: #fff; }
+    .summary-card .detail-label {
+        display: block;
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
     #walletDetailModal .detail-label { font-size: 0.8rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
     #walletDetailModal .detail-value { font-size: 1rem; font-weight: 600; }
     .balance-type-badge { font-size: 0.75rem; padding: 4px 8px; }
@@ -24,6 +31,35 @@
     .log-action-1 { color: #dc3545; }
     .log-action-2 { color: #198754; }
     .log-action-3 { color: #6c757d; }
+
+    .wallet-account-cell {
+        font-family: var(--bs-font-monospace, SFMono-Regular, Menlo, monospace);
+        font-size: 0.85rem;
+        color: #2d3436;
+        background: #f1f2f6;
+        border-radius: 6px;
+        padding: 3px 8px;
+        display: inline-block;
+    }
+    .wallet-amount-cell {
+        font-weight: 600;
+        color: #11998e;
+        white-space: nowrap;
+    }
+    .wallet-limit-cell {
+        color: #636e72;
+        white-space: nowrap;
+    }
+    #walletDetailModal table thead th {
+        background: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+    }
+    [data-theme-version="dark"] .wallet-account-cell { background: rgba(255,255,255,.06); color: #e3e6ea; }
+    [data-theme-version="dark"] .wallet-limit-cell { color: #a4a4a4; }
+    [data-theme-version="dark"] #walletDetailModal table thead th { background: #1f2533; border-bottom-color: #2a3040; color: #c8ccd4; }
 </style>
 <?= endSection() ?>
 
@@ -39,7 +75,7 @@
     <!-- Summary Cards -->
     <div class="row" id="summaryRow">
         <div class="col-xl-3 col-sm-6">
-            <div class="card wallet-card active">
+            <div class="card wallet-card summary-card active">
                 <div class="card-body d-flex align-items-center">
                     <div class="summary-icon bg-light-primary me-3">
                         <i class="fas fa-wallet text-primary"></i>
@@ -52,7 +88,7 @@
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card wallet-card active">
+            <div class="card wallet-card summary-card active">
                 <div class="card-body d-flex align-items-center">
                     <div class="summary-icon bg-light-success me-3">
                         <i class="fas fa-peso-sign text-success"></i>
@@ -65,7 +101,7 @@
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card wallet-card active">
+            <div class="card wallet-card summary-card active">
                 <div class="card-body d-flex align-items-center">
                     <div class="summary-icon bg-light-warning me-3">
                         <i class="fas fa-coins text-warning"></i>
@@ -78,7 +114,7 @@
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="card wallet-card frozen">
+            <div class="card wallet-card summary-card frozen">
                 <div class="card-body d-flex align-items-center">
                     <div class="summary-icon bg-light-danger me-3">
                         <i class="fas fa-snowflake text-danger"></i>
@@ -95,24 +131,29 @@
     <!-- Wallet List Table -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Wallet List</h4>
+            <div class="card user-card">
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-wallet me-2 text-primary"></i>Wallet List
+                    </h4>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge-status badge-neutral" id="walletCount">0 total</span>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="tblWallet" class="display responsive nowrap w-100">
+                        <table id="tblWallet" class="display responsive nowrap w-100 user-table">
                             <thead>
                                 <tr>
                                     <th width="3%">#</th>
-                                    <th width="12%">Account No.</th>
-                                    <th width="20%">Beneficiary</th>
+                                    <th width="13%">Account No.</th>
+                                    <th>Beneficiary</th>
                                     <th width="12%">Branch</th>
-                                    <th width="10%">Balance</th>
-                                    <th width="10%">Credit Limit</th>
-                                    <th width="8%">Status</th>
-                                    <th width="10%">Created</th>
-                                    <th width="12%">Actions</th>
+                                    <th width="11%">Balance</th>
+                                    <th width="11%">Credit Limit</th>
+                                    <th width="10%">Status</th>
+                                    <th width="11%">Created</th>
+                                    <th width="10%">Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -128,14 +169,14 @@
 <div class="modal fade" id="walletDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header modal-header-muted">
                 <div>
-                    <h5 class="modal-title"><i class="fas fa-wallet mr-1"></i> Wallet Details</h5>
+                    <h5 class="modal-title"><i class="fas fa-wallet me-1"></i> Wallet Details</h5>
                     <small class="text-muted" id="walletDetailAccount"></small>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modal-body-sub">
                 <!-- Beneficiary Info -->
                 <div class="row mb-4">
                     <div class="col-md-4">
@@ -189,7 +230,7 @@
                 </div>
 
                 <!-- Balance Breakdown -->
-                <h6 class="mb-3"><i class="fas fa-layer-group mr-1"></i> Balance Breakdown</h6>
+                <h6 class="mb-3"><i class="fas fa-layer-group me-1"></i> Balance Breakdown</h6>
                 <div class="table-responsive mb-4">
                     <table class="table table-sm table-bordered" id="wdBalanceTable">
                         <thead class="table-light">
@@ -204,7 +245,7 @@
                 </div>
 
                 <!-- Transaction Logs -->
-                <h6 class="mb-3"><i class="fas fa-history mr-1"></i> Transaction History</h6>
+                <h6 class="mb-3"><i class="fas fa-history me-1"></i> Transaction History</h6>
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered" id="wdLogTable">
                         <thead class="table-light">
@@ -302,14 +343,42 @@ $(document).ready(function() {
                 next: '<i class="fa fa-angle-double-right"></i>',
                 previous: '<i class="fa fa-angle-double-left"></i>'
             }
-        }
+        },
+        pageLength: 25,
+        lengthMenu: [10, 25, 50, 100],
+        bFilter: false,
+        dom: '<"row mb-3"<"col-sm-6"l><"col-sm-6">>rtip',
+        columnDefs: [
+            { orderable: false, targets: [8] }
+        ],
+        order: [[2, 'asc']]
     });
+
+    function refreshTooltips() {
+        if (!window.bootstrap || !bootstrap.Tooltip) return;
+        var $tips = $('#tblWallet tbody [data-bs-toggle="tooltip"]');
+        $tips.each(function() {
+            var inst = bootstrap.Tooltip.getInstance(this);
+            if (inst) inst.dispose();
+        });
+        $tips.each(function() {
+            new bootstrap.Tooltip(this);
+        });
+    }
 
     loadSummary();
     loadWallets();
 
     function formatCurrency(val) {
         return '₱' + parseFloat(val || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function escapeHtml(value) {
+        return $('<div>').text(value == null ? '' : value).html();
+    }
+
+    function escapeAttr(value) {
+        return $('<div>').text(value == null ? '' : value).html().replace(/"/g, '&quot;');
     }
 
     function loadSummary() {
@@ -349,34 +418,46 @@ $(document).ready(function() {
                 }
                 var data = res.data || [];
                 if (data.length === 0) {
+                    $('#walletCount').text('0 total');
                     tblWallet.draw(false);
+                    refreshTooltips();
                     return;
                 }
                 data.forEach(function(w, i) {
                     var statusBadge = w.is_frozen == 1
-                        ? '<span class="badge badge-frozen">Frozen</span>'
-                        : '<span class="badge badge-active">Active</span>';
+                        ? '<span class="badge-status badge-inactive"><i class="fas fa-snowflake me-1"></i>Frozen</span>'
+                        : '<span class="badge-status badge-active"><i class="fas fa-check-circle me-1"></i>Active</span>';
 
-                    var actions = `<button class="btn btn-primary btn-sm viewWallet" data-id="${w.id}" title="View Details">
+                    var name = w.full_name || '-';
+                    var username = w.username || '';
+
+                    var actions = `<button class="btn-action btn-view viewWallet" data-id="${w.id}" data-bs-toggle="tooltip" title="View Wallet Details">
                         <i class="fas fa-eye"></i>
                     </button>
-                    ${w.is_frozen != 1 ? `<button class="btn btn-success btn-sm cashInBtn" data-id="${w.id}" data-name="${w.full_name || ''}" title="Cash In">
-                        <i class="fas fa-plus-circle"></i>
+                    ${w.is_frozen != 1 ? `<button class="btn-action btn-cashin cashInBtn" data-id="${w.id}" data-name="${escapeAttr(name === '-' ? '' : name)}" data-bs-toggle="tooltip" title="Cash In">
+                        <i class="fas fa-plus"></i>
                     </button>` : ''}`;
+
+                    var beneficiary = `
+                        <div class="user-name-cell">${escapeHtml(name)}</div>
+                        <div class="user-contact-cell"><i class="fas fa-user"></i><span title="${escapeAttr(username)}">${escapeHtml(username || "-")}</span></div>
+                    `;
 
                     tblWallet.row.add([
                         i + 1,
-                        '<code>' + (w.account_num || '-') + '</code>',
-                        '<strong>' + (w.full_name || '-') + '</strong><br><small class="text-muted">' + (w.username || '-') + '</small>',
+                        w.account_num ? `<span class="wallet-account-cell">${escapeHtml(w.account_num)}</span>` : '<span class="text-muted">—</span>',
+                        beneficiary,
                         w.branch_name || '-',
-                        '<strong class="text-success">' + formatCurrency(w.total_balance) + '</strong>',
-                        formatCurrency(w.credit_limit),
+                        `<span class="wallet-amount-cell">${formatCurrency(w.total_balance)}</span>`,
+                        `<span class="wallet-limit-cell">${formatCurrency(w.credit_limit)}</span>`,
                         statusBadge,
                         w.created_at || '-',
                         actions
                     ]);
                 });
+                $('#walletCount').text(data.length + ' total');
                 tblWallet.draw(false);
+                refreshTooltips();
             },
             error: function(xhr) {
                 closeLoader();
@@ -414,8 +495,8 @@ $(document).ready(function() {
                 $('#wdBalance').text(formatCurrency(w.total_balance));
                 $('#wdCreditLimit').text(formatCurrency(w.credit_limit));
                 $('#wdStatus').html(w.is_frozen == 1
-                    ? '<span class="badge badge-frozen">Frozen</span>'
-                    : '<span class="badge badge-active">Active</span>');
+                    ? '<span class="badge-status badge-inactive"><i class="fas fa-snowflake me-1"></i>Frozen</span>'
+                    : '<span class="badge-status badge-active"><i class="fas fa-check-circle me-1"></i>Active</span>');
                 $('#wdCreated').text(w.created_at || '-');
 
                 // Balance breakdown
@@ -425,8 +506,8 @@ $(document).ready(function() {
                     w.balances.forEach(function(b) {
                         balTbody.append(
                             '<tr>' +
-                            '<td>' + (b.program_name || '-') + '</td>' +
-                            '<td><span class="badge balance-type-badge bg-light-primary text-dark">' + (b.balance_type_label || '-') + '</span></td>' +
+                            '<td>' + escapeHtml(b.program_name || '-') + '</td>' +
+                            '<td><span class="badge balance-type-badge bg-light-primary text-dark">' + escapeHtml(b.balance_type_label || '-') + '</span></td>' +
                             '<td class="text-end fw-bold">' + formatCurrency(b.amount) + '</td>' +
                             '</tr>'
                         );
@@ -463,7 +544,7 @@ $(document).ready(function() {
                         logTbody.append(
                             '<tr>' +
                             '<td>' + (l.created_at || '-') + '</td>' +
-                            '<td><span class="' + actionClass + ' fw-bold">' + (l.action_label || '-') + '</span></td>' +
+                            '<td><span class="' + actionClass + ' fw-bold">' + escapeHtml(l.action_label || '-') + '</span></td>' +
                             '<td class="text-end">' + formatCurrency(l.amount) + '</td>' +
                             '<td class="text-end">' + formatCurrency(l.balance_before) + '</td>' +
                             '<td class="text-end">' + formatCurrency(l.balance_after) + '</td>' +
@@ -490,7 +571,7 @@ $(document).ready(function() {
                     var sel = $('#ciProgram');
                     sel.find('option:gt(0)').remove();
                     res.data.forEach(function(p) {
-                        sel.append('<option value="' + p.id + '">' + (p.name || p.code || 'Program ' + p.id) + '</option>');
+                        sel.append('<option value="' + p.id + '">' + escapeHtml(p.name || p.code || 'Program ' + p.id) + '</option>');
                     });
                     reinitSelect2(sel);
                 }

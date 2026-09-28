@@ -2,13 +2,9 @@
 <?= startSection('css') ?>
 <link href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css" rel="stylesheet">
+<link href="<?= $baseURL ?>assets/css/user-table.css" rel="stylesheet">
+<link href="<?= $baseURL ?>assets/css/product-table.css" rel="stylesheet">
 <style>
-    .inv-thumb {
-        width: 50px;
-        height: 50px;
-        border-radius: 10%;
-        object-fit: cover;
-    }
     .facility-filter {
         min-width: 260px;
     }
@@ -25,47 +21,50 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header flex-wrap">
-                    <h4 class="card-title">Inventory List <small class="text-muted">(batch level)</small></h4>
+            <div class="card user-card">
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-warehouse me-2 text-primary"></i>Inventory List
+                        <small class="text-muted fw-normal">(batch level)</small>
+                    </h4>
 
-                    <div class="d-flex align-items-center flex-wrap gap-2">
+                    <div class="table-toolbar">
                         <select id="facilityFilter" class="form-control native-select facility-filter">
                             <option value="">All Facilities</option>
                         </select>
 
                         <a href="<?= $baseURL ?>stock-movements" class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-exchange-alt mr-1"></i> Stock Movements
+                            <i class="fas fa-exchange-alt me-1"></i> Stock Movements
                         </a>
                         <a href="<?= $baseURL ?>low-stock" class="btn btn-outline-warning btn-sm">
-                            <i class="fas fa-exclamation-triangle mr-1"></i> Low Stock
+                            <i class="fas fa-exclamation-triangle me-1"></i> Low Stock
                         </a>
                         <a href="<?= $baseURL ?>add-inventory" class="btn btn-primary btn-sm">
-                            <i class="fa fa-plus mr-1"></i> Receive Stock
+                            <i class="fa fa-plus me-1"></i> Receive Stock
                         </a>
                     </div>
                 </div>
 
                 <div class="card-body">
                     <div class="table-responsive">
-                    <table id="tblInventory" class="display responsive nowrap w-100">
+                    <table id="tblInventory" class="display responsive nowrap w-100 user-table">
                         <thead>
                             <tr>
-                                <th width="2%">#</th>
-                                <th width="7%">Image</th>
+                                <th width="3%">#</th>
+                                <th width="6%">Image</th>
                                 <th>Product</th>
-                                <th>Facility</th>
-                                <th>Batch</th>
-                                <th>Received</th>
-                                <th>Current</th>
-                                <th>Reserved</th>
-                                <th>Available</th>
-                                <th>Reorder</th>
-                                <th>Cost</th>
-                                <th>Selling</th>
-                                <th>Expiry</th>
-                                <th>Status</th>
-                                <th width="8%">Actions</th>
+                                <th width="11%">Facility</th>
+                                <th width="10%">Batch</th>
+                                <th width="8%">Received</th>
+                                <th width="8%">Current</th>
+                                <th width="8%">Reserved</th>
+                                <th width="9%">Available</th>
+                                <th width="8%">Reorder</th>
+                                <th width="9%">Cost</th>
+                                <th width="9%">Selling</th>
+                                <th width="10%">Expiry</th>
+                                <th width="10%">Status</th>
+                                <th width="6%">Actions</th>
                             </tr>
                         </thead>
 
@@ -84,11 +83,11 @@
 <div class="modal fade" id="invActionModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header modal-header-muted">
                 <h5 class="modal-title" id="invActionModalLabel">Inventory Action</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modal-body-sub">
                 <input type="hidden" id="invActionId">
                 <input type="hidden" id="invActionType">
 
@@ -121,7 +120,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="btnInvActionSave">Confirm</button>
             </div>
         </div>
@@ -132,14 +131,14 @@
 <div class="modal fade" id="invLogsModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header modal-header-muted">
                 <div>
                     <h5 class="modal-title">Inventory Movements</h5>
                     <small class="text-muted" id="invLogsSubLabel"></small>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modal-body-sub">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover mb-0">
                         <thead class="font-weight-bold">
@@ -177,21 +176,20 @@
                     next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
                     previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
                 }
-            }
+            },
+            pageLength: 25,
+            lengthMenu: [10, 25, 50, 100],
+            bFilter: false,
+            dom: '<"row mb-3"<"col-sm-6"l><"col-sm-6">>rtip',
+            columnDefs: [
+                { orderable: false, targets: [14] }
+            ]
         });
 
         let inventoryRows = [];
 
         function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, function(char) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                } [char];
-            });
+            return $('<div>').text(value ?? '').html();
         }
 
         function formatNumber(value) {
@@ -208,14 +206,14 @@
 
         // Fallback thumbnail when an image file is missing
         function productThumbFallback() {
-            return '<div style="width:50px;height:50px;border-radius:10%;background:#e9ecef;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>';
+            return '<span class="product-thumb-fallback"><i class="fas fa-image"></i></span>';
         }
         window.productThumbFallback = productThumbFallback;
 
         function getStatusBadge(status) {
             return status == 1 ?
-                '<span class="badge light badge-success">Active</span>' :
-                '<span class="badge light badge-danger">Inactive</span>';
+                '<span class="badge-status badge-active"><i class="fas fa-check-circle me-1"></i>Active</span>' :
+                '<span class="badge-status badge-inactive"><i class="fas fa-ban me-1"></i>Inactive</span>';
         }
 
         function getExpiryBadge(expiryDate) {
@@ -227,18 +225,20 @@
             let diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
 
             if (diffDays < 0) {
-                return '<span class="badge light badge-danger">' + escapeHtml(expiryDate) + ' (Expired)</span>';
+                return '<span class="badge-status badge-inactive"><i class="fas fa-ban me-1"></i>' + escapeHtml(expiryDate) + ' Expired</span>';
             }
             if (diffDays <= 60) {
-                return '<span class="badge light badge-warning">' + escapeHtml(expiryDate) + ' (Expiring)</span>';
+                return '<span class="badge-status badge-pending-status"><i class="fas fa-clock me-1"></i>' + escapeHtml(expiryDate) + ' Expiring</span>';
             }
             return escapeHtml(expiryDate);
         }
 
         function getStockCell(available, reorderLevel) {
-            let cls = available <= 0 ? 'text-danger' : (available <= reorderLevel ? 'text-warning' : 'text-success');
-            let low = available <= reorderLevel ? ' <span class="badge light badge-warning">LOW</span>' : '';
-            return '<span class="' + cls + ' font-weight-bold">' + formatNumber(available) + '</span>' + low;
+            let cls = available <= 0 ? 'stock-out' : (available <= reorderLevel ? 'stock-low' : 'stock-ok');
+            let low = available <= reorderLevel
+                ? '<span class="badge-status badge-pending-status low-flag">LOW</span>'
+                : '';
+            return '<span class="stock-cell ' + cls + '">' + formatNumber(available) + '</span>' + low;
         }
 
         // ================= FACILITY FILTER =================
@@ -298,23 +298,21 @@
                         let reorder = parseFloat(item.reorder_level ?? 0);
 
                         let imageHtml = item.primary_image ?
-                            `<img src="<?= $baseURL ?>assets/images/product/${escapeHtml(item.primary_image)}" alt="Product" class="inv-thumb" onerror="this.outerHTML=productThumbFallback();">` :
+                            `<img src="<?= $baseURL ?>assets/images/product/${encodeURIComponent(item.primary_image)}" alt="Product" class="product-thumb" onerror="this.outerHTML=productThumbFallback();">` :
                             productThumbFallback();
 
-                        let productInfo =
-                            `<span class="fas fa-box"></span> ` + escapeHtml(item.product_name) + `<br>` +
-                            `<span class="fas fa-barcode"></span> <small>` + escapeHtml(item.sku) + `</small>`;
+                        let productInfo = `
+                            <div class="user-name-cell">${escapeHtml(item.product_name)}</div>
+                            <div class="user-contact-cell"><i class="fas fa-barcode"></i><span>${escapeHtml(item.sku)}</span></div>
+                        `;
 
                         let actions = `
-                        <div class="dropdown ms-auto text-end c-pointer">
-                            <div class="btn-link" data-bs-toggle="dropdown" data-bs-boundary="viewport">
-                                <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <rect x="0" y="0" width="24" height="24"></rect>
-                                        <circle fill="#000000" cx="5" cy="12" r="2"></circle>
-                                        <circle fill="#000000" cx="12" cy="12" r="2"></circle>
-                                        <circle fill="#000000" cx="19" cy="12" r="2"></circle>
-                                    </g>
+                        <div class="dropdown text-end c-pointer">
+                            <div class="btn-kebab" data-bs-toggle="dropdown" data-bs-boundary="viewport" title="Row actions">
+                                <svg viewBox="0 0 24 24" version="1.1" aria-hidden="true">
+                                    <circle cx="5" cy="12" r="2"></circle>
+                                    <circle cx="12" cy="12" r="2"></circle>
+                                    <circle cx="19" cy="12" r="2"></circle>
                                 </svg>
                             </div>
                             <div class="dropdown-menu dropdown-menu-end">
@@ -351,14 +349,14 @@
                             imageHtml,
                             productInfo,
                             escapeHtml(item.facility_name ?? '-'),
-                            '<strong>' + escapeHtml(item.batch_number || '-') + '</strong>',
-                            formatNumber(item.received_stock),
-                            formatNumber(item.current_stock),
-                            formatNumber(item.reserved_stock),
+                            `<span class="batch-cell">${escapeHtml(item.batch_number || '-')}</span>`,
+                            `<span class="num-cell">${formatNumber(item.received_stock)}</span>`,
+                            `<span class="num-cell">${formatNumber(item.current_stock)}</span>`,
+                            `<span class="num-cell">${formatNumber(item.reserved_stock)}</span>`,
                             getStockCell(available, reorder),
-                            formatNumber(reorder),
-                            formatMoney(item.cost_price),
-                            formatMoney(item.facility_price !== null && item.facility_price !== undefined ? item.facility_price : item.selling_price),
+                            `<span class="num-cell">${formatNumber(reorder)}</span>`,
+                            `<span class="money-cell">${formatMoney(item.cost_price)}</span>`,
+                            `<span class="money-cell">${formatMoney(item.facility_price !== null && item.facility_price !== undefined ? item.facility_price : item.selling_price)}</span>`,
                             getExpiryBadge(item.expiry_date),
                             getStatusBadge(item.status),
                             actions
@@ -413,27 +411,27 @@
                     logs.forEach(function(log) {
                         let qty = parseFloat(log.quantity_changed || 0);
                         let qtyHtml = qty > 0 ?
-                            `<span class="text-success font-weight-bold">+${formatNumber(qty)}</span>` :
+                            `<span class="qty-up">+${formatNumber(qty)}</span>` :
                             qty < 0 ?
-                            `<span class="text-danger font-weight-bold">${formatNumber(qty)}</span>` :
+                            `<span class="qty-down">${formatNumber(qty)}</span>` :
                             `<span class="text-muted">0</span>`;
 
-                        let typeBadge = 'badge-light badge-secondary';
-                        if (log.action_type == 1) typeBadge = 'badge-light badge-success';
-                        else if (log.action_type == 2) typeBadge = 'badge-light badge-info';
-                        else if (log.action_type == 3) typeBadge = 'badge-light badge-primary';
-                        else if (log.action_type == 4) typeBadge = 'badge-light badge-warning';
-                        else if (log.action_type == 5) typeBadge = 'badge-light badge-dark';
-                        else if (log.action_type == 6) typeBadge = 'badge-light badge-danger';
-                        else if (log.action_type == 7) typeBadge = 'badge-light badge-primary';
-                        else if (log.action_type == 10) typeBadge = 'badge-light badge-secondary';
+                        let typeCls = 'badge-neutral';
+                        if (log.action_type == 1) typeCls = 'badge-active';
+                        else if (log.action_type == 2) typeCls = 'badge-info';
+                        else if (log.action_type == 3) typeCls = 'badge-info';
+                        else if (log.action_type == 4) typeCls = 'badge-pending-status';
+                        else if (log.action_type == 5) typeCls = 'badge-neutral';
+                        else if (log.action_type == 6) typeCls = 'badge-inactive';
+                        else if (log.action_type == 7) typeCls = 'badge-info';
+                        else if (log.action_type == 10) typeCls = 'badge-neutral';
 
                         html += `
                             <tr>
                                 <td>${escapeHtml(log.created_at ?? '-')}</td>
-                                <td><span class="badge ${typeBadge}">${escapeHtml(log.action_label ?? '')}</span></td>
+                                <td><span class="badge-status ${typeCls}">${escapeHtml(log.action_label ?? '')}</span></td>
                                 <td>${qtyHtml}</td>
-                                <td>${formatNumber(log.new_balance)}</td>
+                                <td><span class="num-cell">${formatNumber(log.new_balance)}</span></td>
                                 <td>${escapeHtml(log.remarks ?? '')}</td>
                             </tr>
                         `;

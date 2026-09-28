@@ -26,12 +26,21 @@
 
 <?= startSection('content') ?>
 <script>
-    function beneficiaryAvatarFallback(el) {
+    function beneficiaryAvatarFallback(el, init) {
         el.onerror = null;
+        if (!init) {
+            var nm = document.getElementById('name');
+            var txt = (nm && nm.textContent) || '';
+            var parts = txt.trim().split(/\s+/);
+            init = ((parts[0] || '').charAt(0) || '') + ((parts[1] || '').charAt(0) || '');
+        }
+        init = (init || '?').toUpperCase();
         var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140">' +
-            '<rect width="140" height="140" rx="70" fill="#e9ecef"/>' +
-            '<circle cx="70" cy="55" r="24" fill="#adb5bd"/>' +
-            '<path d="M22 120c4-26 24-38 48-38s44 12 48 38z" fill="#adb5bd"/></svg>';
+            '<defs><linearGradient id="bvGrad" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#6b7aff"/><stop offset="1" stop-color="#7c4dff"/>' +
+            '</linearGradient></defs>' +
+            '<rect width="140" height="140" rx="70" fill="url(#bvGrad)"/>' +
+            '<text x="70" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#ffffff">' + init + '</text></svg>';
         el.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
 </script>
@@ -263,6 +272,12 @@
 
                         if (p.profile) {
                             $("#avatarImg").attr("src", "<?= $baseURL ?>assets/images/profile/" + p.profile);
+                        } else {
+                            var parts = (p.name || '').trim().split(/\s+/);
+                            beneficiaryAvatarFallback(
+                                document.getElementById('avatarImg'),
+                                ((parts[0] || '').charAt(0) || '') + ((parts[1] || '').charAt(0) || '')
+                            );
                         }
                     } else {
                         Swal.fire("Error", res.message || "Beneficiary not found.", "error");

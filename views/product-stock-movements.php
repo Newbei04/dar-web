@@ -1,18 +1,8 @@
 <?= startSection('css') ?>
 <link href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css" rel="stylesheet">
-<style>
-    .badge-receive   { background: #e8f5e9; color: #2e7d32; }
-    .badge-sale      { background: #fce4ec; color: #c62828; }
-    .badge-return    { background: #e3f2fd; color: #1565c0; }
-    .badge-adjust    { background: #fff3e0; color: #e65100; }
-    .badge-expired   { background: #f3e5f5; color: #6a1b9a; }
-    .badge-damaged   { background: #ffebee; color: #b71c1c; }
-    .badge-price     { background: #e8eaf6; color: #283593; }
-    .badge-reserve   { background: #f1f8e9; color: #33691e; }
-    .badge-release   { background: #e0f7fa; color: #00695c; }
-    .badge-transfer  { background: #fce4ec; color: #ad1457; }
-</style>
+<link href="<?= $baseURL ?>assets/css/user-table.css" rel="stylesheet">
+<link href="<?= $baseURL ?>assets/css/product-table.css" rel="stylesheet">
 <?= endSection() ?>
 
 <?= startSection('content') ?>
@@ -26,14 +16,17 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header flex-wrap">
-                    <h4 class="card-title">Stock Movements / Logs</h4>
-                    <div class="d-flex align-items-center gap-2">
-                        <select id="facilityFilter" class="form-control native-select" style="min-width:220px;">
+            <div class="card user-card">
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-exchange-alt me-2 text-primary"></i>Stock Movements / Logs
+                    </h4>
+                    <div class="table-toolbar">
+                        <span class="badge-status badge-neutral" id="movementCount">0 records</span>
+                        <select id="facilityFilter" class="form-control native-select movements-filter-facility">
                             <option value="">All Facilities</option>
                         </select>
-                        <select id="actionFilter" class="form-control native-select" style="min-width:160px;">
+                        <select id="actionFilter" class="form-control native-select movements-filter-action">
                             <option value="">All Types</option>
                             <option value="1">Receive</option>
                             <option value="2">Sale</option>
@@ -50,19 +43,19 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="tblMovements" class="display responsive nowrap w-100">
+                        <table id="tblMovements" class="display responsive nowrap w-100 user-table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Date</th>
+                                    <th width="3%">#</th>
+                                    <th width="12%">Date</th>
                                     <th>Product</th>
-                                    <th>Facility</th>
-                                    <th>Batch</th>
-                                    <th>Type</th>
-                                    <th>Qty Change</th>
-                                    <th>New Balance</th>
-                                    <th>Reference</th>
-                                    <th>By</th>
+                                    <th width="11%">Facility</th>
+                                    <th width="10%">Batch</th>
+                                    <th width="9%">Type</th>
+                                    <th width="8%">Qty Change</th>
+                                    <th width="8%">New Balance</th>
+                                    <th width="9%">Reference</th>
+                                    <th width="10%">By</th>
                                     <th>Remarks</th>
                                 </tr>
                             </thead>
@@ -92,19 +85,15 @@
                     next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
                     previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
                 }
-            }
+            },
+            pageLength: 25,
+            lengthMenu: [10, 25, 50, 100],
+            bFilter: false,
+            dom: '<"row mb-3"<"col-sm-6"l><"col-sm-6">>rtip'
         });
 
         function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, function(char) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                } [char];
-            });
+            return $('<div>').text(value ?? '').html();
         }
 
         function formatNumber(value) {
@@ -114,17 +103,18 @@
             });
         }
 
+        // Maps action_type to a badge class. Mirrors $action_labels in ctrl-inventory.php.
         var badgeMap = {
-            'Receive': 'badge-receive',
-            'Sale': 'badge-sale',
-            'Return': 'badge-return',
-            'Adjustment': 'badge-adjust',
-            'Expired': 'badge-expired',
-            'Damaged': 'badge-damaged',
-            'Price Change': 'badge-price',
-            'Reserve': 'badge-reserve',
-            'Release': 'badge-release',
-            'Transfer': 'badge-transfer'
+            1: 'badge-receive',
+            2: 'badge-sale',
+            3: 'badge-return',
+            4: 'badge-adjust',
+            5: 'badge-expired',
+            6: 'badge-damaged',
+            7: 'badge-price',
+            8: 'badge-reserve',
+            9: 'badge-release',
+            10: 'badge-transfer'
         };
 
         $.ajax({
@@ -171,23 +161,42 @@
                     let data = Array.isArray(res.data) ? res.data : [];
                     data.forEach(function(item, index) {
                         const qty = parseFloat(item.quantity_changed);
-                        const badgeClass = badgeMap[item.action_label] || 'badge-secondary';
-                        const qtyColor = qty < 0 ? 'text-danger' : 'text-success';
+                        const badgeClass = badgeMap[parseInt(item.action_type, 10)] || 'badge-neutral';
+                        const qtyCell = qty > 0
+                            ? '<span class="qty-up">+' + formatNumber(qty) + '</span>'
+                            : qty < 0
+                            ? '<span class="qty-down">' + formatNumber(qty) + '</span>'
+                            : '<span class="text-muted">0</span>';
+
+                        const productInfo = `
+                            <div class="user-name-cell">${escapeHtml(item.product_name)}</div>
+                            <div class="user-contact-cell"><i class="fas fa-barcode"></i><span>${escapeHtml(item.sku)}</span></div>
+                        `;
+
+                        const by = item.created_by
+                            ? `<div class="user-name-cell">${escapeHtml(item.created_by)}</div>`
+                            : '<span class="text-muted">-</span>';
 
                         tbl.row.add([
                             index + 1,
                             escapeHtml(item.created_at || '-'),
-                            escapeHtml(item.product_name) + '<br><small>' + escapeHtml(item.sku) + '</small>',
-                            escapeHtml(item.facility_name || '-'),
-                            '<strong>' + escapeHtml(item.batch_number || '-') + '</strong>',
-                            '<span class="badge light ' + badgeClass + '">' + escapeHtml(item.action_label) + '</span>',
-                            '<span class="' + qtyColor + ' fw-bold">' + formatNumber(qty) + '</span>',
-                            formatNumber(item.new_balance),
-                            escapeHtml(item.reference_id || '-'),
-                            escapeHtml(item.created_by || '-'),
-                            escapeHtml(item.remarks || '-')
+                            productInfo,
+                            `<span class="batch-cell">${escapeHtml(item.facility_name || '-')}</span>`,
+                            `<span class="batch-cell">${escapeHtml(item.batch_number || '-')}</span>`,
+                            '<span class="badge-status ' + badgeClass + '">' + escapeHtml(item.action_label) + '</span>',
+                            qtyCell,
+                            '<span class="num-cell">' + formatNumber(item.new_balance) + '</span>',
+                            item.reference_id
+                                ? `<span class="batch-cell">${escapeHtml(item.reference_id)}</span>`
+                                : '<span class="text-muted">-</span>',
+                            by,
+                            item.remarks
+                                ? `<div class="user-contact-cell"><span>${escapeHtml(item.remarks)}</span></div>`
+                                : '<span class="text-muted">-</span>'
                         ]);
                     });
+
+                    $('#movementCount').text(data.length + ' record' + (data.length === 1 ? '' : 's'));
                     tbl.draw(false);
                 },
                 error: function(xhr) {

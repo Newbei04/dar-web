@@ -2,6 +2,42 @@
 <?= startSection('css') ?>
 <link href="<?= $baseURL ?>assets/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="<?= $baseURL ?>assets/vendor/datatables/responsive/responsive.css" rel="stylesheet">
+<style>
+    .modal-header-muted {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #eef0f4;
+        align-items: center;
+    }
+    .modal-header-muted .modal-title {
+        font-weight: 600;
+    }
+    .modal-header-muted small {
+        display: block;
+        color: #6c757d;
+    }
+    .modal-body-sub {
+        padding: 1.5rem;
+    }
+    .view-info-item {
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f2f6;
+    }
+    .view-info-item:last-child {
+        border-bottom: none;
+    }
+    .view-info-label {
+        font-size: 0.8rem;
+        color: #a4a4a4;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+    }
+    .view-info-value {
+        font-weight: 500;
+        color: #2d3436;
+        margin: 0;
+    }
+</style>
 <?= endSection() ?>
 
 <?= startSection('content') ?>
@@ -16,7 +52,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Machinery Type List</h4>
+                    <h4 class="card-title">
+                        <i class="fas fa-list-ul me-2 text-primary"></i>Machinery Type List
+                    </h4>
 
                     <button type="button" class="btn btn-primary" id="btnAddType">
                         <i class="fa fa-plus mr-1"></i> Add Machinery Type
@@ -82,25 +120,44 @@
 <div class="modal fade" id="viewModal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Machinery Type Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal">
-                </button>
+            <div class="modal-header modal-header-muted">
+                <div>
+                    <h5 class="modal-title">Machinery Type Details</h5>
+                    <small id="view_subtitle">View machine type information</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>ID</label>
-                    <input type="text" class="form-control" id="view_id" readonly>
+            <div class="modal-body modal-body-sub">
+                <div class="view-info-item">
+                    <p class="view-info-label">ID</p>
+                    <p class="view-info-value" id="view_id">-</p>
+                </div>
+                <div class="view-info-item">
+                    <p class="view-info-label">Name</p>
+                    <p class="view-info-value" id="view_name">-</p>
+                </div>
+                <div class="view-info-item">
+                    <p class="view-info-label">Details</p>
+                    <p class="view-info-value" id="view_details">-</p>
                 </div>
 
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" id="view_name" readonly>
-                </div>
+                <hr class="my-3">
 
-                <div class="form-group mb-0">
-                    <label>Details</label>
-                    <textarea class="form-control" id="view_details" rows="3" readonly></textarea>
+                <h6 class="text-muted text-uppercase mb-2" style="font-size:0.8rem; letter-spacing:1px;">Timestamps</h6>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="view-info-item">
+                            <p class="view-info-label">Created</p>
+                            <p class="view-info-value" id="view_created_at">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="view-info-item">
+                            <p class="view-info-label">Updated</p>
+                            <p class="view-info-value" id="view_updated_at">-</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -281,9 +338,15 @@
 
         /* ---------- VIEW ---------- */
         $(document).on("click", ".viewBtn", function() {
-            $("#view_id").val($(this).data("id"));
-            $("#view_name").val($(this).data("name"));
-            $("#view_details").val($(this).data("details"));
+            var id = $(this).data("id");
+            var name = $(this).data("name") || '-';
+            var details = $(this).data("details") || '-';
+            $("#view_id").text(id);
+            $("#view_subtitle").text(id || 'View machine type information');
+            $("#view_name").text(name);
+            $("#view_details").text(details);
+            $("#view_created_at").text($(this).data("created_at") || '-');
+            $("#view_updated_at").text($(this).data("updated_at") || '-');
             $("#viewModal").modal("show");
         });
 

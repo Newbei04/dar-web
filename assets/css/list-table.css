@@ -1,0 +1,137 @@
+/* ================================================================
+   Global List-Table Styling
+   Applied to all DataTables across the application (via layout.php).
+   Mirrors the design used on Facility / Branch list pages.
+   ================================================================ */
+
+/* -----------------------------------------------
+   Card wrapper (any card hosting a DataTable)
+   ----------------------------------------------- */
+.card:has(.table-responsive table.display) {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.card:has(.table-responsive table.display) > .card-header {
+    background: transparent;
+    border-bottom: 1px solid #eee;
+    padding: 1.25rem 1.5rem;
+}
+
+.card:has(.table-responsive table.display) > .card-body {
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+[data-theme-version="dark"] .card:has(.table-responsive table.display) {
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* -----------------------------------------------
+   Table structure
+   ----------------------------------------------- */
+.table-responsive table.display thead th {
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #dee2e6 !important;
+    font-weight: 600;
+    color: #495057;
+    padding: 12px 15px;
+    white-space: nowrap;
+}
+
+.table-responsive table.display tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+.table-responsive table.display tbody tr:hover td {
+    background-color: #f8f9fc;
+}
+
+.table-responsive table.display tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* -----------------------------------------------
+   Compact icon action buttons (inside tables only)
+   ----------------------------------------------- */
+.table-responsive table.display .viewBtn,
+.table-responsive table.display .editBtn,
+.table-responsive table.display .deleteBtn,
+.table-responsive table.display .approveBtn,
+.table-responsive table.display .declineBtn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    line-height: 1;
+    margin: 0 2px;
+    transition: all 0.2s ease;
+}
+
+.table-responsive table.display .viewBtn:hover,
+.table-responsive table.display .editBtn:hover,
+.table-responsive table.display .deleteBtn:hover,
+.table-responsive table.display .approveBtn:hover,
+.table-responsive table.display .declineBtn:hover {
+    transform: scale(1.1);
+    color: #fff;
+}
+
+/* View */
+.table-responsive table.display .viewBtn {
+    background: rgba(102, 126, 234, 0.12);
+    color: #667eea;
+    border: 1px solid transparent;
+}
+.table-responsive table.display .viewBtn:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: #fff;
+}
+
+/* Edit / Approve */
+.table-responsive table.display .editBtn,
+.table-responsive table.display .approveBtn {
+    background: rgba(17, 153, 142, 0.12);
+    color: #11998e;
+    border: 1px solid transparent;
+}
+.table-responsive table.display .editBtn:hover,
+.table-responsive table.display .approveBtn:hover {
+    background: #11998e;
+    border-color: #11998e;
+    color: #fff;
+}
+
+/* Delete / Decline */
+.table-responsive table.display .deleteBtn,
+.table-responsive table.display .declineBtn {
+    background: rgba(245, 87, 108, 0.12);
+    color: #f5576c;
+    border: 1px solid transparent;
+}
+.table-responsive table.display .deleteBtn:hover,
+.table-responsive table.display .declineBtn:hover {
+    background: #f5576c;
+    border-color: #f5576c;
+    color: #fff;
+}
+
+/* -----------------------------------------------
+   Dark mode overrides
+   ----------------------------------------------- */
+[data-theme-version="dark"] .table-responsive table.display thead th {
+    background: #1f2533 !important;
+    border-bottom-color: #2a3040 !important;
+    color: #c8ccd4;
+}
+
+[data-theme-version="dark"] .table-responsive table.display tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.03);
+}

@@ -427,6 +427,10 @@ if ($trans == "ADD_BENEFICIARY") {
     if ($type == 1) {
 
         mysqli_query($conn, "UPDATE beneficiary SET fname='$fname',mname='$mname',lname='$lname',gender='$gender',marital='$marital',birthday='$birthday',email='$email',mobile='$mobile',street='$street',address='$address',barangay_id=" . ($barangay_id ? "'$barangay_id'" : "NULL") . ",district_id=" . ($district_id ? "'$district_id'" : "NULL") . ",city_id=" . ($city_id ? "'$city_id'" : "NULL") . ",province_id=" . ($province_id ? "'$province_id'" : "NULL") . ",region_id=" . ($region_id ? "'$region_id'" : "NULL") . ",updated_at=NOW()$photo_sql WHERE users_id='$id'");
+
+        if ($profile_photo && isset($_SESSION['profile'])) {
+            $_SESSION['profile']['profile'] = $profile_photo;
+        }
     }
 
     echo json_encode([
@@ -509,6 +513,10 @@ if ($trans == "ADD_BENEFICIARY") {
         $benParams[] = $id;
         $benSql = "UPDATE beneficiary SET " . implode(', ', $benUpdates) . " WHERE users_id = ?";
         $db->prepare($benSql)->execute($benParams);
+
+        if ($photo_name && isset($_SESSION['profile'])) {
+            $_SESSION['profile']['profile'] = $photo_name;
+        }
 
         $db->commit();
 
